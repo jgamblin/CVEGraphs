@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.jgamblin.cvegraphs.weekly</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/gamblin/Documents/Github/CVEGraphs/run_weekly.sh</string>
+    </array>
+
+    <!-- Monday at 06:00 local time. Change Weekday (0/7=Sun..6=Sat) / Hour / Minute to reschedule. -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key><integer>1</integer>
+        <key>Hour</key><integer>6</integer>
+        <key>Minute</key><integer>0</integer>
+    </dict>
+
+    <!-- Uncomment and set to receive the brief by email each week.
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>MAIL_TO</key><string>jerry@empiricalsecurity.com</string>
+    </dict>
+    -->
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/gamblin/Documents/Github/CVEGraphs/logs/launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/gamblin/Documents/Github/CVEGraphs/logs/launchd.err.log</string>
+</dict>
+</plist>

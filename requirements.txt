@@ -1,0 +1,7 @@
+# CVEGraphs — social media graph engine
+pandas>=2.2.0,<3.0
+numpy>=2.0.0,<3.0
+matplotlib>=3.9.0,<4.0
+requests>=2.32.0,<3.0
+pyarrow>=17.0.0,<18.0  # parquet support
+tqdm>=4.66.0,<5.0     # download / parse progress bars
