@@ -1,26 +1,26 @@
 {
-  "as_of": "2026-06-30",
+  "as_of": "2026-07-05",
   "findings": [
     {
       "category": "exploitation",
       "score": 92.0,
-      "headline": "Of 35,364 CVEs published in 2026, only 86 (0.24%) are on CISA's KEV list so far",
+      "headline": "Of 36,823 CVEs published in 2026, only 86 (0.23%) are on CISA's KEV list so far",
       "detail": "A floor that rises as the cohort ages, not a final rate. Confirmed exploitation stays rare while volume climbs, the whole triage story.",
       "suggested_chart": "epss_funnel",
       "evidence": {
-        "ytd": 35364,
+        "ytd": 36823,
         "on_kev": 86,
-        "kev_pct": 0.24
+        "kev_pct": 0.23
       }
     },
     {
       "category": "record",
       "score": 90.0,
-      "headline": "2026 year-to-date (35,364) already exceeds every full year before 2024",
+      "headline": "2026 year-to-date (36,823) already exceeds every full year before 2024",
       "detail": "Six-plus months of 2026 outrank all of 2023 (28,817) and every year prior.",
       "suggested_chart": "pace",
       "evidence": {
-        "ytd": 35364,
+        "ytd": 36823,
         "highest_full_year_beaten": 2023,
         "first_year_still_bigger": 2024
       }
@@ -28,35 +28,37 @@
     {
       "category": "record",
       "score": 88.0,
-      "headline": "June 2026 was the busiest CVE month ever: 7,454",
+      "headline": "June 2026 was the busiest CVE month ever: 7,950",
       "detail": "No calendar month in the program's history published more CVEs.",
       "suggested_chart": "pace",
       "evidence": {
         "month": "2026-06",
-        "count": 7454
+        "count": 7950
       }
     },
     {
       "category": "exploitation",
       "score": 87.0,
-      "headline": "Only 47 of 2026's 35,364 CVEs (0.13%) score EPSS >= 0.5",
-      "detail": "222 (0.6%) clear EPSS 0.1. Predicted exploitation is as rare as confirmed: model v2026.06.15.",
+      "headline": "Only 47 of 2026's 36,823 CVEs (0.13%) score EPSS >= 0.5",
+      "detail": "223 (0.6%) clear EPSS 0.1. Predicted exploitation is as rare as confirmed: model v2026.06.15.",
       "suggested_chart": "epss_funnel",
       "evidence": {
         "epss_ge_50": 47,
-        "epss_ge_10": 222,
-        "ytd": 35364
+        "epss_ge_10": 223,
+        "ytd": 36823
       }
     },
     {
-      "category": "mover",
-      "score": 82.2,
-      "headline": "Patchstack published 609 more CVEs this month than last",
-      "detail": "A sharp month-over-month surge worth a closer look.",
-      "suggested_chart": "cna",
+      "category": "recent",
+      "score": 83.0,
+      "headline": "Newest CISA KEV entry: CVE-2026-45659 (Microsoft SharePoint Server), added Jul 01",
+      "detail": "The most recent confirmed-exploited CVE. Timely by definition.",
+      "suggested_chart": "kev",
       "evidence": {
-        "cna": "Patchstack",
-        "month_over_month_delta": 609
+        "cve": "CVE-2026-45659",
+        "vendor": "Microsoft",
+        "product": "SharePoint Server",
+        "date_added": "2026-07-01"
       }
     },
     {
@@ -75,65 +77,89 @@
     {
       "category": "kev",
       "score": 78.0,
-      "headline": "CISA added 24 CVEs to KEV in the last 30 days, 2 ransomware-linked",
+      "headline": "CISA added 20 CVEs to KEV in the last 30 days, 2 ransomware-linked",
       "detail": "Exploitation news travels; a fresh KEV batch is always timely.",
       "suggested_chart": "kev",
       "evidence": {
-        "kev_added_30d": 24,
+        "kev_added_30d": 20,
         "ransomware_linked": 2
+      }
+    },
+    {
+      "category": "recent",
+      "score": 78.0,
+      "headline": "chrome disclosed 349 CVEs in one day (2026-06-30)",
+      "detail": "A single-day mass disclosure. Verify against the vendor's release notes before posting.",
+      "suggested_chart": "kev",
+      "evidence": {
+        "product": "chrome",
+        "window_count": 401,
+        "peak_day": "2026-06-30",
+        "peak_day_count": 349
       }
     },
     {
       "category": "mover",
       "score": 76.0,
-      "headline": "GitHub_M is 2026's top CVE issuer with 6,801 (19% of all published)",
+      "headline": "GitHub_M is 2026's top CVE issuer with 6,850 (19% of all published)",
       "detail": "The CNA mix reflects who has scope, not who ships the worst code.",
       "suggested_chart": "cna",
       "evidence": {
         "top_cna": "GitHub_M",
-        "count": 6801,
-        "share_pct": 19.0
+        "count": 6850,
+        "share_pct": 18.6
       }
     },
     {
       "category": "curio",
       "score": 74.0,
       "headline": "The busiest CVE weekday in 2026 is Wednesday (not Tuesday)",
-      "detail": "Wednesday: 7,943 vs Tuesday: 7,216. The 'Patch Tuesday' mental model does not match the data.",
+      "detail": "Wednesday: 8,314 vs Tuesday: 7,713. The 'Patch Tuesday' mental model does not match the data.",
       "suggested_chart": "rhythm",
       "evidence": {
         "top_weekday": "Wednesday",
         "counts": {
-          "Wednesday": 7943,
-          "Tuesday": 7216,
-          "Thursday": 6533
+          "Wednesday": 8314,
+          "Tuesday": 7713,
+          "Thursday": 6784
         }
+      }
+    },
+    {
+      "category": "recent",
+      "score": 74.0,
+      "headline": "Highest-EPSS new CVE since Jun 29: CVE-2026-27771 at 0.407",
+      "detail": "The most likely-to-be-exploited of the freshly published set.",
+      "suggested_chart": "kev",
+      "evidence": {
+        "cve": "CVE-2026-27771",
+        "epss": 0.4074
       }
     },
     {
       "category": "pace",
       "score": 72.0,
-      "headline": "35,364 CVEs published so far in 2026, one every 7.4 minutes",
-      "detail": "195/day, +49% vs 2025 at the same point. Straight-line run-rate lands near 71,300 for the full year.",
+      "headline": "36,823 CVEs published so far in 2026, one every 7.3 minutes",
+      "detail": "198/day, +52% vs 2025 at the same point. Straight-line run-rate lands near 72,300 for the full year.",
       "suggested_chart": "pace",
       "evidence": {
-        "ytd": 35364,
-        "per_day": 195.4,
-        "minutes": 7.4,
-        "yoy_pct": 49.5,
-        "projected_year": 71300
+        "ytd": 36823,
+        "per_day": 198.0,
+        "minutes": 7.3,
+        "yoy_pct": 52.4,
+        "projected_year": 72300
       }
     },
     {
       "category": "record",
       "score": 68.0,
-      "headline": "The CVE catalog is at 344,258, 5,742 short of 350,000",
-      "detail": "At the current rate it crosses 350,000 in about 29 days.",
+      "headline": "The CVE catalog is at 345,716, 4,284 short of 350,000",
+      "detail": "At the current rate it crosses 350,000 in about 22 days.",
       "suggested_chart": "pace",
       "evidence": {
-        "total": 344258,
+        "total": 345716,
         "next_milestone": 350000,
-        "days_to_milestone": 29
+        "days_to_milestone": 22
       }
     },
     {

@@ -30,7 +30,7 @@ from pathlib import Path
 import pandas as pd
 
 from data import load_cvelist, load_epss, load_nvd
-from rolling_config import current_year, data_asof, elapsed_days, ytd_mask
+from rolling_config import current_year, data_asof, elapsed_days, recent_mask, ytd_mask
 
 HERE = Path(__file__).resolve().parent
 CONTENT = HERE / "content"
@@ -44,6 +44,7 @@ CHART_FOR = {
     "mover": "cna",
     "product": "product",
     "curio": "rhythm",
+    "recent": "kev",
 }
 
 
@@ -239,6 +240,66 @@ def scan_curios(f, nvd, asof, cur):
         )
 
 
+def scan_recent(f, nvd_epss, kv, asof, days=7):
+    """Timely 'what just happened' findings over a trailing window.
+
+    Recency is a share-worthiness signal in its own right: a fresh KEV addition
+    or a sudden product batch is postable *because* it just happened.
+    """
+    win = nvd_epss[recent_mask(nvd_epss, days, asof)]
+    if not len(win):
+        return
+    since = (asof - pd.Timedelta(days=days - 1)).strftime("%b %d")
+
+    # Newest KEV addition (name the product — recognizable = shareable).
+    dated = [(e, pd.to_datetime(e.get("dateAdded"), errors="coerce", utc=True)) for e in kv]
+    dated = [(e, d) for e, d in dated if pd.notna(d)]
+    if dated:
+        e, d = max(dated, key=lambda x: x[1])
+        ransom = "  Ransomware-linked." if e.get("knownRansomwareCampaignUse") == "Known" else ""
+        _finding(
+            f, cat="recent", score=83,
+            headline=(f"Newest CISA KEV entry: {e['cveID']} "
+                      f"({e.get('vendorProject')} {e.get('product')}), added {d.strftime('%b %d')}"),
+            detail=f"The most recent confirmed-exploited CVE.{ransom} Timely by definition.",
+            cve=e["cveID"], vendor=e.get("vendorProject"), product=e.get("product"),
+            date_added=str(d.date()),
+        )
+
+    # Product batch in the window (e.g. a browser dropping a pile of CVEs).
+    prod = win["product"].dropna().value_counts()
+    if len(prod) and int(prod.iloc[0]) >= 10:
+        p, n = prod.index[0], int(prod.iloc[0])
+        # Be honest about single-day dumps vs a sustained week: if one day
+        # carries most of the count, headline that day, not the window.
+        pdt = pd.to_datetime(win[win["product"] == p]["published"], utc=True, errors="coerce")
+        by_day = pdt.dt.date.value_counts()
+        peak_day, peak_n = by_day.index[0], int(by_day.iloc[0])
+        if peak_n >= 0.6 * n:
+            headline = f"{p} disclosed {peak_n} CVEs in one day ({peak_day})"
+            detail = "A single-day mass disclosure. Verify against the vendor's release notes before posting."
+        else:
+            headline = f"{p} published {n} CVEs since {since}"
+            detail = "A concentrated recent batch, worth a same-week callout."
+        _finding(
+            f, cat="recent", score=78, headline=headline, detail=detail,
+            product=p, window_count=n, peak_day=str(peak_day), peak_day_count=peak_n,
+        )
+
+    # Highest-EPSS CVE published in the window.
+    withe = win.dropna(subset=["epss"])
+    if len(withe):
+        top = withe.loc[withe["epss"].idxmax()]
+        if top["epss"] >= 0.1:
+            _finding(
+                f, cat="recent", score=74,
+                headline=(f"Highest-EPSS new CVE since {since}: {top['cve_id']} "
+                          f"at {top['epss']:.3f}"),
+                detail="The most likely-to-be-exploited of the freshly published set.",
+                cve=top["cve_id"], epss=round(float(top["epss"]), 4),
+            )
+
+
 # =============================================================================
 # DRIVER
 # =============================================================================
@@ -265,6 +326,7 @@ def gather():
     scan_exploitation(f, nvd, kev_ids, kev_recent, kev_ransom, asof, cur)
     scan_movers(f, cvelist, asof, cur)
     scan_curios(f, nvd, asof, cur)
+    scan_recent(f, nvd, kv, asof)
 
     f.sort(key=lambda x: x["score"], reverse=True)
     return f, asof

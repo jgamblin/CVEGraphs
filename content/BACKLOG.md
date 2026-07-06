@@ -6,8 +6,8 @@ Tiers: **Evergreen** (re-render on cadence) · **Rotating** (topic changes) ·
 
 ## Evergreen (weekly workhorses)
 - ✅ **pace** — YTD CVEs by year, apples-to-apples, "one every N minutes" hook
-- 🔨 **kev** — CVEs added to CISA KEV (trailing 30d), ransomware-linked flagged
-- 🔨 **cna** — top CNA issuers this month, with ▲▼ movement vs last month
+- ✅ **kev** — monthly KEV additions (trailing 12mo), ransomware-linked highlighted
+- ✅ **cna** — top CNA issuers year-to-date leaderboard
 - 💡 **forecast** — 2026 run-rate vs CVEForecast projection
 - 💡 **severity** — critical/high/med/low mix of the trailing window
 
@@ -31,6 +31,11 @@ Data: `processed/epss.parquet`; join with `data.load_nvd(with_epss=True)`.
 - 💡 **us_vs_world** — who *publishes* the world's CVEs (July 4 post)
 - 💡 **reserved_gap** — reserved-but-unpublished ID backlog
 - 💡 **id_burn** — annual CVE ID block consumption rate
+
+## Themed / one-off (reusable as data updates)
+- ✅ **chrome_day** — "Out with Patch Tuesday, in with Chrome Day": monthly
+  biggest-single-day head-to-head, Microsoft vs Chrome CNA. Caption in
+  `captions/chrome_day.md`.
 
 ## Novelty formats
 - 💡 **cna_race** — animated bar-chart-race GIF of top CNAs over time

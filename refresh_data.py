@@ -30,7 +30,9 @@ import datetime
 import gzip
 import io
 import json
+import shutil
 import subprocess
+import tarfile
 import time
 import warnings
 from email.utils import parsedate_to_datetime
@@ -53,6 +55,10 @@ OUTPUT_DIR = HERE / "processed"
 
 NVD_URL = "https://nvd.handsonhacking.org/nvd.json"
 CVELIST_REPO = "https://github.com/CVEProject/cvelistV5.git"
+# Tarball fallback: a single streamed HTTP download (like NVD), far more reliable
+# than git's smart protocol for this very large repo, which frequently resets
+# mid-pack ("RPC failed ... Connection reset by peer").
+CVELIST_TARBALL = "https://codeload.github.com/CVEProject/cvelistV5/tar.gz/refs/heads/main"
 KEV_URLS = [
     "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
     "https://raw.githubusercontent.com/cisagov/kev-data/main/known_exploited_vulnerabilities.json",
@@ -135,19 +141,83 @@ def download_nvd(force=False):
     raise RuntimeError(f"NVD download failed after 3 attempts: {last_err}")
 
 
+def _git_clone_cvelist(out, attempts=3):
+    """Shallow git clone with retries + a larger HTTP buffer. Returns success."""
+    for attempt in range(1, attempts + 1):
+        if out.exists():
+            shutil.rmtree(out, ignore_errors=True)  # git won't clone into a stale dir
+        try:
+            print(f"  CVEList V5: git clone attempt {attempt}/{attempts} ...")
+            subprocess.run(
+                ["git", "-c", "http.postBuffer=524288000",
+                 "clone", "--depth", "1", CVELIST_REPO, str(out)],
+                check=True,
+            )
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"    git clone failed: {e}")
+            if attempt < attempts:
+                time.sleep(5 * attempt)
+    return False
+
+
+def _download_cvelist_tarball(out):
+    """Fallback: stream the GitHub tarball and extract it into ``out``."""
+    tmp = DATA_DIR / "cvelistV5.tar.gz"
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            print(f"  CVEList V5: tarball download attempt {attempt}/3 ...")
+            with requests.get(CVELIST_TARBALL, stream=True, timeout=(30, 600)) as r:
+                r.raise_for_status()
+                with open(tmp, "wb") as f, tqdm(
+                    unit="iB", unit_scale=True, unit_divisor=1024
+                ) as pbar:
+                    for chunk in r.iter_content(chunk_size=1 << 20):
+                        pbar.update(f.write(chunk))
+            break
+        except Exception as e:  # noqa: BLE001 - report, back off, retry
+            last_err = e
+            print(f"    tarball attempt {attempt}/3 failed: {e}")
+            tmp.unlink(missing_ok=True)
+            if attempt < 3:
+                time.sleep(5 * attempt)
+    else:
+        raise RuntimeError(f"CVEList tarball download failed after 3 attempts: {last_err}")
+
+    if out.exists():
+        shutil.rmtree(out, ignore_errors=True)
+    print("  CVEList V5: extracting tarball ...")
+    with tarfile.open(tmp, "r:gz") as tf:
+        tf.extractall(DATA_DIR, filter="data")  # extracts to cvelistV5-main/
+    tmp.unlink(missing_ok=True)
+    extracted = DATA_DIR / "cvelistV5-main"
+    if extracted.exists():
+        extracted.rename(out)
+
+
 def clone_or_update_cvelist():
-    """Shallow-clone (or fast-forward) the CVE List V5 repo into ./data."""
+    """Get the CVE List V5 tree into ./data, resiliently.
+
+    Existing git clone -> fast-forward. Otherwise git clone with retries, and if
+    that keeps failing (the repo is large and the transfer often resets), fall
+    back to a streamed tarball download.
+    """
     DATA_DIR.mkdir(exist_ok=True)
     out = DATA_DIR / "cvelistV5"
-    if out.exists():
+    if (out / ".git").exists():
         print("  CVEList V5: updating existing clone ...")
-        # A shallow clone can't always fast-forward; unshallow first (no-op if
-        # already complete), then pull.
-        subprocess.run(["git", "-C", str(out), "fetch", "--unshallow"], check=False)
-        subprocess.run(["git", "-C", str(out), "pull", "--ff-only"], check=True)
+        try:
+            subprocess.run(["git", "-C", str(out), "fetch", "--unshallow"], check=False)
+            subprocess.run(["git", "-C", str(out), "pull", "--ff-only"], check=True)
+            return out
+        except subprocess.CalledProcessError as e:
+            print(f"    update failed ({e}); refetching fresh")
+
+    if _git_clone_cvelist(out):
         return out
-    print(f"  CVEList V5: cloning {CVELIST_REPO} (large) ...")
-    subprocess.run(["git", "clone", "--depth", "1", CVELIST_REPO, str(out)], check=True)
+    print("  CVEList V5: git clone exhausted retries; using tarball fallback")
+    _download_cvelist_tarball(out)
     return out
 
 
