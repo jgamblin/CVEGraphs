@@ -14,13 +14,20 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from data import load_cvelist
+import matplotlib.patches as mpatches
+
 from rolling_config import data_asof
 from style_social import COLORS, DEFAULT_RATIOS, figsize_for, stamp_and_save
 
 GRAPHS = Path(__file__).resolve().parent.parent / "graphs"
 MONTHS = 14
-MS_COLOR = "#ea580c"        # Microsoft = orange
+# Distinct hues per vendor (brand colors are both blue, so unusable here).
+# Each month the winner is full-saturation; the loser is faded, so the
+# crossover reads at a glance while vendor identity stays fixed by hue.
+MS_COLOR = "#ea580c"              # Microsoft = orange
+MS_LIGHT = "#f9d0b4"             # faded orange (Microsoft, month it lost)
 CHROME_COLOR = COLORS["primary"]  # Chrome = navy
+CHROME_LIGHT = "#b7c1cf"         # faded navy (Chrome, month it lost)
 
 
 def _monthly_max_day(cve, cpub, assigner):
@@ -41,8 +48,11 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     ms = _monthly_max_day(cve, cpub, "microsoft")
     ch = _monthly_max_day(cve, cpub, "Chrome")
 
-    cur_period = asof.tz_convert(None).to_period("M")
-    periods = [cur_period - i for i in range(MONTHS)][::-1]
+    # End on the last COMPLETE month; the current month is partial (and its
+    # Patch Tuesday may not have landed), so it is dropped rather than shown
+    # half-formed.
+    last_complete = asof.tz_convert(None).to_period("M") - 1
+    periods = [last_complete - i for i in range(MONTHS)][::-1]
     ms_v = [int(ms.get(p, 0)) for p in periods]
     ch_v = [int(ch.get(p, 0)) for p in periods]
 
@@ -60,10 +70,11 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         fig, ax = plt.subplots(figsize=figsize_for(ratio))
         x = range(len(periods))
         w = 0.42
-        ax.bar([i - w / 2 for i in x], ms_v, width=w, color=MS_COLOR,
-               edgecolor="white", label="Microsoft (Patch Tuesday)")
-        ax.bar([i + w / 2 for i in x], ch_v, width=w, color=CHROME_COLOR,
-               edgecolor="white", label="Chrome (Google)")
+        # Winner full-saturation, loser faded (position + legend keep vendor ID).
+        ms_c = [MS_COLOR if ms_v[i] >= ch_v[i] else MS_LIGHT for i in x]
+        ch_c = [CHROME_COLOR if ch_v[i] > ms_v[i] else CHROME_LIGHT for i in x]
+        ax.bar([i - w / 2 for i in x], ms_v, width=w, color=ms_c, edgecolor="white")
+        ax.bar([i + w / 2 for i in x], ch_v, width=w, color=ch_c, edgecolor="white")
 
         # Annotate the Chrome peak.
         ax.annotate(f"{ch_peak}", xy=(ch_peak_i + w / 2, ch_peak),
@@ -74,15 +85,20 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         ax.set_xticks(list(x))
         ax.set_xticklabels(labels, fontsize=10)
         ax.margins(y=0.18)
-        ax.legend(loc="upper left", fontsize=11, frameon=False)
+        # Manual legend so swatches stay full-saturation regardless of bar fades.
+        ax.legend(handles=[mpatches.Patch(color=MS_COLOR, label="Microsoft (Patch Tuesday)"),
+                           mpatches.Patch(color=CHROME_COLOR, label="Chrome (Google)")],
+                  loc="upper left", fontsize=11, frameon=False)
 
-        ax.text(0.0, -0.14,
-                f"Largest single day each CNA published, trailing {MONTHS} months "
-                f"through {asof.strftime('%b %Y')}. Source: CVE List V5.",
-                transform=ax.transAxes, fontsize=10.5, color=COLORS["neutral"], va="top")
+        ax.text(0.0, -0.155,
+                f"Biggest single day each CNA published, {MONTHS} complete months "
+                f"through {periods[-1].strftime('%b %Y')}.\nWinner each month shown "
+                f"in full color. Source: CVE List V5.",
+                transform=ax.transAxes, fontsize=9.5, color=COLORS["neutral"],
+                va="top", linespacing=1.4)
 
         top = {"wide": 0.80, "square": 0.84, "portrait": 0.86}[ratio]
-        fig.subplots_adjust(top=top, bottom=0.16, left=0.10, right=0.96)
+        fig.subplots_adjust(top=top, bottom=0.19, left=0.10, right=0.96)
         if ratio == "wide":
             fig.text(0.04, 0.95, title1, fontsize=21, fontweight="bold",
                      color=COLORS["text"], ha="left", va="top")

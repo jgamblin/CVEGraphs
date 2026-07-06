@@ -58,10 +58,11 @@ code beyond a single session). Curation and posting stay in your hands.
 
 ## Status
 
-Phase 0–1 complete: rolling data layer, social style, four charts (**Pace
-Tracker**, **EPSS Funnel**, **CNA Leaderboard**, **KEV Watch**), an insight miner
-(`insights.py`) with a recency scanner, and a weekly runner (`run_weekly.sh` +
-`deploy/`). `refresh_data.py` is now **self-contained** — it rebuilds
+Phase 0–1 complete: rolling data layer, social style, six charts (**Pace
+Tracker**, **EPSS Funnel**, **CNA Leaderboard**, **KEV Watch**, **Chrome Day**,
+**CVSS vs EPSS gap**), an insight miner (`insights.py`) with a recency scanner,
+and a weekly runner (`run_weekly.sh` + `deploy/`). `refresh_data.py` is now
+**self-contained** — it rebuilds
 the parquet from upstream feeds (NVD, CVE List V5, CISA KEV, CVEForecast, and
 production EPSS V5 scores) with no dependency on any sibling repo. EPSS is available via
 `data.load_nvd(with_epss=True)` or `data.load_epss()`. Next up per

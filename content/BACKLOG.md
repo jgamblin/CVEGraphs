@@ -18,8 +18,8 @@ Data: `processed/epss.parquet`; join with `data.load_nvd(with_epss=True)`.
 - 💡 **epss_vs_kev** — EPSS distribution of KEV vs non-KEV CVEs: does the model
   score the truly-exploited ones higher?
 - 💡 **high_epss_board** — the highest-EPSS CVEs published this period (a watchlist).
-- 💡 **cvss_epss_gap** — high CVSS but low EPSS: severe on paper, unlikely to be
-  exploited. The prioritization reframe in one scatter.
+- ✅ **cvss_epss_gap** — CVSS vs EPSS scatter: severe on paper, quiet in the wild.
+  Companion to the "vulnpocalypse that wasn't" post (scoped to Chrome via FOCUS).
 
 ## Rotating deep-dives
 - 💡 **cwe** — weakness class of the week (trend + top examples)

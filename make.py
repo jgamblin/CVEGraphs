@@ -13,7 +13,7 @@ output paths written to graphs/.
 import sys
 
 from data import load_nvd
-from charts import chrome_day, cna, epss_funnel, kev, pace
+from charts import chrome_day, cna, cvss_epss_gap, epss_funnel, kev, pace
 
 # name -> (module, one-line description)
 CHARTS = {
@@ -22,6 +22,7 @@ CHARTS = {
     "cna": (cna, "CNA leaderboard: who publishes this year's CVEs"),
     "kev": (kev, "KEV watch: confirmed exploitation over the trailing 12 months"),
     "chrome_day": (chrome_day, "Chrome Day vs Patch Tuesday: biggest single-day drops"),
+    "cvss_epss_gap": (cvss_epss_gap, "CVSS vs EPSS: severe on paper, quiet in the wild"),
 }
 
 
