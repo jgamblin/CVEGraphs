@@ -106,10 +106,10 @@ def thousands_formatter():
 def stamp_and_save(fig, filepath, asof_str):
     """Stamp handle / site / as-of date and write the file, then close."""
     fig.text(
-        0.99, 0.01, f"{HANDLE}  ·  {SITE}  ·  {asof_str}",
+        0.99, 0.012, f"{HANDLE}  ·  {SITE}  ·  {asof_str}",
         transform=fig.transFigure,
-        fontsize=12, color=COLORS["secondary"],
-        alpha=0.75, ha="right", va="bottom",
+        fontsize=9, color=COLORS["secondary"],
+        alpha=0.7, ha="right", va="bottom",
         fontweight="bold", fontstyle="italic",
     )
     # Exact dimensions (no 'tight' crop) so the aspect ratio is honored and the

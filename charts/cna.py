@@ -68,7 +68,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             fig.text(0.05, 0.965, title1, fontsize=20, fontweight="bold",
                      color=COLORS["text"], ha="left", va="top")
             fig.text(0.05, 0.918, title2, fontsize=13.5, fontweight="bold",
-                     color=COLORS["alert"], ha="left", va="top")
+                     color=COLORS["secondary"], ha="left", va="top")
             fig.text(0.05, 0.882, sub, fontsize=11, color=COLORS["secondary"], ha="left", va="top")
 
         path = GRAPHS / f"cna_{ratio}_{asof.strftime('%Y-%m-%d')}.png"

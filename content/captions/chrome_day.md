@@ -19,8 +19,10 @@ typical Patch Tuesday carries the actively-exploited bugs you actually schedule
 around. Patch Tuesday is also a fixed date; Chrome Day lands whenever Chrome
 ships.
 
-Still, the shape is striking, and two months is not yet a trend. Microsoft's next
-Patch Tuesday is July 14. I will be watching to see if Chrome keeps the crown.
+Still, the shape is striking. Microsoft's next Patch Tuesday is July 14. Honestly,
+I care less about who "wins" this and more about what the shift says: finding and
+fixing more of your own bugs is a good thing, even when it inflates your CVE count.
+I will be watching to see if the pattern holds.
 
 Is your triage still built around one Tuesday a month?
 
@@ -52,8 +54,9 @@ it looks nothing like the movie.
 In 2026 Google has published roughly 1,600 Chrome CVEs, including 427 in a single
 day. On a raw-count chart that looks alarming. Look closer and it flips:
 
-- They are overwhelmingly low-level memory-safety bugs. Use-after-free alone is
-  about 480 of them.
+- Half are memory-safety bugs, and one type dominates: use-after-free alone is
+  nearly a third of them (about 480). That is the fingerprint of automated,
+  at-scale bug hunting, not a wave of new attack techniques.
 - By CVSS many rate High or Critical. By EPSS they are near zero: out of ~1,600,
   one scores above 0.1 and none are on CISA's KEV list.
 - Translation: real bugs, found and fixed internally, that almost none of will
@@ -79,7 +82,7 @@ Are we measuring security, or just measuring how hard someone is looking?
 - **"You cherry-picked the biggest day."** Fair, but June monthly TOTALS were also lopsided: Chrome 965 vs Microsoft 219.
 - **"Isn't June 30 + July 1 really one drop?"** No. July 1 (52) is a different version (150.0.7871.46), a separate release ~24h later, not a midnight spillover. June 4's 427 is a clean single-day, single-release record.
 - **"Chrome auto-updates, so who cares?"** Correct, and that is the point: this is a disclosure-volume story, not a patch-urgency one. Confirmed exploitation (KEV) and EPSS are the risk signals, and by those Chrome's batch is low-risk.
-- **Bug-class / quality framing:** of ~1,600 Chrome 2026 CVEs, ~480 are use-after-free and most of the rest are other memory-safety bugs. Mean EPSS 0.003, max 0.22, one above 0.1, none on KEV. High CVSS, near-zero real-world exploitation likelihood.
+- **Bug-class / quality framing:** of 1,604 Chrome 2026 CVEs, 50% are memory-safety bugs; use-after-free (CWE-416) alone is 478 (30%), then improper input validation 17%, OOB read 6.7%. Mean EPSS 0.003, max 0.22, one above 0.1, none on KEV. High CVSS, near-zero real-world exploitation likelihood.
 
 ## Alt text
 ```

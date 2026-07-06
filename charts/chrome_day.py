@@ -62,7 +62,6 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
     title1 = "Out with Patch Tuesday, in with Chrome Day"
     title2 = f"Chrome's biggest day hit {ch_peak}; Microsoft's biggest Patch Tuesday: {ms_peak}"
-    sub = "Biggest single publishing day per month. Microsoft is monthly clockwork; Chrome is burstier but bigger."
 
     labels = [p.strftime("%b\n%y") for p in periods]
     out = []
@@ -97,22 +96,20 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
                 transform=ax.transAxes, fontsize=9.5, color=COLORS["neutral"],
                 va="top", linespacing=1.4)
 
-        top = {"wide": 0.80, "square": 0.84, "portrait": 0.86}[ratio]
+        # Header is just the hook + the headline stat; the metric and the
+        # winner-color convention live in the footer, so no third grey line.
+        top = {"wide": 0.83, "square": 0.87, "portrait": 0.88}[ratio]
         fig.subplots_adjust(top=top, bottom=0.19, left=0.10, right=0.96)
         if ratio == "wide":
             fig.text(0.04, 0.95, title1, fontsize=21, fontweight="bold",
                      color=COLORS["text"], ha="left", va="top")
-            fig.text(0.04, 0.90, title2, fontsize=12.5, fontweight="bold",
-                     color=COLORS["alert"], ha="left", va="top")
-            fig.text(0.04, 0.855, sub, fontsize=11, color=COLORS["secondary"],
-                     ha="left", va="top")
+            fig.text(0.04, 0.895, title2, fontsize=13, fontweight="bold",
+                     color=COLORS["secondary"], ha="left", va="top")
         else:
             fig.text(0.05, 0.965, title1, fontsize=19, fontweight="bold",
                      color=COLORS["text"], ha="left", va="top")
-            fig.text(0.05, 0.918, title2, fontsize=12.5, fontweight="bold",
-                     color=COLORS["alert"], ha="left", va="top")
-            fig.text(0.05, 0.882, sub, fontsize=10.5, color=COLORS["secondary"],
-                     ha="left", va="top")
+            fig.text(0.05, 0.917, title2, fontsize=13, fontweight="bold",
+                     color=COLORS["secondary"], ha="left", va="top")
 
         path = GRAPHS / f"chrome_day_{ratio}_{asof.strftime('%Y-%m-%d')}.png"
         stamp_and_save(fig, path, asof_str)

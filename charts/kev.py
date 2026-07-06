@@ -85,7 +85,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             fig.text(0.05, 0.965, title1, fontsize=18, fontweight="bold",
                      color=COLORS["text"], ha="left", va="top")
             fig.text(0.05, 0.920, title2, fontsize=13, fontweight="bold",
-                     color=COLORS["alert"], ha="left", va="top")
+                     color=COLORS["secondary"], ha="left", va="top")
             fig.text(0.05, 0.884, sub, fontsize=11, color=COLORS["secondary"], ha="left", va="top")
 
         path = GRAPHS / f"kev_{ratio}_{asof.strftime('%Y-%m-%d')}.png"
