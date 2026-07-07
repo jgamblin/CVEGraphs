@@ -86,6 +86,18 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             ax.text(xs[-1] + 0.3, ys[-1], f"{disp}\n#{frm} → #{now}",
                     fontsize=11, fontweight="bold", color=color, va="center", ha="left", zorder=6)
 
+            # If it climbed into view from below the visible window, mark the
+            # off-chart origin so the "#130" in the label is anchored on-image.
+            first_vis = next((i for i, r in enumerate(rs) if r is not None and r <= VIS), None)
+            if first_vis is not None and frm > VIS and any(
+                    rs[j] is None or rs[j] > VIS for j in range(first_vis)):
+                ax.annotate(f"entered from #{frm}", xy=(x[first_vis], rs[first_vis]),
+                            xytext=(x[first_vis] - 2.4, VIS + 0.35),
+                            fontsize=9.5, fontweight="bold", fontstyle="italic",
+                            color=color, alpha=0.9, ha="center", va="center", zorder=6,
+                            arrowprops=dict(arrowstyle="-|>", color=color, alpha=0.6,
+                                            lw=1.6, connectionstyle="arc3,rad=-0.25"))
+
         ax.set_ylim(VIS + 0.6, 0.4)  # rank 1 at top; below VIS is off-chart
         ax.set_yticks(range(1, VIS + 1))
         ax.set_yticklabels([f"#{i}" for i in range(1, VIS + 1)], fontsize=10)
