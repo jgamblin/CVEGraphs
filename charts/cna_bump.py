@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
-Who leads CVE issuance, month by month — a bump (rank-flow) chart.
+The rise of GitHub and VulnCheck — a two-year CNA rank-flow (bump) chart.
 
-Each line is a top CNA; its vertical position is its rank that month (1 = most
-CVEs). Lines crossing show the issuer mix reshuffling. Rare on LinkedIn.
+Monthly rank among all CVE Numbering Authorities over the last 24 months. Every
+issuer is a faint grey line (the churn); GitHub and VulnCheck are drawn bold and
+labeled with how far they climbed. The visible window is the top ~10, so
+VulnCheck rises into view from the bottom (it started outside the top 90).
 """
 
 from pathlib import Path
@@ -16,71 +18,92 @@ from rolling_config import data_asof
 from style_social import COLORS, DEFAULT_RATIOS, figsize_for, stamp_and_save
 
 GRAPHS = Path(__file__).resolve().parent.parent / "graphs"
-MONTHS = 7
-TOP_N = 7
+MONTHS = 24
+VIS = 10  # visible rank window (top-10); climbers rise into it from below
 HIGHLIGHT = {"GitHub_M": COLORS["alert"], "VulnCheck": COLORS["primary"]}
+NICE = {"GitHub_M": "GitHub"}  # display names
 
 
 def render(nvd=None, ratios=DEFAULT_RATIOS):
     cve = load_cvelist()
     cpub = pd.to_datetime(cve["date_published"], utc=True, errors="coerce").dt.tz_convert(None)
     asof = data_asof(cve)
+    m = cpub.dt.to_period("M")
 
     last_complete = asof.tz_convert(None).to_period("M") - 1
     periods = [last_complete - i for i in range(MONTHS)][::-1]
-    m = cpub.dt.to_period("M")
 
-    # Rank CNAs within each month; keep the ones that ever crack the top TOP_N.
+    # Rank every issuer within each month.
     per_month = {}
     for p in periods:
         vc = cve[m == p]["assigner_short_name"].replace("", "unknown").value_counts()
         per_month[p] = {name: rank + 1 for rank, name in enumerate(vc.index)}
-    tracked = set()
-    for p in periods:
-        tracked.update([n for n, r in per_month[p].items() if r <= TOP_N])
 
-    title1 = "Who assigns the CVEs keeps changing"
-    title2 = f"Monthly rank of the top CVE issuers. Rank 1 = most CVEs published that month."
-    labels = [p.strftime("%b") for p in periods]
+    def ranks_for(name):
+        return [per_month[p].get(name) for p in periods]
+
+    # Every issuer that ever cracks the visible window = the grey mesh.
+    mesh_names = set()
+    for p in periods:
+        mesh_names.update(n for n, r in per_month[p].items() if r <= VIS)
+    mesh_names -= set(HIGHLIGHT)
+
+    x = list(range(len(periods)))
+
+    def journey(name):
+        rs = [r for r in ranks_for(name) if r is not None]
+        return max(rs), ranks_for(name)[-1]  # deepest seen, current
+
+    gh_from, gh_now = journey("GitHub_M")
+    vc_from, vc_now = journey("VulnCheck")
+
+    title1 = "The rise of GitHub and VulnCheck"
+    title2 = "Monthly rank among every CVE issuer, over the last two years."
+
+    labels = [p.strftime("%b\n%y") if i % 3 == 0 else "" for i, p in enumerate(periods)]
 
     out = []
     for ratio in ratios:
         fig, ax = plt.subplots(figsize=figsize_for(ratio))
-        x = list(range(len(periods)))
-        for name in tracked:
-            ys = [per_month[p].get(name) for p in periods]
-            xs = [xi for xi, y in zip(x, ys) if y is not None and y <= TOP_N + 1]
-            yy = [y for y in ys if y is not None and y <= TOP_N + 1]
-            if len(yy) < 2:
-                continue
-            color = HIGHLIGHT.get(name, COLORS["light"])
-            lw = 3.2 if name in HIGHLIGHT else 1.6
-            z = 5 if name in HIGHLIGHT else 2
-            ax.plot(xs, yy, "-o", color=color, lw=lw, markersize=7 if name in HIGHLIGHT else 5,
-                    zorder=z, markerfacecolor=color, markeredgecolor="white")
-            # Label at the right end.
-            if ys[-1] is not None and ys[-1] <= TOP_N:
-                ax.text(x[-1] + 0.12, ys[-1], name,
-                        fontsize=10.5 if name in HIGHLIGHT else 9.5,
-                        fontweight="bold" if name in HIGHLIGHT else "normal",
-                        color=color if name in HIGHLIGHT else COLORS["secondary"],
-                        va="center", ha="left", zorder=z)
 
-        ax.set_ylim(TOP_N + 0.6, 0.4)  # rank 1 at top
-        ax.set_yticks(range(1, TOP_N + 1))
-        ax.set_yticklabels([f"#{i}" for i in range(1, TOP_N + 1)], fontsize=10)
+        # Grey mesh: faint, thin, no labels, clipped to the visible window.
+        for name in mesh_names:
+            rs = ranks_for(name)
+            xs = [xi for xi, r in zip(x, rs) if r is not None and r <= VIS]
+            ys = [r for r in rs if r is not None and r <= VIS]
+            if len(ys) >= 2:
+                ax.plot(xs, ys, "-", color=COLORS["light"], lw=1.0, alpha=0.45, zorder=1)
+
+        # Highlighted climbers.
+        for name, color in HIGHLIGHT.items():
+            rs = ranks_for(name)
+            xs = [xi for xi, r in zip(x, rs) if r is not None and r <= VIS]
+            ys = [r for r in rs if r is not None and r <= VIS]
+            ax.plot(xs, ys, "-o", color=color, lw=3.6, markersize=6,
+                    markerfacecolor=color, markeredgecolor="white", zorder=5)
+            frm, now = (gh_from, gh_now) if name == "GitHub_M" else (vc_from, vc_now)
+            disp = NICE.get(name, name)
+            ax.text(xs[-1] + 0.3, ys[-1], f"{disp}\n#{frm} → #{now}",
+                    fontsize=11, fontweight="bold", color=color, va="center", ha="left", zorder=6)
+
+        ax.set_ylim(VIS + 0.6, 0.4)  # rank 1 at top; below VIS is off-chart
+        ax.set_yticks(range(1, VIS + 1))
+        ax.set_yticklabels([f"#{i}" for i in range(1, VIS + 1)], fontsize=10)
         ax.set_xticks(x)
-        ax.set_xticklabels(labels, fontsize=11)
-        ax.set_xlim(-0.3, len(periods) + 1.3)
+        ax.set_xticklabels(labels, fontsize=10)
+        ax.set_xlim(-0.3, len(periods) + 2.4)
         for s in ("right", "top"):
             ax.spines[s].set_visible(False)
-        ax.grid(True, axis="y", alpha=0.4)
+        ax.grid(True, axis="y", alpha=0.35)
 
-        ax.text(0.0, -0.13, f"Top-{TOP_N} CNA rank by month. Source: CVE List V5.",
-                transform=ax.transAxes, fontsize=10, color=COLORS["neutral"], va="top")
+        ax.text(0.0, -0.10,
+                "Rank by monthly CVE count among 200+ CNAs. Grey = other issuers.\n"
+                "Source: CVE List V5.",
+                transform=ax.transAxes, fontsize=9.5, color=COLORS["neutral"],
+                va="top", linespacing=1.5)
 
         top = {"wide": 0.82, "square": 0.86, "portrait": 0.88}[ratio]
-        fig.subplots_adjust(top=top, bottom=0.13, left=0.09, right=0.90)
+        fig.subplots_adjust(top=top, bottom=0.17, left=0.09, right=0.86)
         fig.text(0.05, 0.965, title1, fontsize=20, fontweight="bold",
                  color=COLORS["text"], ha="left", va="top")
         fig.text(0.05, 0.918, title2, fontsize=11.5, fontweight="bold",
