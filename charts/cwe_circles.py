@@ -54,6 +54,48 @@ CWE_NAMES = {
 }
 
 
+def _units(name):
+    """Break a label into wrap units + the separator to rejoin within a line."""
+    if " " in name:
+        return name.split(" "), " "
+    if "-" in name:                       # e.g. Use-After-Free -> Use- / After- / Free
+        parts = name.split("-")
+        return [p + "-" for p in parts[:-1]] + [parts[-1]], ""
+    return [name], ""
+
+
+def _candidates(name):
+    """Candidate line-wraps (1, 2, or 3 lines), each a list of line strings."""
+    units, sep = _units(name)
+    n = len(units)
+    cands = [[name]]
+    if n >= 2:
+        best = min(([sep.join(units[:i]), sep.join(units[i:])] for i in range(1, n)),
+                   key=lambda ls: max(len(x) for x in ls))
+        cands.append(best)
+    if n >= 3:
+        best = min(([sep.join(units[:i]), sep.join(units[i:j]), sep.join(units[j:])]
+                    for i in range(1, n - 1) for j in range(i + 1, n)),
+                   key=lambda ls: max(len(x) for x in ls))
+        cands.append(best)
+    return cands
+
+
+def _fit_label(ax, rend, name, avail_px):
+    """Best (text, fontsize) that fits an inscribed square of side avail_px."""
+    best_fs, best_txt = -1, None
+    for lines in _candidates(name):
+        s = "\n".join(lines)
+        probe = ax.text(0, 0, s, fontsize=10, fontweight="bold",
+                        ha="center", va="center")
+        bb = probe.get_window_extent(rend)
+        probe.remove()
+        fs = min(10 * min(avail_px / bb.width, avail_px / bb.height), 13)
+        if fs > best_fs:
+            best_fs, best_txt = fs, s
+    return best_txt, best_fs
+
+
 def render(nvd=None, ratios=DEFAULT_RATIOS):
     if nvd is None:
         nvd = load_nvd()
@@ -115,20 +157,27 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
                         color=COLORS["text"], zorder=7,
                         bbox=dict(boxstyle="round,pad=0.28", fc="white", ec=COLORS["light"], alpha=0.92))
 
-        # CWE leaves (level 2): colored by severity.
-        for c in circles:
-            if c.level != 2:
-                continue
-            cwe = c.ex["id"]
-            avg = float(cvss_map[cwe])
-            ax.add_patch(plt.Circle((c.x, c.y), c.r, facecolor=cmap(norm(avg)),
+        # CWE leaves (level 2): colored circles first, labels measured after.
+        leaves = [c for c in circles if c.level == 2]
+        for c in leaves:
+            ax.add_patch(plt.Circle((c.x, c.y), c.r, facecolor=cmap(norm(cvss_map[c.ex["id"]])),
                                     edgecolor=COLORS["light"], linewidth=1.0, zorder=2))
-            name = CWE_NAMES.get(cwe, cwe.replace("CWE-", "CWE "))
-            fs = min(13, c.r * 600 / max(len(name), 3))
-            if fs >= 7:
-                txt = COLORS["text"] if avg < (vmin + vmax) / 2 else "white"
-                ax.text(c.x, c.y, name, ha="center", va="center", fontsize=fs,
-                        fontweight="bold", color=txt, zorder=3)
+
+        # Measure text against actual pixels so labels wrap to stay inside the
+        # circle (two lines if needed) and never overflow.
+        fig.canvas.draw()
+        rend = fig.canvas.get_renderer()
+        o = ax.transData.transform((0, 0))
+        px_per_unit = abs(ax.transData.transform((1, 0))[0] - o[0])
+        for c in leaves:
+            avg = float(cvss_map[c.ex["id"]])
+            name = CWE_NAMES.get(c.ex["id"], c.ex["id"].replace("CWE-", "CWE "))
+            avail = 2 * c.r * px_per_unit * 0.72  # side of inscribed square
+            txt, fs = _fit_label(ax, rend, name, avail)
+            if fs >= 6:
+                color = COLORS["text"] if avg < (vmin + vmax) / 2 else "white"
+                ax.text(c.x, c.y, txt, ha="center", va="center", fontsize=fs,
+                        fontweight="bold", color=color, zorder=3, linespacing=0.95)
 
         cax = fig.add_axes([0.30, 0.125, 0.40, 0.02])
         cb = fig.colorbar(ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation="horizontal")
