@@ -37,9 +37,12 @@ Data: `processed/epss.parquet`; join with `data.load_nvd(with_epss=True)`.
   biggest-single-day head-to-head, Microsoft vs Chrome CNA. Caption in
   `captions/chrome_day.md`.
 
-## Novelty formats
+## Novelty formats (non-bar, for feed variety)
+- ✅ **calendar_heatmap** — GitHub-style daily-publishing grid (best in wide)
+- ✅ **waffle_exploit** — 1,000 squares, ~2 exploited; the volume-vs-risk thesis
+- ✅ **ridgeline_severity** — CVSS distribution by year, per-year average marker
+- ✅ **cna_bump** — monthly CNA rank-flow (GitHub #7 -> #1)
 - 💡 **cna_race** — animated bar-chart-race GIF of top CNAs over time
-- 💡 **calendar** — GitHub-style daily-publishing heatmap grid
 - 💡 **streamgraph** — severity composition month over month
 - 💡 **woke_up** — "since you woke up" real-time-ish stat card
 - 💡 **milestone** — auto-fire cards on round numbers (350,000th CVE, etc.)

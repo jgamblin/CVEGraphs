@@ -13,7 +13,18 @@ output paths written to graphs/.
 import sys
 
 from data import load_nvd
-from charts import chrome_day, cna, cvss_epss_gap, epss_funnel, kev, pace
+from charts import (
+    calendar_heatmap,
+    chrome_day,
+    cna,
+    cna_bump,
+    cvss_epss_gap,
+    epss_funnel,
+    kev,
+    pace,
+    ridgeline_severity,
+    waffle_exploit,
+)
 
 # name -> (module, one-line description)
 CHARTS = {
@@ -23,6 +34,10 @@ CHARTS = {
     "kev": (kev, "KEV watch: confirmed exploitation over the trailing 12 months"),
     "chrome_day": (chrome_day, "Chrome Day vs Patch Tuesday: biggest single-day drops"),
     "cvss_epss_gap": (cvss_epss_gap, "CVSS vs EPSS: severe on paper, quiet in the wild"),
+    "calendar_heatmap": (calendar_heatmap, "Calendar heatmap: a year of daily CVE publishing"),
+    "waffle_exploit": (waffle_exploit, "Waffle: 1,000 CVEs, how few are exploited"),
+    "ridgeline_severity": (ridgeline_severity, "Ridgeline: CVSS distribution by year"),
+    "cna_bump": (cna_bump, "Bump chart: monthly CNA rank flow"),
 }
 
 
