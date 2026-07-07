@@ -136,26 +136,27 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         ax.set_xlim(-1.12, 1.12)
         ax.set_ylim(-1.12, 1.20)
 
-        # Pillars (level 1): faint fill + outline + a label on the top rim.
-        for c in circles:
-            if c.level != 1:
-                continue
+        # Pillars (level 1): faint fill + outline.
+        pillars = [c for c in circles if c.level == 1]
+        for c in pillars:
             ax.add_patch(plt.Circle((c.x, c.y), c.r, facecolor="white",
                                     edgecolor=COLORS["secondary"], linewidth=1.3, zorder=1))
-            if c.r >= 0.15:
-                name = PILLAR_SHORT.get(c.ex["id"], c.ex["id"])
-                # Label above pillars in the top half, below those in the bottom
-                # half. Keeps labels in open vertical whitespace, never in the
-                # crowded center where the circles meet, and never at the edges.
-                pad = 0.04
-                if c.y >= 0:
-                    ly, va = c.y + c.r + pad, "bottom"
-                else:
-                    ly, va = c.y - c.r - pad, "top"
-                ax.text(c.x, ly, name, ha="center", va=va,
-                        fontsize=min(11.5, c.r * 24), fontweight="bold",
-                        color=COLORS["text"], zorder=7,
-                        bbox=dict(boxstyle="round,pad=0.28", fc="white", ec=COLORS["light"], alpha=0.92))
+
+        # Labels above top-half pillars and below bottom-half ones, but aligned
+        # to a SHARED baseline per side so all bottom labels sit on one line.
+        pad = 0.05
+        labeled = [c for c in pillars if c.r >= 0.15]
+        bottoms = [c for c in labeled if c.y < 0]
+        tops = [c for c in labeled if c.y >= 0]
+        bot_y = min((c.y - c.r for c in bottoms), default=0) - pad
+        top_y = max((c.y + c.r for c in tops), default=0) + pad
+        for c in labeled:
+            name = PILLAR_SHORT.get(c.ex["id"], c.ex["id"])
+            ly, va = (top_y, "bottom") if c.y >= 0 else (bot_y, "top")
+            ax.text(c.x, ly, name, ha="center", va=va,
+                    fontsize=min(11.5, c.r * 24), fontweight="bold",
+                    color=COLORS["text"], zorder=7,
+                    bbox=dict(boxstyle="round,pad=0.28", fc="white", ec=COLORS["light"], alpha=0.92))
 
         # CWE leaves (level 2): colored circles first, labels measured after.
         leaves = [c for c in circles if c.level == 2]
