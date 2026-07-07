@@ -41,7 +41,7 @@ Data: `processed/epss.parquet`; join with `data.load_nvd(with_epss=True)`.
 - ✅ **calendar_heatmap** — GitHub-style daily-publishing grid (best in wide)
 - ✅ **waffle_exploit** — 1,000 squares, ~2 exploited; the volume-vs-risk thesis
 - ✅ **ridgeline_severity** — CVSS distribution by year, per-year average marker
-- ✅ **cna_bump** — monthly CNA rank-flow (GitHub #7 -> #1)
+- ✅ **cna_bump** — monthly CNA rank-flow: GitHub and MITRE trade places (#7->#1 vs #1->#7)
 - 💡 **cna_race** — animated bar-chart-race GIF of top CNAs over time
 - 💡 **streamgraph** — severity composition month over month
 - 💡 **woke_up** — "since you woke up" real-time-ish stat card
