@@ -19,6 +19,7 @@ from charts import (
     cna,
     cna_bump,
     cvss_epss_gap,
+    cwe_circles,
     epss_funnel,
     kev,
     pace,
@@ -38,6 +39,7 @@ CHARTS = {
     "waffle_exploit": (waffle_exploit, "Waffle: 1,000 CVEs, how few are exploited"),
     "ridgeline_severity": (ridgeline_severity, "Ridgeline: CVSS distribution by year"),
     "cna_bump": (cna_bump, "Bump chart: monthly CNA rank flow"),
+    "cwe_circles": (cwe_circles, "Circle pack: CWEs sized by count, colored by CVSS"),
 }
 
 

@@ -26,15 +26,18 @@ byte-for-byte compatible with data.py / charts/.
 
 import argparse
 import concurrent.futures
+import csv
 import datetime
 import gzip
 import io
 import json
+import re
 import shutil
 import subprocess
 import tarfile
 import time
 import warnings
+import zipfile
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 
@@ -77,6 +80,8 @@ EPSS_URL = (
     "https://raw.githubusercontent.com/empiricalsec/epss_scores/main/"
     "{year}/epss_scores-{date}.csv.gz"
 )
+# MITRE CWE-1000 Research view: every weakness chains up to one of 10 Pillars.
+CWE_VIEW_URL = "https://cwe.mitre.org/data/csv/1000.csv.zip"
 
 
 # =============================================================================
@@ -575,6 +580,48 @@ def fetch_epss(days_back=10):
     print("[EPSS] no scores found in the lookback window; leaving existing file")
 
 
+def fetch_cwe_pillars():
+    """Map every CWE to its top-level MITRE Pillar (CWE-1000 Research view)."""
+    try:
+        print("  CWE: fetching MITRE CWE-1000 hierarchy ...")
+        content = requests.get(CWE_VIEW_URL, timeout=60).content
+    except Exception as e:  # noqa: BLE001
+        print(f"[CWE] fetch failed ({e}); leaving existing cwe_pillars.json")
+        return
+    zf = zipfile.ZipFile(io.BytesIO(content))
+    rows = list(csv.DictReader(io.StringIO(zf.read(zf.namelist()[0]).decode("utf-8", "replace"))))
+    abstraction, cname, parents = {}, {}, {}
+    for r in rows:
+        cid = "CWE-" + r["CWE-ID"]
+        abstraction[cid] = r.get("Weakness Abstraction", "")
+        cname[cid] = r.get("Name", "")
+        parents[cid] = ["CWE-" + m.group(1) for m in re.finditer(
+            r"NATURE:ChildOf:CWE ID:(\d+):VIEW ID:1000", r.get("Related Weaknesses", "") or "")]
+    pillars = {c for c, a in abstraction.items() if a == "Pillar"}
+
+    def to_pillar(cid, seen=None):
+        seen = seen or set()
+        if cid in pillars:
+            return cid
+        if cid in seen or cid not in parents:
+            return None
+        seen.add(cid)
+        for p in parents[cid]:
+            r = to_pillar(p, seen)
+            if r:
+                return r
+        return None
+
+    mapping = {c: to_pillar(c) for c in parents if to_pillar(c)}
+    OUTPUT_DIR.mkdir(exist_ok=True)
+    (OUTPUT_DIR / "cwe_pillars.json").write_text(json.dumps({
+        "_source": "MITRE CWE-1000 Research Concepts view (cwe.mitre.org)",
+        "pillars": {p: cname[p] for p in sorted(pillars)},
+        "cwe_to_pillar": mapping,
+    }, indent=1))
+    print(f"[CWE] wrote processed/cwe_pillars.json ({len(mapping)} CWEs -> {len(pillars)} pillars)")
+
+
 def fetch_feeds():
     OUTPUT_DIR.mkdir(exist_ok=True)
     kev = _fetch_json(KEV_URLS)
@@ -595,6 +642,7 @@ def fetch_feeds():
         print("[Forecast] fetch failed; leaving any existing forecast.json in place")
 
     fetch_epss()
+    fetch_cwe_pillars()
 
 
 # =============================================================================

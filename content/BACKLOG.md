@@ -22,6 +22,8 @@ Data: `processed/epss.parquet`; join with `data.load_nvd(with_epss=True)`.
   Companion to the "vulnpocalypse that wasn't" post (scoped to Chrome via FOCUS).
 
 ## Rotating deep-dives
+- ✅ **cwe_circles** — hierarchical circle pack: CWEs grouped by MITRE pillar
+  (authoritative, from cwe.mitre.org), sized by count, colored by CVSS
 - 💡 **cwe** — weakness class of the week (trend + top examples)
 - 💡 **vendor** — one vendor's count + YoY, rotating the top 20
 - 💡 **product** — hot target spotlight (e.g. OpenClaw tracker)
