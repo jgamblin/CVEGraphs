@@ -17,7 +17,7 @@ GitHub, in red, climbed from 7th to 1st and has held the top spot all year.
 
 VulnCheck, in navy, does not even appear until the middle of 2025. That is not a gap in the data, it is the whole point. VulnCheck was sitting around rank 130, far outside the top 100, so it was below the chart entirely. It broke into the top 10 in mid-2025 and has not stopped since, reaching number 4.
 
-The takeaway is not that either ships buggier code. It is that the people cataloging vulnerabilities changed. Platforms and specialist research CNAs onboarded and started publishing at scale, and the leaderboard that used to belong to a handful of big software vendors got rewritten in about 24 months.
+The takeaway is not about code quality. Neither GitHub nor VulnCheck is reporting bugs in its own products, both publish CVEs for other people's software. GitHub covers the open-source packages in its ecosystem, and VulnCheck operates as a vulnerability-intelligence authority. What changed is who does the cataloging: platform and third-party research CNAs now assign vulnerabilities at scale, and the leaderboard that used to belong to a handful of big software vendors got rewritten in about 24 months.
 
 If your mental model of who reports vulnerabilities is still Microsoft, Oracle, and Adobe, it is two years out of date.
 
