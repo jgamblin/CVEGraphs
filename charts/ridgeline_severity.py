@@ -5,9 +5,9 @@ Ridgeline (joyplot) of CVSS severity by year.
 One filled density ridge per year, stacked and overlapping, showing how the
 distribution of CVSS scores has shifted over time. Rarely seen on LinkedIn.
 
-Note: raw EPSS collapses at ~0 and makes an ugly ridge, so this plots the CVSS
-score distribution, which is naturally spread (the classic joyplot look). An
-EPSS-on-log-scale variant is a small tweak if preferred.
+Uses the best-available CVSS base score per CVE (v4 when assigned, else v3) so
+coverage stays near 100% every year; a v3-only view would drop the fast-growing
+share of v4-scored CVEs and bias the trend.
 """
 
 from pathlib import Path
@@ -39,9 +39,15 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     cur = current_year(asof)
     years = list(range(cur - N_YEARS + 1, cur + 1))
 
+    # Best-available CVSS base score: v4 when present, else v3. Using both keeps
+    # coverage near 100% every year; v3-only silently drops the growing share of
+    # v4-scored CVEs (35% in 2026), which would bias the trend.
+    score = nvd["cvss_v4"].where(nvd["cvss_v4"].notna(), nvd["cvss_v3"])
+    nvd = nvd.assign(_cvss=score)
+
     ridges = []
     for y in years:
-        v = nvd[(nvd["year"] == y)]["cvss_v3"].dropna().values
+        v = nvd[(nvd["year"] == y)]["_cvss"].dropna().values
         if len(v) > 50:
             x, d = _smooth_density(v)
             ridges.append((y, x, d, float(np.mean(v))))
@@ -78,7 +84,9 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             ax.spines[s].set_visible(False)
         ax.grid(False)
 
-        ax.text(0.0, -0.13, f"CVSS v3 score distribution by year, through {cur}. Source: NVD.",
+        ax.text(0.0, -0.13,
+                f"CVSS base score (v3, or v4 when that is what was assigned), through {cur}. "
+                f"Source: NVD.",
                 transform=ax.transAxes, fontsize=10, color=COLORS["neutral"], va="top")
 
         top = {"wide": 0.82, "square": 0.86, "portrait": 0.88}[ratio]
