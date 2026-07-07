@@ -12,6 +12,7 @@ from cwe.mitre.org), so the grouping is authoritative, not hand-curated.
 """
 
 import json
+import math
 from collections import defaultdict
 from pathlib import Path
 
@@ -26,7 +27,7 @@ from style_social import COLORS, DEFAULT_RATIOS, figsize_for, stamp_and_save
 
 GRAPHS = Path(__file__).resolve().parent.parent / "graphs"
 PROCESSED = Path(__file__).resolve().parent.parent / "processed"
-TOP_N = 30
+TOP_N = 22
 DROP = {"NVD-CWE-noinfo", "NVD-CWE-Other", None}
 
 # Lightly shortened, faithful pillar labels (full names live in the caption).
@@ -78,7 +79,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
                                 target_enclosure=circlify.Circle(x=0, y=0, r=1))
 
     vmin, vmax = float(g["cvss"].min()), float(g["cvss"].max())
-    cmap = LinearSegmentedColormap.from_list("sev", ["#fff0dd", "#f59e0b", COLORS["alert"]])
+    # On-brand blue/grey ramp: light slate -> navy, darker = more severe.
+    cmap = LinearSegmentedColormap.from_list("sev", ["#e9eef4", "#6f93b8", COLORS["primary"]])
     norm = Normalize(vmin=vmin, vmax=vmax)
 
     title1 = f"The anatomy of software weaknesses in {cur}"
@@ -89,21 +91,29 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         fig, ax = plt.subplots(figsize=figsize_for(ratio))
         ax.set_aspect("equal")
         ax.axis("off")
-        ax.set_xlim(-1.05, 1.05)
-        ax.set_ylim(-1.08, 1.08)
+        ax.set_xlim(-1.12, 1.12)
+        ax.set_ylim(-1.12, 1.20)
 
         # Pillars (level 1): faint fill + outline + a label on the top rim.
         for c in circles:
             if c.level != 1:
                 continue
-            ax.add_patch(plt.Circle((c.x, c.y), c.r, facecolor="#f1f3f6",
-                                    edgecolor=COLORS["neutral"], linewidth=1.4, zorder=1))
+            ax.add_patch(plt.Circle((c.x, c.y), c.r, facecolor="white",
+                                    edgecolor=COLORS["secondary"], linewidth=1.3, zorder=1))
             if c.r >= 0.15:
                 name = PILLAR_SHORT.get(c.ex["id"], c.ex["id"])
-                ax.text(c.x, c.y + c.r, name, ha="center", va="center",
+                # Label above pillars in the top half, below those in the bottom
+                # half. Keeps labels in open vertical whitespace, never in the
+                # crowded center where the circles meet, and never at the edges.
+                pad = 0.04
+                if c.y >= 0:
+                    ly, va = c.y + c.r + pad, "bottom"
+                else:
+                    ly, va = c.y - c.r - pad, "top"
+                ax.text(c.x, ly, name, ha="center", va=va,
                         fontsize=min(11.5, c.r * 24), fontweight="bold",
                         color=COLORS["text"], zorder=7,
-                        bbox=dict(boxstyle="round,pad=0.28", fc="white", ec=COLORS["light"], alpha=0.9))
+                        bbox=dict(boxstyle="round,pad=0.28", fc="white", ec=COLORS["light"], alpha=0.92))
 
         # CWE leaves (level 2): colored by severity.
         for c in circles:
@@ -112,17 +122,17 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             cwe = c.ex["id"]
             avg = float(cvss_map[cwe])
             ax.add_patch(plt.Circle((c.x, c.y), c.r, facecolor=cmap(norm(avg)),
-                                    edgecolor="white", linewidth=1.1, zorder=2))
+                                    edgecolor=COLORS["light"], linewidth=1.0, zorder=2))
             name = CWE_NAMES.get(cwe, cwe.replace("CWE-", "CWE "))
-            fs = min(13, c.r * 620 / max(len(name), 3))
-            if fs >= 6.5:
+            fs = min(13, c.r * 600 / max(len(name), 3))
+            if fs >= 7:
                 txt = COLORS["text"] if avg < (vmin + vmax) / 2 else "white"
                 ax.text(c.x, c.y, name, ha="center", va="center", fontsize=fs,
                         fontweight="bold", color=txt, zorder=3)
 
         cax = fig.add_axes([0.30, 0.125, 0.40, 0.02])
         cb = fig.colorbar(ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation="horizontal")
-        cb.set_label("Average CVSS  (lighter = milder, darker red = more severe)",
+        cb.set_label("Average CVSS  (lighter = milder, darker = more severe)",
                      fontsize=9, color=COLORS["secondary"], labelpad=3)
         cb.ax.tick_params(labelsize=8, length=0)
         cb.outline.set_visible(False)

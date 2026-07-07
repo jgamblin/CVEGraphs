@@ -9,11 +9,11 @@ lines for clean LinkedIn paste.
 ```
 Here is the 2026 CVE landscape, organized the way MITRE actually organizes it.
 
-Every CWE (weakness type) rolls up to one of MITRE's 10 top-level pillars. This maps the top 30 weaknesses of 2026 into those pillars: circle size is how common the weakness is, color is how severe it tends to be on average.
+Every CWE (weakness type) rolls up to one of MITRE's 10 top-level pillars. This maps the top 22 weaknesses of 2026 into those pillars: circle size is how common the weakness is, color is how severe it tends to be on average (darker = higher CVSS).
 
-Two pillars dominate, almost tied. Improper Neutralization (injection) is one giant pale circle, XSS, surrounded by dark-red injection bugs: SQLi, code injection, OS command injection. Improper Resource Control is just as big: use-after-free and other memory-safety bugs, path traversal, SSRF, deserialization. Improper Access Control is the third: missing and broken authorization.
+Two pillars dominate, almost tied. Improper Neutralization (injection) is one giant pale circle, XSS, surrounded by the darker, higher-severity injection bugs: SQLi, code injection, OS command injection. Improper Resource Control is just as big: use-after-free and other memory-safety bugs, path traversal, SSRF, deserialization. Improper Access Control is the third: missing and broken authorization.
 
-The reframe is right there in the colors. The single most common weakness, XSS, is one of the milder ones (pale). The dangerous reds are smaller circles: injection, deserialization, command execution. Common and severe are not the same axis.
+The reframe is right there in the shading. The single most common weakness, XSS, is one of the milder ones (pale). The dangerous ones are the small dark circles: injection, deserialization, command execution. Common and severe are not the same axis.
 
 The grouping is straight from MITRE's CWE-1000 research view, not buckets I made up.
 
@@ -33,5 +33,5 @@ The catch: the most common bug, XSS, is one of the mildest. Common and severe ar
 
 ## Alt text
 ```
-Hierarchical circle-packing chart of the top 30 CWEs in 2026, grouped into MITRE's CWE-1000 pillars. Large outlined circles are the pillars (Improper Neutralization, Improper Resource Control, Improper Access Control, plus small pillars for CSRF and NULL-pointer dereference). Inside each, individual CWEs are circles sized by CVE count and colored by average CVSS. XSS is the largest circle but pale (moderate severity); injection and deserialization circles are smaller but deep red. Sources: NVD, cwe.mitre.org.
+Hierarchical circle-packing chart of the top 22 CWEs in 2026, grouped into MITRE's CWE-1000 pillars. Large outlined circles are the pillars (Improper Neutralization, Improper Resource Control, Improper Access Control, plus small pillars for CSRF and NULL-pointer dereference). Inside each, individual CWEs are circles sized by CVE count and shaded by average CVSS on a light-to-navy scale. XSS is the largest circle but pale (moderate severity); injection and deserialization circles are smaller but dark navy (severe). Sources: NVD, cwe.mitre.org.
 ```
