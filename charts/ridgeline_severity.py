@@ -16,6 +16,7 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.lines import Line2D
 
 from data import load_nvd
 from rolling_config import current_year, data_asof
@@ -76,13 +77,15 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             ax.plot(x, yv, color="white", lw=1.0, zorder=i)
             ax.text(-0.2, base + 0.1, label, fontsize=9.5, fontweight="bold",
                     color=COLORS["text"], ha="right", va="bottom")
-            # Average marker: dashed vertical line at this ridge's mean.
+            # Average marker: solid red vertical line at this ridge's mean, so
+            # the shift between v3 and v4 (and across years) stands out.
             dm = float(np.interp(mean_cvss, x, d))
             ax.plot([mean_cvss, mean_cvss], [base, base + dm / dmax * overlap],
-                    color=COLORS["text"], lw=1.2, ls=(0, (2, 1.5)), alpha=0.8, zorder=100)
+                    color=COLORS["alert"], lw=2.0, solid_capstyle="round", zorder=100)
 
         ax.legend(handles=[mpatches.Patch(color=VER["v3"], label="CVSS v3"),
-                           mpatches.Patch(color=VER["v4"], label="CVSS v4")],
+                           mpatches.Patch(color=VER["v4"], label="CVSS v4"),
+                           Line2D([0], [0], color=COLORS["alert"], lw=2.0, label="Yearly average")],
                   loc="upper right", frameon=False, fontsize=10.5)
 
         ax.set_xlim(0, 10)
