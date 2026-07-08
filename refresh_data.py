@@ -373,6 +373,28 @@ def _parse_nvd(items):
     return df
 
 
+def reconcile_nvd_v4(nvd_df, cvelist_df):
+    """Override NVD's cvss_v4 with the CNA's authoritative CVE List v4.
+
+    The NVD JSON mirror carries stale/lower CVSS v4 base scores for many CVEs (it
+    lags the CNA's own vector), which made v4 read ~0.6 points lower than it truly
+    is and produced a spurious "v4 scores lower than v3" trend. The CVE List V5 CNA
+    container is authoritative for the CNA's own v4, so we prefer it by cve_id and
+    fall back to the NVD value only where CVE List has none. NVD's v3 matches the
+    CNA and is left untouched.
+    """
+    auth_v4 = cvelist_df.dropna(subset=["cvss_v4"]).drop_duplicates(
+        "cve_id").set_index("cve_id")["cvss_v4"]
+    mapped = nvd_df["cve_id"].map(auth_v4)
+    changed = int((mapped.notna() & (mapped != nvd_df["cvss_v4"])).sum())
+    nvd_df = nvd_df.copy()
+    nvd_df["cvss_v4"] = mapped.where(mapped.notna(), nvd_df["cvss_v4"])
+    nvd_df.to_parquet(OUTPUT_DIR / "nvd_cves.parquet", index=False)
+    print(f"[NVD] reconciled cvss_v4 from CVE List (authoritative): "
+          f"{changed:,} scores corrected -> processed/nvd_cves.parquet")
+    return nvd_df
+
+
 def process_nvd():
     print("[NVD] loading JSON (1GB+, this takes a minute) ...")
     with open(DATA_DIR / "nvd.json") as f:
@@ -675,8 +697,10 @@ def main():
         clone_or_update_cvelist()
 
     print("\n[2/3] Processing to parquet ...")
-    process_nvd()
-    process_cvelist()
+    nvd_df = process_nvd()
+    cvelist_df = process_cvelist()
+    # NVD's mirrored v4 is unreliable; prefer the CNA's authoritative CVE List v4.
+    reconcile_nvd_v4(nvd_df, cvelist_df)
 
     print("\n[3/3] Fetching feeds ...")
     fetch_feeds()

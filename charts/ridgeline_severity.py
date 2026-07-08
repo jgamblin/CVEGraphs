@@ -34,7 +34,7 @@ def _smooth_density(vals, bins=60, rng=(0, 10)):
     return centers, h
 
 
-def render(nvd=None, ratios=DEFAULT_RATIOS):
+def render(nvd=None, ratios=DEFAULT_RATIOS, show_median=False):
     if nvd is None:
         nvd = load_nvd()
     asof = data_asof(nvd)
@@ -59,18 +59,19 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     ridges = []
     for label, vals, ver in rows:
         x, d = _smooth_density(vals)
-        ridges.append((label, x, d, float(np.mean(vals)), ver, len(vals)))
-    dmax = max(d.max() for _, _, d, _, _, _ in ridges)
+        ridges.append((label, x, d, float(np.mean(vals)),
+                       float(np.median(vals)), ver, len(vals)))
+    dmax = max(d.max() for _, _, d, _, _, _, _ in ridges)
     overlap = 1.7  # >1 makes ridges overlap like a proper joyplot
 
     title1 = "How severe are CVEs, year by year?"
-    title2 = "From 2024, CVSS v3 and v4 are shown separately. v4 has been scoring lower."
+    title2 = "From 2024, CVSS v3 and v4 are shown separately. On the same CVEs they score about the same."
 
     out = []
     for ratio in ratios:
         fig, ax = plt.subplots(figsize=figsize_for(ratio))
         n = len(ridges)
-        for i, (label, x, d, mean_cvss, ver, nvals) in enumerate(ridges):
+        for i, (label, x, d, mean_cvss, med_cvss, ver, nvals) in enumerate(ridges):
             base = (n - 1 - i)  # newest at top
             yv = base + d / dmax * overlap
             ax.fill_between(x, base, yv, color=VER[ver], alpha=0.9, zorder=i, lw=0)
@@ -87,17 +88,24 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             # (so years are comparable), at this ridge's mean score.
             ax.plot([mean_cvss, mean_cvss], [base, base + 0.9],
                     color=COLORS["alert"], lw=2.0, solid_capstyle="round", zorder=100)
+            # Optional black median tick alongside the red average, same height.
+            if show_median:
+                ax.plot([med_cvss, med_cvss], [base, base + 0.9],
+                        color="black", lw=2.0, solid_capstyle="round", zorder=101)
 
-        ax.legend(handles=[mpatches.Patch(color=VER["v3"], label="CVSS v3"),
-                           mpatches.Patch(color=VER["v4"], label="CVSS v4"),
-                           Line2D([0], [0], color=COLORS["alert"], lw=2.0, label="Yearly average")],
-                  loc="upper center", bbox_to_anchor=(0.5, -0.11), ncol=3,
+        handles = [mpatches.Patch(color=VER["v3"], label="CVSS v3"),
+                   mpatches.Patch(color=VER["v4"], label="CVSS v4"),
+                   Line2D([0], [0], color=COLORS["alert"], lw=2.0, label="Yearly average")]
+        if show_median:
+            handles.append(Line2D([0], [0], color="black", lw=2.0, label="Yearly median"))
+        ax.legend(handles=handles,
+                  loc="upper center", bbox_to_anchor=(0.5, -0.11), ncol=len(handles),
                   frameon=False, fontsize=10.5, handletextpad=0.5, columnspacing=2.4)
 
         ax.set_xlim(0, 10)
         # Trim top whitespace: end just above the tallest ridge (or average tick).
         ylim_top = max((n - 1 - i) + max(overlap * d.max() / dmax, 0.9)
-                       for i, (_, _, d, _, _, _) in enumerate(ridges)) + 0.15
+                       for i, (_, _, d, _, _, _, _) in enumerate(ridges)) + 0.15
         ax.set_ylim(-0.3, ylim_top)
         ax.set_xlabel("CVSS base score")
         ax.set_yticks([])
@@ -107,7 +115,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         ax.grid(False)
 
         ax.text(0.0, -0.20,
-                f"CVSS base score by year. v3 and v4 split out from 2024. Source: NVD.",
+                f"CVSS base score by year. v3/v4 split from 2024; v4 read from the CNA's CVE List vector. Source: NVD + CVE List.",
                 transform=ax.transAxes, fontsize=10, color=COLORS["neutral"], va="top")
 
         top = {"wide": 0.82, "square": 0.86, "portrait": 0.88}[ratio]
@@ -117,12 +125,16 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         fig.text(0.05, 0.918, title2, fontsize=11.5, fontweight="bold",
                  color=COLORS["secondary"], ha="left", va="top")
 
-        path = GRAPHS / f"ridgeline_severity_{ratio}_{asof.strftime('%Y-%m-%d')}.png"
+        suffix = "_median" if show_median else ""
+        path = GRAPHS / f"ridgeline_severity{suffix}_{ratio}_{asof.strftime('%Y-%m-%d')}.png"
         stamp_and_save(fig, path, asof.strftime("%b %d, %Y"))
         out.append(path)
     return out
 
 
 if __name__ == "__main__":
-    for p in render():
+    nvd = load_nvd()
+    for p in render(nvd):
+        print(p)
+    for p in render(nvd, show_median=True):
         print(p)
