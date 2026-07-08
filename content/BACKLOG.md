@@ -20,6 +20,15 @@ Data: `processed/epss.parquet`; join with `data.load_nvd(with_epss=True)`.
 - 💡 **high_epss_board** — the highest-EPSS CVEs published this period (a watchlist).
 - ✅ **cvss_epss_gap** — CVSS vs EPSS scatter: severe on paper, quiet in the wild.
   Companion to the "vulnpocalypse that wasn't" post (scoped to Chrome via FOCUS).
+- ✅ **scorer_divergence** — dumbbell: same bug, same CNA, v4 minus v3 by CWE;
+  VulDB vs VulnCheck disagree (even on direction). "Who scores matters more than which
+  version." Caption in `captions/scorer_divergence.md`.
+- ✅ **cna_spread** — range chart: one weakness class (XSS default, CWE-swappable),
+  CVSS v3 by scoring CNA; bar = middle 80% of scores, tick = average, spanning ~3.4 to
+  ~6.7. "A CVSS score is an opinion with a decimal point." Caption in `captions/cna_spread.md`.
+- ✅ **cwe_spread** — range chart: top 10 CWEs, CVSS v3 80% range + median. Memory/
+  injection high (stack overflow 8.5), web/authz lower (XSS 6.4); XSS widest band. Companion
+  to cna_spread. Caption in `captions/cwe_spread.md`.
 
 ## Rotating deep-dives
 - ✅ **cwe_circles** — hierarchical circle pack: CWEs grouped by MITRE pillar

@@ -58,15 +58,21 @@ code beyond a single session). Curation and posting stay in your hands.
 
 ## Status
 
-Phase 0–1 complete: rolling data layer, social style, ten charts — six bar/line
-(**Pace Tracker**, **EPSS Funnel**, **CNA Leaderboard**, **KEV Watch**, **Chrome
-Day**, **CVSS vs EPSS gap**) plus four non-bar formats for feed variety
-(**Calendar Heatmap**, **Waffle**, **Ridgeline**, **CNA Bump**) — an insight
-miner (`insights.py`) with a recency scanner, and a weekly runner
-(`run_weekly.sh` + `deploy/`). `refresh_data.py` is now **self-contained** — it rebuilds
-the parquet from upstream feeds (NVD, CVE List V5, CISA KEV, CVEForecast, and
-production EPSS V5 scores) with no dependency on any sibling repo. EPSS is available via
-`data.load_nvd(with_epss=True)` or `data.load_epss()`. Next up per
-`content/BACKLOG.md`: the KEV Watch, CNA Leaderboard, and EPSS funnel charts.
+Fourteen charts across the shelf:
+
+- **Bar / line workhorses** — Pace Tracker, EPSS Funnel, CNA Leaderboard, KEV
+  Watch, Chrome Day, CVSS vs EPSS gap.
+- **Non-bar formats** for feed variety — Calendar Heatmap, Waffle, Ridgeline, CNA
+  Bump, CWE Circle Pack.
+- **CVSS scoring-methodology set** — CNA score spread (`cna_spread`), scorer
+  divergence (`scorer_divergence`), and CWE score spread (`cwe_spread`), which
+  together show how much a CVSS number depends on *who* assigned it.
+
+An insight miner (`insights.py`) and a weekly runner (`run_weekly.sh` + `deploy/`)
+round it out. `refresh_data.py` is self-contained — it rebuilds the parquet from
+upstream feeds (NVD, CVE List V5, CISA KEV, CVEForecast, and production EPSS V5)
+with no dependency on any sibling repo, and reconciles CVSS v4 from the
+authoritative CVE List vector (the NVD mirror's v4 runs low). EPSS is available via
+`data.load_nvd(with_epss=True)` or `data.load_epss()`.
 
 Built on free CVE tooling from [RogoLabs](https://rogolabs.net).
