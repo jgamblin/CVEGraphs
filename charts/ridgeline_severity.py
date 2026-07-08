@@ -75,13 +75,13 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             yv = base + d / dmax * overlap
             ax.fill_between(x, base, yv, color=VER[ver], alpha=0.9, zorder=i, lw=0)
             ax.plot(x, yv, color="white", lw=1.0, zorder=i)
-            ax.text(-0.2, base + 0.28, label, fontsize=9.5, fontweight="bold",
+            ax.text(-0.2, base + 0.34, label, fontsize=9.5, fontweight="bold",
                     color=COLORS["text"], ha="right", va="bottom")
             # Small muted CVE count so the reader sees each ridge's sample size
             # (the v4 ridges are far smaller than the v3 ones).
-            cstr = (f"{nvals / 1000:.0f}k" if nvals >= 10000
-                    else f"{nvals / 1000:.1f}k" if nvals >= 1000 else str(nvals))
-            ax.text(-0.2, base + 0.08, f"n={cstr}", fontsize=7.5,
+            cstr = (f"{nvals / 1000:.0f}K" if nvals >= 10000
+                    else f"{nvals / 1000:.1f}K" if nvals >= 1000 else str(nvals))
+            ax.text(-0.2, base + 0.06, f"{cstr} CVEs", fontsize=7.5,
                     color=COLORS["neutral"], ha="right", va="bottom")
             # Average marker: solid red tick of the SAME height on every ridge
             # (so years are comparable), at this ridge's mean score.
