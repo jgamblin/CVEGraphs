@@ -211,10 +211,14 @@ def clone_or_update_cvelist():
     DATA_DIR.mkdir(exist_ok=True)
     out = DATA_DIR / "cvelistV5"
     if (out / ".git").exists():
-        print("  CVEList V5: updating existing clone ...")
+        print("  CVEList V5: updating existing clone (shallow) ...")
         try:
-            subprocess.run(["git", "-C", str(out), "fetch", "--unshallow"], check=False)
-            subprocess.run(["git", "-C", str(out), "pull", "--ff-only"], check=True)
+            # Shallow fetch of just the latest commit + hard reset. Never
+            # --unshallow: that re-downloads the repo's entire history (huge and
+            # slow) on every refresh.
+            subprocess.run(["git", "-C", str(out), "fetch", "--depth", "1", "origin", "main"],
+                           check=True)
+            subprocess.run(["git", "-C", str(out), "reset", "--hard", "FETCH_HEAD"], check=True)
             return out
         except subprocess.CalledProcessError as e:
             print(f"    update failed ({e}); refetching fresh")

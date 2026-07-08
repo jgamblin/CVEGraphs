@@ -2,9 +2,9 @@
 
 Image: `graphs/ridgeline_severity_<ratio>_<date>.png`. House style: no em dashes.
 From 2024 the chart splits CVSS v3 (dark) and v4 (light) into their own ridges.
-Verified: on 25,130 CVEs scored BOTH ways, v4 is 0.68 lower on average and lower
+Verified: on 25,154 CVEs scored BOTH ways, v4 is 0.68 lower on average and lower
 65% of the time. v4 share: ~0% pre-2024 -> 8.9% (2024) -> 25.8% (2025) -> 35% (2026).
-Population means 2025: v3 6.59 / v4 5.94; 2026: v3 6.89 / v4 6.21. Single lines
+Population means 2025: v3 6.59 / v4 5.94; 2026: v3 6.89 / v4 6.22. Single lines
 for clean LinkedIn paste.
 
 ## LinkedIn / Mastodon
@@ -43,11 +43,11 @@ lower than v3. Source: NVD.
 ```
 
 ## Have ready in the comments (verified ammo)
-- **The clean proof:** 25,130 CVEs have both a v3 and a v4 score; v4 averages 0.68
+- **The clean proof:** 25,154 CVEs have both a v3 and a v4 score; v4 averages 0.68
   lower (median 6.0 vs 6.5) and is lower on 65% of them. So it is the scoring
   system, not just which CVEs get v4.
 - **v4 adoption:** ~0% through 2023, 8.9% (2024), 25.8% (2025), 35.0% (2026).
-- **Population means:** 2025 v3 6.59 / v4 5.94; 2026 v3 6.89 / v4 6.21.
+- **Population means:** 2025 v3 6.59 / v4 5.94; 2026 v3 6.89 / v4 6.22.
 - **"v4 is supposed to score differently."** Correct, by design (reworked metrics).
   The point is not that v4 is wrong, it is that CVSS trend lines now mix two rulers.
 - **Not a severity-inflation story:** the CVE explosion is volume; exploitation
