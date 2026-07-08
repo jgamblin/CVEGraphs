@@ -38,9 +38,9 @@ CVSS v4 is now a third of all scores, and it rates the same bugs lower than v3. 
 ```
 Ridgeline chart of CVE CVSS base scores by year, 2018 to 2026. Years 2018 to 2023
 are single dark ridges (CVSS v3). From 2024 each year has two ridges: dark for v3
-and light for v4. The light v4 ridges sit lower and wider than the dark v3 ones,
-with a distinct low cluster near a score of 2, showing v4 scores vulnerabilities
-lower than v3. Source: NVD.
+and light for v4, each labeled with its CVE count. The light v4 ridges sit lower
+and wider than the dark v3 ones, with a distinct low cluster near a score of 2,
+showing v4 scores vulnerabilities lower than v3. Source: NVD.
 ```
 
 ## Have ready in the comments (verified ammo)

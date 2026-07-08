@@ -59,8 +59,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     ridges = []
     for label, vals, ver in rows:
         x, d = _smooth_density(vals)
-        ridges.append((label, x, d, float(np.mean(vals)), ver))
-    dmax = max(d.max() for _, _, d, _, _ in ridges)
+        ridges.append((label, x, d, float(np.mean(vals)), ver, len(vals)))
+    dmax = max(d.max() for _, _, d, _, _, _ in ridges)
     overlap = 1.7  # >1 makes ridges overlap like a proper joyplot
 
     title1 = "How severe are CVEs, year by year?"
@@ -70,13 +70,19 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     for ratio in ratios:
         fig, ax = plt.subplots(figsize=figsize_for(ratio))
         n = len(ridges)
-        for i, (label, x, d, mean_cvss, ver) in enumerate(ridges):
+        for i, (label, x, d, mean_cvss, ver, nvals) in enumerate(ridges):
             base = (n - 1 - i)  # newest at top
             yv = base + d / dmax * overlap
             ax.fill_between(x, base, yv, color=VER[ver], alpha=0.9, zorder=i, lw=0)
             ax.plot(x, yv, color="white", lw=1.0, zorder=i)
-            ax.text(-0.2, base + 0.1, label, fontsize=9.5, fontweight="bold",
+            ax.text(-0.2, base + 0.28, label, fontsize=9.5, fontweight="bold",
                     color=COLORS["text"], ha="right", va="bottom")
+            # Small muted CVE count so the reader sees each ridge's sample size
+            # (the v4 ridges are far smaller than the v3 ones).
+            cstr = (f"{nvals / 1000:.0f}k" if nvals >= 10000
+                    else f"{nvals / 1000:.1f}k" if nvals >= 1000 else str(nvals))
+            ax.text(-0.2, base + 0.08, f"n={cstr}", fontsize=7.5,
+                    color=COLORS["neutral"], ha="right", va="bottom")
             # Average marker: solid red tick of the SAME height on every ridge
             # (so years are comparable), at this ridge's mean score.
             ax.plot([mean_cvss, mean_cvss], [base, base + 0.9],
@@ -91,7 +97,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         ax.set_xlim(0, 10)
         # Trim top whitespace: end just above the tallest ridge (or average tick).
         ylim_top = max((n - 1 - i) + max(overlap * d.max() / dmax, 0.9)
-                       for i, (_, _, d, _, _) in enumerate(ridges)) + 0.15
+                       for i, (_, _, d, _, _, _) in enumerate(ridges)) + 0.15
         ax.set_ylim(-0.3, ylim_top)
         ax.set_xlabel("CVSS base score")
         ax.set_yticks([])
