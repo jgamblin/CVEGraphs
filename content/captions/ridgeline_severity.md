@@ -1,54 +1,54 @@
-# Caption — Ridgeline: CVSS severity by year (`ridgeline_severity`)
+# Caption — Ridgeline: CVSS severity by year, v3 vs v4 (`ridgeline_severity`)
 
 Image: `graphs/ridgeline_severity_<ratio>_<date>.png`. House style: no em dashes.
-Uses best-available CVSS base score (v4 when assigned, else v3) for ~99% coverage
-every year. Verified means: 7.30 (2018) -> 6.44 (2025), 6.65 (2026 partial).
-Critical share 15.4% (2018) -> ~9-10% now; Low (<4) 1.4% -> 8.9%; Medium is now
-the biggest band. Paragraphs are single lines for clean LinkedIn paste.
+From 2024 the chart splits CVSS v3 (dark) and v4 (light) into their own ridges.
+Verified: on 25,130 CVEs scored BOTH ways, v4 is 0.68 lower on average and lower
+65% of the time. v4 share: ~0% pre-2024 -> 8.9% (2024) -> 25.8% (2025) -> 35% (2026).
+Population means 2025: v3 6.59 / v4 5.94; 2026: v3 6.89 / v4 6.21. Single lines
+for clean LinkedIn paste.
 
 ## LinkedIn / Mastodon
 ```
-Are CVEs getting more severe every year? The data says the opposite.
+Are CVEs getting more severe every year? No. And a big part of the reason is a measurement change hiding in plain sight.
 
-This is the distribution of CVSS scores for every year since 2018, one ridge per year, with a dashed line at each year's average. The averages have drifted left: from about 7.3 in 2018 to the mid 6s in recent years.
+This is the CVSS score distribution for every year since 2018. From 2024 I split each year into CVSS v3 (dark) and CVSS v4 (light), because v4 went from a rounding error to a third of all scores in two years.
 
-The mix shifted underneath that. Critical's share has fallen by about a third, from 15% of scored CVEs in 2018 to roughly 10% now. The single biggest bucket is now Medium, and a low-severity cluster that barely existed in 2018 (about 1%) has grown to roughly 9%.
+The light ridges sit lower. CVSS v4 scores vulnerabilities below what v3 would have. And this is not a quirk of which CVEs get v4: on the 25,000 vulnerabilities that carry both a v3 and a v4 score, v4 comes out 0.68 points lower on average, and lower about two-thirds of the time. Same vulnerability, lower number, because the ruler changed.
 
-So the record CVE volume is not a wave of ever-scarier bugs. We are cataloging far more vulnerabilities, and on average they are getting less severe, not more. Volume is the story; severity is drifting the other way.
+So "average CVE severity is falling" is partly real (more medium-grade ecosystem CVEs) and partly just this: a fast-growing slice of CVEs is now measured with a system that scores lower.
 
-One method note, because it matters: about a third of 2026 CVEs are now scored with CVSS v4 instead of v3, so this uses whichever base score was assigned. Drop v4 and you would be ignoring a third of the year.
+Two takeaways. Comparing CVSS trends across, say, 2023 and 2026 now means partly comparing two different rulers, so be careful. And severity was never the number that should drive your queue anyway. Exploitability is. Different chart.
 
-And severity was never the number that should drive your queue anyway. CVSS is potential impact, not the odds anyone exploits it. That is a different chart.
-
-Are you seeing severity drift down in your own data?
+What share of your CVEs are scored with v4 yet?
 
 #vulnerabilitymanagement #cybersecurity #CVE
 ```
 
 ## X / Bluesky
 ```
-Are CVEs getting more severe every year? No. The opposite.
+Are CVEs getting more severe? No, and there is a twist.
 
-CVSS score distribution by year, 2018 to 2026. The average drifts down, from ~7.3 to the mid 6s. Critical's share fell by a third (15% to ~10%); Medium is now the biggest bucket.
+CVSS v4 is now a third of all scores, and it rates the same bugs lower than v3. On 25,000 CVEs scored both ways, v4 came out 0.68 points lower on average.
 
-More CVEs, milder on average. (Uses CVSS v3/v4 for full coverage.)
+"Average severity is falling" is partly just a change of ruler.
 ```
 
 ## Alt text
 ```
-Ridgeline chart: nine stacked density curves, one per year 2018 to 2026, of CVE
-CVSS base scores (v3 or v4). A dashed vertical line marks each year's average; it
-moves steadily left over time, from about 7.3 in 2018 to the mid 6s by 2026.
-Recent years show more mass at the low and medium end, including a new cluster
-near a score of 2. Source: NVD.
+Ridgeline chart of CVE CVSS base scores by year, 2018 to 2026. Years 2018 to 2023
+are single dark ridges (CVSS v3). From 2024 each year has two ridges: dark for v3
+and light for v4. The light v4 ridges sit lower and wider than the dark v3 ones,
+with a distinct low cluster near a score of 2, showing v4 scores vulnerabilities
+lower than v3. Source: NVD.
 ```
 
 ## Have ready in the comments (verified ammo)
-- **"You dropped CVSS v4."** No, this uses v4 when assigned, else v3, ~99% coverage
-  every year. v3-only would drop 35% of 2026 and bias the trend down further.
-- **Band shift 2018 -> 2026:** Critical 15.4% -> 10.3%; High 45% -> 39%; Medium
-  38% -> 41% (peaked ~52% in 2024-25); Low (<4) 1.4% -> 8.9%.
-- **Why milder?** More ecosystem/mass-assigned CVEs (web plugins, libraries) that
-  skew medium, plus v4 scoring a bit lower. It is a mix shift, not a scale change.
-- **Not a severity-inflation story:** the "CVE explosion" is volume, not rising
-  severity; exploitation (EPSS/KEV) is the real risk signal.
+- **The clean proof:** 25,130 CVEs have both a v3 and a v4 score; v4 averages 0.68
+  lower (median 6.0 vs 6.5) and is lower on 65% of them. So it is the scoring
+  system, not just which CVEs get v4.
+- **v4 adoption:** ~0% through 2023, 8.9% (2024), 25.8% (2025), 35.0% (2026).
+- **Population means:** 2025 v3 6.59 / v4 5.94; 2026 v3 6.89 / v4 6.21.
+- **"v4 is supposed to score differently."** Correct, by design (reworked metrics).
+  The point is not that v4 is wrong, it is that CVSS trend lines now mix two rulers.
+- **Not a severity-inflation story:** the CVE explosion is volume; exploitation
+  (EPSS/KEV) is the real risk signal.
