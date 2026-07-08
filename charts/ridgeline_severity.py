@@ -86,7 +86,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         ax.legend(handles=[mpatches.Patch(color=VER["v3"], label="CVSS v3"),
                            mpatches.Patch(color=VER["v4"], label="CVSS v4"),
                            Line2D([0], [0], color=COLORS["alert"], lw=2.0, label="Yearly average")],
-                  loc="upper right", frameon=False, fontsize=10.5)
+                  loc="upper center", bbox_to_anchor=(0.5, -0.11), ncol=3,
+                  frameon=False, fontsize=10.5, handletextpad=0.5, columnspacing=2.4)
 
         ax.set_xlim(0, 10)
         ax.set_ylim(-0.3, n + overlap)
@@ -97,12 +98,12 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             ax.spines[s].set_visible(False)
         ax.grid(False)
 
-        ax.text(0.0, -0.13,
+        ax.text(0.0, -0.20,
                 f"CVSS base score by year. v3 and v4 split out from 2024. Source: NVD.",
                 transform=ax.transAxes, fontsize=10, color=COLORS["neutral"], va="top")
 
         top = {"wide": 0.82, "square": 0.86, "portrait": 0.88}[ratio]
-        fig.subplots_adjust(top=top, bottom=0.14, left=0.17, right=0.96)
+        fig.subplots_adjust(top=top, bottom=0.20, left=0.17, right=0.96)
         fig.text(0.05, 0.965, title1, fontsize=20, fontweight="bold",
                  color=COLORS["text"], ha="left", va="top")
         fig.text(0.05, 0.918, title2, fontsize=11.5, fontweight="bold",
