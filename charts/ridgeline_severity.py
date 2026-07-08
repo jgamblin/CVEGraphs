@@ -77,10 +77,9 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             ax.plot(x, yv, color="white", lw=1.0, zorder=i)
             ax.text(-0.2, base + 0.1, label, fontsize=9.5, fontweight="bold",
                     color=COLORS["text"], ha="right", va="bottom")
-            # Average marker: solid red vertical line at this ridge's mean, so
-            # the shift between v3 and v4 (and across years) stands out.
-            dm = float(np.interp(mean_cvss, x, d))
-            ax.plot([mean_cvss, mean_cvss], [base, base + dm / dmax * overlap],
+            # Average marker: solid red tick of the SAME height on every ridge
+            # (so years are comparable), at this ridge's mean score.
+            ax.plot([mean_cvss, mean_cvss], [base, base + 0.9],
                     color=COLORS["alert"], lw=2.0, solid_capstyle="round", zorder=100)
 
         ax.legend(handles=[mpatches.Patch(color=VER["v3"], label="CVSS v3"),
@@ -90,7 +89,10 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
                   frameon=False, fontsize=10.5, handletextpad=0.5, columnspacing=2.4)
 
         ax.set_xlim(0, 10)
-        ax.set_ylim(-0.3, n + overlap)
+        # Trim top whitespace: end just above the tallest ridge (or average tick).
+        ylim_top = max((n - 1 - i) + max(overlap * d.max() / dmax, 0.9)
+                       for i, (_, _, d, _, _) in enumerate(ridges)) + 0.15
+        ax.set_ylim(-0.3, ylim_top)
         ax.set_xlabel("CVSS base score")
         ax.set_yticks([])
         ax.set_xticks(range(0, 11, 2))
