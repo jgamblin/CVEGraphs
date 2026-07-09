@@ -6,28 +6,28 @@ posts. Data: CVE List V5, CVSS v3 (broadest cross-CNA coverage), CWE-79 (XSS)
 by default; the chart is CWE-swappable via the `cwe` arg / `CWE` constant.
 
 Finding: for XSS scored with v3, the 13 CNAs with >= 100 CVEs each average from
-3.4 (VulDB) to 6.7 (Microsoft). The spread is mostly ONE contested metric, Scope:
-VulDB marks XSS Scope:Changed 0% of the time, most others 90-100% (Microsoft 49%,
-GitHub 63%), and that one call is worth ~1.5-2 points. Secondary drivers are real
-population differences (adobe's XSS are 91% PR:L / authenticated, which genuinely
-rates lower) and other metric conventions (Wordfence marks 82% UI:None). All are
-defensible CVSS readings, not errors. This chart illustrates the effect; the
-`scorer_divergence` chart is the rigorous same-CVE proof.
+3.4 (VulDB) to 6.7 (Microsoft), but the range is mostly VulDB alone at the bottom;
+the other 12 cluster 5.5 to 6.7. Biggest driver of VulDB's floor is NOT Scope, it is
+Confidentiality impact: VulDB scores C:None on ~100% of its XSS vs C:Low+ on ~98% for
+the field, worth ~1.4 points (the largest single lever, from a field-typical 6.1).
+Scope (VulDB 0% Changed vs field 88%) and Privileges are each worth ~0.7. VulDB-typical
+XSS = 3.5, field-typical = 6.1. No single dial orders the other 12 (Scope:Changed rate
+vs mean correlates r=-0.59). `scorer_divergence` (same CVE, same scorer) is the proof.
 
 ## LinkedIn / Mastodon
 Attach: `cna_spread_wide_<date>.png`.
 ```
-Here is one weakness, cross-site scripting, the most common bug on the internet. And here is the same weakness scored by 13 different organizations. The typical XSS gets rated about a 3.4 by VulDB and close to a 6.7 by Microsoft. Same class of bug, same scoring system, more than a full severity band apart.
+A CVSS score is not a fact about a bug. It is an opinion with a decimal point.
 
-So I dug into why, and most of the gap comes down to a single contested call in the CVSS math: is an XSS "Scope: Changed"?
+Cross-site scripting is the most common bug on the internet. Here it is scored by 13 different organizations: the same weakness averages about a 3.4 at VulDB and about a 6.7 at Microsoft. Same bug class, same scoring system, more than a full severity band apart.
 
-The case for yes: the injected script runs in the victim's browser, a different component than the vulnerable server, so the impact crosses a boundary. The case for no: it is all still the one web app. The spec leaves room for both, and the scorers split hard. One organization marks XSS Scope:Changed almost never. Most of the others mark it Scope:Changed almost always. That single metric is worth roughly two points, and it is most of the gap.
+Most of that spread is really one organization. VulDB sits alone at the bottom while the other twelve cluster between 5.5 and 6.7. So the real question is why VulDB reads the same bugs so much lower.
 
-The rest is real difference in the bugs themselves. Some scorers mostly catalog authenticated XSS, which genuinely rates lower.
+The biggest reason is not the metric people argue about. It is whether an XSS leaks data at all. VulDB scores confidentiality impact as None on essentially every XSS, treating it as a bug that can alter a page but not read anything. Almost everyone else scores it Low: an XSS can read the page, lift a session token, scrape what the victim can see. That single call is worth about 1.4 points, the largest lever in the whole vector.
 
-None of this is anyone being wrong. It is careful people resolving the same ambiguity in defensible but different ways. Which is exactly the problem. A CVSS base score is not a fact about a bug, it is an opinion with a decimal point, and the opinion depends on who holds the pen.
+VulDB then stacks two more conservative calls on top: it marks XSS as not crossing a trust boundary (Scope:Unchanged) where most others mark it Changed, and it usually requires the attacker to already have some privilege. Each is worth about half as much as the confidentiality call. That is the twist: Scope is the metric the community argues about most for XSS, yet the quieter confidentiality call moves the score twice as far.
 
-So comparing scores across sources quietly compares scorers, and severity alone stays a weak way to rank your work. Exploitation evidence travels better.
+None of these orgs is being sloppy. They are applying the same defined metrics to a genuinely ambiguous bug and landing in different places, and no single dial orders them. The number just depends on who holds the pen.
 
 When a CVE carries two different CVSS scores, which one does your program actually use?
 
@@ -36,31 +36,37 @@ When a CVE carries two different CVSS scores, which one does your program actual
 
 ## X / Bluesky
 ```
-Why do CVSS scores for the same bug vary so much? Take XSS: 13 orgs score it, averages run 3.4 to 6.7.
+A CVSS score is not a fact about a bug. It is an opinion with a decimal point.
 
-Most of the gap is one contested call: is XSS "Scope: Changed"? One org says never, most of the rest say almost always. That metric alone is worth ~2 points.
-
-A CVSS score is an opinion with a decimal point.
+13 orgs scored XSS: averages run 3.4 to 6.7, mostly because VulDB sits alone at the bottom. The biggest reason is not the metric people argue about (Scope), it is whether an XSS leaks data at all. That one call is worth ~1.4 points, double Scope.
 ```
 
 ## Alt text
 ```
-Range chart of CVSS v3 base scores for cross-site scripting (CWE-79), one row per scoring CNA, for the 13 CNAs with at least 100 XSS CVEs. Each row has a bar showing where the middle 80% of that CNA's scores fall, colored by severity from light grey for low scores up to deep navy for high, with a bold tick at the average. Average scores climb from VulDB at the bottom (3.4, a pale low-scoring outlier) up to Microsoft at 6.7, so the same weakness gets very different scores depending on who rates it. Source: CVE List V5.
+Range chart of CVSS v3 base scores for cross-site scripting (CWE-79), one row per scoring CNA, for the 13 CNAs with at least 100 XSS CVEs. Each row has a bar showing where the middle 80% of that CNA's scores fall, colored by severity from light grey for low scores up to deep navy for high, with a bold tick at the average. VulDB sits alone at the bottom with an average of 3.4; the other twelve CNAs cluster between 5.5 and 6.7, up to Microsoft at 6.7. The same weakness gets very different scores depending on who rates it. Source: CVE List V5.
 ```
 
 ## Notes / caveats
 - v3, not v4: v3 has the broadest per-CNA coverage. v4 per-CNA volume is still thin.
-- Not unique to XSS: most high-volume classes show a similar cross-CNA spread. The
-  chart is CWE-swappable (`render(cwe="CWE-89")`) if you want to show SQLi etc.
-- **Precise mechanism (verified from vectors):** the gap is mostly the Scope metric.
-  VulDB marks XSS Scope:Changed 0% of the time; most others 90-100% (Microsoft 49%,
-  GitHub 63%). In CVSS v3 that is worth ~1.5-2 points and explains VulDB's floor.
-  Secondary: adobe's XSS are 91% authenticated (PR:L), genuinely lower; Wordfence
-  marks 82% UI:None. All defensible readings of an ambiguous spec, not errors.
-- Framing: do NOT imply any CNA is "wrong." The honest claim is that scorers resolve
-  the same spec ambiguities (Scope above all) differently, so a base score reflects
-  who scored it. This is the illustrative chart; `scorer_divergence` (same CVE,
-  same scorer) is the rigorous proof.
-- Bars are colored by CVSS severity (light grey low -> deep navy high), so VulDB reads
-  as the pale low outlier. Small-sample rows (Microsoft 113, sap 109) are shown as-is.
+- The spread is mostly VulDB, not a gradient. VulDB averages 3.4; the other 12 cluster
+  5.5-6.7. Across those 12, Scope:Changed rate correlates NEGATIVELY with the average
+  (r=-0.59, vs +0.38 across all 13), so no single metric orders the field. Do NOT claim
+  "most of the gap is Scope."
+- Per-metric decomposition (CVSS v3.1, from a field-typical XSS = 6.1, flipping one
+  metric to VulDB's value):
+    - Confidentiality None (vs Low): **-1.4** <- largest lever
+    - Scope Unchanged (vs Changed): -0.7
+    - Privileges Low (vs None): -0.7
+  VulDB-typical vector (AV:N/AC:L/PR:L/UI:R/S:U/C:N/I:L/A:N) = 3.5.
+- Vector distributions (verified): VulDB C:None 100%, S:U 100%, UI:R 100%, PR-required
+  86%. Field: C:Low+ ~98%, S:C 88%, PR-required ~68%. So VulDB models XSS as a
+  self-contained integrity-only bug; the field models it as leaking data and crossing
+  a boundary. Both are defensible readings; FIRST's own v3.1 examples score XSS as
+  Scope:Changed with confidentiality impact.
+- Other conventions: adobe's XSS are 90% PR:L (authenticated); Wordfence marks 80% UI:None.
+- Small samples: Microsoft n=113, sap n=109; treat 6.7 as an indicative endpoint (within
+  noise of @huntrdev 6.60 and INCIBE 6.57), not a precise leader.
+- Framing: do NOT imply any CNA is "wrong." Honest claim: defined metrics, applied
+  inconsistently to an ambiguous bug, so a base score reflects who scored it.
+- Bars colored by severity (light grey low -> deep navy high); VulDB the pale low outlier.
 ```
