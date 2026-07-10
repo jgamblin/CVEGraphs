@@ -5,9 +5,9 @@ How severe is each weakness class? CVSS spread by CWE.
 For the ten most common CWEs, show the typical range of CVSS v3 base scores (a
 bar from the 10th to 90th percentile, colored by severity) with a bold tick at
 the median. Companion to `cna_spread`: that one holds the weakness fixed and
-varies the scorer; this one pools all scorers and varies the weakness, so the
-band width reflects real severity spread AND (for contested classes like XSS)
-scorer disagreement.
+varies the scorer. This one is single-source (the CNA's own v3 vector, one per
+CVE) and varies the weakness, so band width reflects real severity variation
+across different CVEs within a class. It does NOT measure scorer disagreement.
 
 Uses CVE List V5 and CVSS v3 for the broadest coverage.
 """
@@ -91,7 +91,12 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
                     color=COLORS["neutral"], ha="left", va="center")
 
         ax.set_yticks(pos)
-        ax.set_yticklabels(labels, fontsize=11.5, fontweight="bold")
+        ax.set_yticklabels([])  # draw two-line labels by hand (name + CWE id)
+        for y, nm, cwe_id in zip(pos, labels, order):
+            ax.text(-0.015, y + 0.12, nm, transform=ax.get_yaxis_transform(),
+                    fontsize=11, fontweight="bold", color=COLORS["text"], ha="right", va="center")
+            ax.text(-0.015, y - 0.17, cwe_id, transform=ax.get_yaxis_transform(),
+                    fontsize=7.5, color=COLORS["neutral"], ha="right", va="center")
         for y, nval in zip(pos, ns):
             ax.text(1.03, y, f"{nval:,} CVEs", transform=ax.get_yaxis_transform(),
                     fontsize=7.5, color=COLORS["neutral"], ha="left", va="center")
