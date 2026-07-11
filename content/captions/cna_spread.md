@@ -64,7 +64,7 @@ Range chart of CVSS v3 base scores for cross-site scripting (CWE-79), one row pe
   a boundary. Both are defensible readings; FIRST's own v3.1 examples score XSS as
   Scope:Changed with confidentiality impact.
 - Other conventions: adobe's XSS are 90% PR:L (authenticated); Wordfence marks 80% UI:None.
-- Small samples: Microsoft n=113, sap n=109; treat 6.7 as an indicative endpoint (within
+- Small samples: Microsoft 113 CVEs, sap 109 CVEs; treat 6.7 as an indicative endpoint (within
   noise of @huntrdev 6.60 and INCIBE 6.57), not a precise leader.
 - Framing: do NOT imply any CNA is "wrong." Honest claim: defined metrics, applied
   inconsistently to an ambiguous bug, so a base score reflects who scored it.

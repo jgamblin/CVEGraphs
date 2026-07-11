@@ -11,7 +11,7 @@ from 7.8 (out-of-bounds write) up to a wall of 9.8 for the code-execution classe
 (code injection, OS command injection, deserialization) and the auth classes (improper
 auth, missing auth). The memory-corruption classes (use-after-free, memory buffer error,
 type confusion) sit a notch lower around 8.8. Grouped: memory corruption mean 8.4 /
-median 8.8 (n=373); code execution + injection mean 9.0 / median 9.8 (n=293). All KEV
+median 8.8 (373 CVEs); code execution + injection mean 9.0 / median 9.8 (293 CVEs). All KEV
 with a v3 score: mean 8.4 / median 8.8. The 12 shown classes cover ~850 of 1,635 KEV.
 
 ## LinkedIn / Mastodon

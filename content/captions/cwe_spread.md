@@ -65,7 +65,7 @@ Range chart of CVSS v3 base scores for the 10 most common CWEs, one row each, so
 - Use "memory corruption," not "memory-safety": out-of-bounds read is a memory-safety
   bug but sits low (5.5), so "memory-safety scores highest" is false. Name the
   specific high classes (stack overflow, OS cmd, SQLi) instead of the category.
-- Top 10 is a volume cutoff; excluded CWE-284 (n=1999) also has band 4.5, so scope
+- Top 10 is a volume cutoff; excluded CWE-284 (1,999 CVEs) also has band 4.5, so scope
   "widest" to "these ten."
 - Tick is the median (pooled distribution is right-skewed; median is the honest center).
 - First CWE only per CVE (4% of CVEs have >1 CWE). Names shortened for the axis.

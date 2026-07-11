@@ -35,8 +35,8 @@ voice:
 > Read `content/insights.json`. Pick the 3 most genuinely surprising and
 > share-worthy findings for this week (avoid repeating last week's angles in
 > `CALENDAR.md`). For each, draft a LinkedIn + X + Bluesky post. House style:
-> no em dashes, lead with the number, end with a question. Note the
-> `suggested_chart` to attach.
+> no em dashes, no "n=" (spell it out, e.g. "373 CVEs"), lead with the number,
+> end with a question. Note the `suggested_chart` to attach.
 
 For fully on-brand drafts, run this through the **brand-voice** skill
 (`/brand-voice:enforce-voice`) once its connectors are authorized; until then
