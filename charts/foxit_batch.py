@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
 """
-Sunday curio: Foxit PDF Editor shipped 28 CVEs in one day, nearly all memory-safety.
+Sunday curio: Foxit PDF Editor's 28-CVE single-day batch, as a CVSS dot-plot.
 
-A 28-tile grid of the CVEs Foxit disclosed for PDF Editor on 2026-07-08, colored by
-whether each is a use-after-free, another memory-safety bug, or something else. The
-point, and the tie to the `exploited_cwe` post: 26 of 28 are memory-safety and 15 are
-use-after-free, exactly the classes that dominate real-world exploitation.
+Each CVE is a dot placed at its CVSS v3 score and colored by weakness family
+(use-after-free / other memory-safety / everything else). Two things pop out: the
+batch is nearly all memory-safety (the classes that dominate real-world
+exploitation, see `exploited_cwe`), and 20 of the 28 land on the exact same score,
+7.8, a tall single tower.
 
 Data: CVE List V5 (Foxit-assigned CVEs for the target product/date).
 """
 
+from collections import defaultdict
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.lines import Line2D
-from matplotlib.patches import Rectangle
 
 from data import load_cvelist
 from style_social import COLORS, DEFAULT_RATIOS, figsize_for, stamp_and_save
@@ -26,11 +27,11 @@ GRAPHS = Path(__file__).resolve().parent.parent / "graphs"
 ASSIGNER = "Foxit"
 PRODUCT = "Foxit PDF Editor"
 DAY = "2026-07-08"
-COLS = 7
 
 UAF = "CWE-416"
 MEM = {"CWE-416", "CWE-125", "CWE-787", "CWE-843", "CWE-763", "CWE-129",
-       "CWE-120", "CWE-119", "CWE-824", "CWE-822", "CWE-476"}  # memory-safety CWEs
+       "CWE-120", "CWE-119", "CWE-824", "CWE-822", "CWE-476"}
+PALETTE = [COLORS["primary"], COLORS["accent"], COLORS["light"]]  # uaf / other-mem / else
 
 
 def render(nvd=None, ratios=DEFAULT_RATIOS):
@@ -41,50 +42,65 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     n = len(f)
     n_uaf = int((f["cwe"] == UAF).sum())
     n_mem = int(f["cwe"].isin(MEM).sum())
-    n_other = n - n_mem
     asof = pd.Timestamp(DAY, tz="UTC")
 
-    # One tile per CVE: use-after-free, other memory-safety, then everything else.
-    tiles = ([COLORS["primary"]] * n_uaf
-             + [COLORS["accent"]] * (n_mem - n_uaf)
-             + [COLORS["light"]] * n_other)
+    def cat(c):
+        return 0 if c == UAF else 1 if c in MEM else 2
+
+    stacks = defaultdict(list)
+    for score, cwe in zip(f["cvss_v3"], f["cwe"]):
+        if pd.notna(score):
+            stacks[round(float(score), 1)].append(cat(cwe))
+    for s in stacks:
+        stacks[s].sort()  # uaf at the bottom of each column
+    tallest = max(len(v) for v in stacks.values())
+    top_score = max(stacks, key=lambda s: len(stacks[s]))
 
     title1 = f"Foxit disclosed {n} PDF Editor CVEs in a single day"
-    title2 = (f"{n_mem} of the {n} are memory-safety bugs. {n_uaf} are use-after-free, "
-              "one of the classes attackers exploit most.")
+    title2 = (f"Nearly all are memory-safety bugs, and {len(stacks[top_score])} of the "
+              f"{n} land on the exact same CVSS score: {top_score}.")
 
-    rows_grid = int(np.ceil(n / COLS))
     out = []
     for ratio in ratios:
         fig, ax = plt.subplots(figsize=figsize_for(ratio))
-        ax.set_aspect("equal")
-        ax.axis("off")
-        gap = 0.12
-        for i, color in enumerate(tiles):
-            r, c = divmod(i, COLS)
-            y = rows_grid - 1 - r
-            ax.add_patch(Rectangle((c + gap / 2, y + gap / 2), 1 - gap, 1 - gap,
-                                   facecolor=color, edgecolor="white", linewidth=1.5))
-        ax.set_xlim(-0.3, COLS + 0.3)
-        ax.set_ylim(-1.4, rows_grid + 0.3)
+
+        for s in sorted(stacks):
+            col = stacks[s]
+            for level, ct in enumerate(col):
+                ax.scatter(s, level, s=330, color=PALETTE[ct], edgecolors="white",
+                           linewidths=1.2, zorder=3)
+            ax.text(s, len(col) + 0.6, str(len(col)), fontsize=9.5, fontweight="bold",
+                    color=COLORS["text"], ha="center", va="bottom")
+
+        ax.set_xlim(min(stacks) - 0.7, max(stacks) + 0.7)
+        ax.set_ylim(-1.0, tallest + 2.0)
+        ax.set_xlabel("CVSS v3 base score")
+        ax.set_yticks([])
+        ax.set_xticks(np.arange(5.5, 9.0, 0.5))
+        for sp in ("left", "right", "top"):
+            ax.spines[sp].set_visible(False)
+        ax.tick_params(axis="y", length=0)
+        ax.grid(axis="x", color=COLORS["grid"], lw=0.6, alpha=0.7)
+        ax.set_axisbelow(True)
 
         ax.legend(handles=[
-            Line2D([0], [0], marker="s", color="none", markerfacecolor=COLORS["primary"],
-                   markersize=13, label=f"Use-after-free ({n_uaf})"),
-            Line2D([0], [0], marker="s", color="none", markerfacecolor=COLORS["accent"],
-                   markersize=13, label=f"Other memory-safety ({n_mem - n_uaf})"),
-            Line2D([0], [0], marker="s", color="none", markerfacecolor=COLORS["light"],
-                   markersize=13, label=f"Everything else ({n_other})")],
-            loc="upper center", bbox_to_anchor=(0.5, 0.02), ncol=3, frameon=False,
-            fontsize=10.5, handletextpad=0.5, columnspacing=2.0)
+            Line2D([0], [0], marker="o", color="none", markerfacecolor=COLORS["primary"],
+                   markeredgecolor="white", markersize=12, label=f"Use-after-free ({n_uaf})"),
+            Line2D([0], [0], marker="o", color="none", markerfacecolor=COLORS["accent"],
+                   markeredgecolor="white", markersize=12, label=f"Other memory-safety ({n_mem - n_uaf})"),
+            Line2D([0], [0], marker="o", color="none", markerfacecolor=COLORS["light"],
+                   markeredgecolor="white", markersize=12, label=f"Everything else ({n - n_mem})")],
+            loc="upper left", bbox_to_anchor=(0.02, 0.98), frameon=False,
+            fontsize=10, handletextpad=0.4, labelspacing=0.7)
 
-        ax.text(COLS / 2, -1.32, f"Foxit PDF Editor CVEs published {DAY}. "
-                "Each tile is one CVE. Source: CVE List V5.",
-                fontsize=8.5, color=COLORS["neutral"], ha="center", va="center")
+        foot_size = {"wide": 9, "square": 8, "portrait": 8}[ratio]
+        ax.text(0.0, -0.16, f"Each dot is one Foxit PDF Editor CVE published {DAY}, "
+                "placed at its CVSS v3 score. Source: CVE List V5.",
+                transform=ax.transAxes, fontsize=foot_size, color=COLORS["neutral"], va="top")
 
-        top = {"wide": 0.86, "square": 0.88, "portrait": 0.89}[ratio]
+        top = {"wide": 0.84, "square": 0.86, "portrait": 0.88}[ratio]
         t1 = {"wide": 21, "square": 19, "portrait": 18}[ratio]
-        fig.subplots_adjust(top=top, bottom=0.06, left=0.05, right=0.95)
+        fig.subplots_adjust(top=top, bottom=0.20, left=0.06, right=0.96)
         fig.text(0.05, 0.965, title1, fontsize=t1, fontweight="bold",
                  color=COLORS["text"], ha="left", va="top")
         fig.text(0.05, 0.915, title2, fontsize=11, fontweight="bold",
