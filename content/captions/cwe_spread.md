@@ -18,15 +18,20 @@ tightest (stack overflow, SQLi) up to ~4.5 for the widest of these ten (OOB read
 3.3-7.8, path traversal 4.6-9.0, input validation 4.4-8.8). XSS is the most common
 class by far (~20K CVEs) and spans 3.5-7.1. These are the CNA's own v3 scores, one
 per CVE, so band width is severity variation across CVEs, not scorer disagreement.
+All 10 classes' 80% bands overlap in 6.3-7.1 (max p10 = 6.3, min p90 = 7.1),
+highlighted as a band on the chart: a score there fits any of the ten. Headline
+"Stop triaging by bug class."
 
 ## LinkedIn / Mastodon
 Attach: `cwe_spread_wide_<date>.png`.
 ```
-A CWE is a genre, not a grade.
+Stop triaging by bug class.
 
-Here are the 10 most common weakness types and the CVSS scores they actually get. Memory corruption and injection score highest: stack buffer overflows run a median 8.5, OS command injection 7.8, SQL injection 7.3. The classes that dominate the CVE feed by sheer volume sit lower: cross-site scripting 6.4, CSRF 5.4, information exposure and missing authorization both 5.3. And the category is not destiny. Out-of-bounds read, also a memory bug, sits down at 5.5.
+Here are the 10 most common weakness types, lined up by the CVSS scores they actually get. The ranking looks sensible: injection and memory corruption up in the 7s and 8s (stack buffer overflow tops out at a median 8.5), the high-volume web classes down in the 5s and 6s. Folk wisdom, confirmed.
 
-Two things worth sitting with. First, the class barely narrows the range: even within one weakness type the middle 80% of scores spans three to four and a half points, so knowing a bug is "an XSS" or "a path traversal" tells you surprisingly little about its severity. Second, that flatness holds even for the class you see most: XSS runs from 3.5 to 7.1 across its CVEs, low to high. The label does not predict the score.
+Then look at the grey band in the middle. Every one of these ten classes, top to bottom, has a stack of vulnerabilities in the same 6.3 to 7.1 window. Pull a CVE scored 6.5 and it could be any of them. The class does not pin the score, and the score does not pin the class.
+
+And the ranking itself is soft. Within a single weakness type the middle 80% of scores spans three to four and a half points, so knowing a bug is "an XSS" or "a path traversal" tells you little about its severity. The category is not destiny either: out-of-bounds read is a memory bug like the top-ranked stack overflow, yet it sits near the bottom.
 
 So a "critical CWE" is not really a thing. The class shifts the odds, but severity lives in the specific bug.
 
@@ -37,16 +42,16 @@ Which weakness class do you think your program over-weights, and which does it w
 
 ## X / Bluesky
 ```
-A CWE is a genre, not a grade.
+Stop triaging by bug class.
 
-The 10 most common CWEs and the CVSS scores they actually get: memory corruption and injection highest (stack overflow median 8.5, OS command injection 7.8), high-volume web classes lower (XSS 6.4, CSRF 5.4). Out-of-bounds read, also a memory bug, lands at 5.5.
+The 10 most common CWEs and the CVSS scores they get: memory corruption and injection highest (stack overflow median 8.5, OS command injection 7.8), high-volume web classes lower (XSS 6.4, CSRF 5.4).
 
-Even within one class the middle 80% spans 3 to 4.5 points. The label does not predict the score.
+But every one of the 10 has vulnerabilities in the same 6.3 to 7.1 band. The class does not tell you the severity.
 ```
 
 ## Alt text
 ```
-Range chart of CVSS v3 base scores for the 10 most common CWEs, one row each, sorted by median from Stack overflow at the top (median 8.5) down to Missing authorization at the bottom (5.3). Each row has a bar showing where the middle 80% of that weakness class's scores fall, colored by severity from light grey for low up to deep navy for high, with a tick at the median. Memory-corruption and injection classes score highest, though out-of-bounds read (also a memory bug) sits low at 5.5. Even within one class the middle 80% spans three to four and a half points. Source: CVE List V5.
+Range chart of CVSS v3 base scores for the 10 most common CWEs, one row each, sorted by median from Stack overflow at the top (median 8.5) down to Missing authorization at the bottom (5.3). Each row has a bar showing where the middle 80% of that weakness class's scores fall, colored by severity from light grey for low up to deep navy for high, with a tick at the median. A highlighted band from 6.3 to 7.1 marks where all ten classes overlap: every one has vulnerabilities in that range. Memory-corruption and injection classes score highest, though out-of-bounds read (also a memory bug) sits low at 5.5. Even within one class the middle 80% spans three to four and a half points. Source: CVE List V5.
 ```
 
 ## Notes / caveats

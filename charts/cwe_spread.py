@@ -67,6 +67,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     title1 = "How severe is each weakness class?"
     title2 = f"80% range and median CVSS v3 for the {TOP_N} most common CWEs."
 
+    ov_lo, ov_hi = max(lob), min(hib)  # band every class's 80% range overlaps
+
     out = []
     for ratio in ratios:
         fig, ax = plt.subplots(figsize=figsize_for(ratio))
@@ -90,6 +92,19 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             ax.text(hib[i] + 0.15, y, f"{hib[i]:.1f}", fontsize=8,
                     color=COLORS["neutral"], ha="left", va="center")
 
+        # Common overlap band: every one of the 10 classes has its middle 80%
+        # passing through here, so a score in this range fits any of them.
+        ax.axvspan(ov_lo, ov_hi, color="0.5", alpha=0.15, zorder=2.4)  # neutral grey
+        for xb in (ov_lo, ov_hi):
+            ax.plot([xb, xb], [-0.7, len(order) + 0.25], color="0.35",
+                    lw=1.0, ls=(0, (4, 3)), alpha=0.7, zorder=2.5)
+        yb = len(order) - 0.15
+        ax.plot([ov_lo, ov_hi], [yb, yb], color="0.25", lw=2.5,
+                solid_capstyle="round", zorder=6)
+        ax.text((ov_lo + ov_hi) / 2, yb + 0.13, "All 10 classes overlap here",
+                fontsize=9, fontweight="bold", color="0.25",
+                ha="center", va="bottom", zorder=6)
+
         ax.set_yticks(pos)
         ax.set_yticklabels([])  # draw two-line labels by hand (name + CWE id)
         for y, nm, cwe_id in zip(pos, labels, order):
@@ -103,7 +118,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
         ax.set_xlabel("CVSS v3 base score")
         ax.set_xlim(0, 10)
-        ax.set_ylim(-0.7, len(order) - 0.3)
+        ax.set_ylim(-0.7, len(order) + 0.25)
         ax.set_xticks(range(0, 11, 2))
         ax.spines["bottom"].set_bounds(0, 10)
 
