@@ -1,4 +1,4 @@
-# Caption — CVSS dot-plot: Foxit PDF Editor's 28-CVE single-day batch (`foxit_batch`)
+# Caption: CVSS dot-plot of Foxit PDF Editor's July 8 CVE batch (`foxit_batch`)
 
 Image: `graphs/foxit_batch_<ratio>_<date>.png`. House style: no em dashes.
 Sunday curio, ties to the `exploited_cwe` post. One-off (product/date hardcoded).
@@ -9,19 +9,21 @@ Foxit PDF Editor. CWE breakdown: 15 use-after-free (CWE-416), 6 out-of-bounds re
 (CWE-125), plus type confusion, out-of-bounds write, invalid pointer release, array
 index, buffer copy (1 each) = 26 memory-safety of 28. The other two: 1 XXE (CWE-611)
 and 1 with no CWE. CVSS v3 range 6.1-8.2, median 7.8; notably 20 of the 28 carry the
-identical score 7.8 (the tower in the dot-plot). These are the memory-corruption
-classes that dominate real-world exploitation (see `exploited_cwe`).
+identical score 7.8 (the tower in the dot-plot). The use-after-free bulk sits near the
+top of what actually gets exploited (see `exploited_cwe`); the out-of-bounds reads do
+not. This was a routine scheduled release (Foxit PDF Editor 2026.1.2); batch disclosure
+at a version bump is their normal cadence, so 28 is the largest batch so far, not an anomaly.
 
 ## LinkedIn / Mastodon
 Attach: `foxit_batch_wide_<date>.png`.
 ```
 Earlier this week I posted that the bugs attackers actually exploit skew hard to memory corruption and injection, with use-after-free near the top, not the common web bugs like XSS and CSRF. Here is a vivid example from the same week's CVE feed.
 
-Foxit disclosed 28 CVEs in its PDF Editor in a single day. 26 of the 28 are memory-safety bugs. Fifteen are use-after-free, and 20 of the 28 land on the exact same CVSS score, 7.8. The other memory-safety ones are out-of-bounds reads (and one write), a type confusion, and a few odds and ends. Two of the 28 are not memory bugs at all: an XML-parsing flaw and one with no assigned class. Basically the shelf attackers shop from, restocked in one release.
+Foxit disclosed 28 CVEs in its PDF Editor in one release. 26 of the 28 are memory-safety bugs. Fifteen are use-after-free, and 20 of the 28 land on the exact same CVSS score, 7.8. The other memory-safety ones are out-of-bounds reads (and one write), a type confusion, and three other memory-corruption classes. Two of the 28 are not memory bugs at all: an XML-parsing flaw and one with no assigned class. The shelf attackers shop from, restocked in one update.
 
-To be clear, this is not a Foxit problem, and to their credit they found these, fixed them, and disclosed them, which is exactly what you want a vendor to do. Any large C or C++ program that parses untrusted files produces this shape of bug, and a PDF is untrusted input by definition. It is why document parsers have been an exploitation workhorse for two decades, and why the whole industry keeps pushing memory safety and sandboxing.
+To be clear, this is not a Foxit problem, and to their credit they found these, fixed them, and disclosed them, which is exactly what you want a vendor to do. This shipped as a routine scheduled release, Foxit PDF Editor 2026.1.2, and bundling security fixes into a version bump is their normal cadence. This is the largest batch so far, but not an anomaly. Any large C or C++ program that parses untrusted files produces this shape of bug, and a PDF is untrusted input by definition. It is why document parsers have been an exploitation workhorse for two decades, and why the whole industry keeps pushing memory safety and sandboxing.
 
-The interesting part is the mix. These score a median 7.8, they belong to the classes that show up most in real-world exploitation, and there are 28 in one product on one day. A queue sorted only by "critical" labels or KEV listings can walk right past a batch like this.
+The interesting part is the mix, not the size. Fifteen of the 28 are use-after-free, which sits near the top of what actually gets exploited, and most of the rest are the memory-corruption family alongside it. They all land around 7.8, which clears a critical-only filter but not a High SLA. The real question is whether a use-after-free in a file parser should jump the rest of your 7.x queue, not whether it shows up at all.
 
 Would you triage a use-after-free in a file parser differently from the same CVSS somewhere else?
 
@@ -32,7 +34,7 @@ Would you triage a use-after-free in a file parser differently from the same CVS
 ```
 This week I posted that attackers exploit memory corruption and injection far more than the common web bugs like XSS.
 
-A vivid example from the same feed: Foxit disclosed 28 CVEs for its PDF Editor in a single day. 26 of 28 are memory-safety bugs. 15 are use-after-free.
+A vivid example from this week's CVE disclosures: Foxit disclosed 28 CVEs for its PDF Editor in one release. 26 of 28 are memory-safety bugs. 15 are use-after-free.
 
 The shelf attackers shop from, restocked in one release.
 ```
@@ -49,9 +51,15 @@ a shorter column of 6 at score 6.1, and single dots at 6.5 and 8.2. Twenty-six o
 ## Notes / caveats
 - Verified: 28 CVEs, all 2026-07-08, all Foxit-assigned, all Foxit PDF Editor; 26
   memory-safety, 15 use-after-free; median CVSS 7.8. The two non-memory: 1 XXE, 1 no CWE.
-- Framing: NOT "picking on Foxit." Batch disclosure is normal, and memory-unsafe file
-  parsers produce this bug shape by nature. The point is the class mix, and its overlap
-  with what actually gets exploited (`exploited_cwe`).
+- Framing: NOT "picking on Foxit." 2026-07-08 was a routine scheduled release (Foxit PDF
+  Editor 2026.1.2 / 14.0.5 / 13.2.5); batch disclosure at a version bump is their normal
+  cadence (15 CVEs on their first CNA day, 2025-12-19), and memory-unsafe file parsers
+  produce this bug shape by nature. Copy must NOT imply 28-in-a-day is anomalous. The
+  point is the class mix. Overlap-with-exploitation is scoped to the use-after-free bulk
+  (`exploited_cwe`); the 6 out-of-bounds reads are NOT among the top exploited classes.
+- Scope note: Foxit became a CNA only 2025-12-19, so its self-assigned history is ~7
+  months; press reported 30+ fixes across Reader AND Editor, but CVE List tags all 28 as
+  Foxit PDF Editor, so "28 for PDF Editor" is accurate to the data we hold.
 - One-off: product and date are constants at the top of `foxit_batch.py`. Stamped with
   the disclosure date (2026-07-08), not the data-refresh date.
 - Memory-safety CWE set is listed in the module (MEM). "Everything else" = XXE + no-CWE.

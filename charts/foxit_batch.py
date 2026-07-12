@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Sunday curio: Foxit PDF Editor's 28-CVE single-day batch, as a CVSS dot-plot.
+Sunday curio: Foxit PDF Editor's 28-CVE release batch (2026-07-08), as a CVSS dot-plot.
 
 Each CVE is a dot placed at its CVSS v3 score and colored by weakness family
 (use-after-free / other memory-safety / everything else). Two things pop out: the
@@ -56,7 +56,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     tallest = max(len(v) for v in stacks.values())
     top_score = max(stacks, key=lambda s: len(stacks[s]))
 
-    title1 = f"Foxit disclosed {n} PDF Editor CVEs in a single day"
+    title1 = f"Foxit disclosed {n} PDF Editor CVEs in one release"
     title2 = (f"Nearly all are memory-safety bugs, and {len(stacks[top_score])} of the "
               f"{n} land on the exact same CVSS score: {top_score}.")
 
