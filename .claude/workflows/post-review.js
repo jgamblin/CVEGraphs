@@ -77,10 +77,16 @@ const COPY = [
   { key: 'factcheck', prompt:
     `You are a hostile DATA FACT-CHECKER. For EACH claim in the packet, independently recompute it ` +
     `from source using Bash + python in this repo (data.py exposes load_nvd()/load_cvelist(); CISA ` +
-    `KEV is processed/kev_catalog.json; product-id coverage is processed/product_id_coverage.parquet; ` +
-    `raw records under data/cvelistV5/cves). Report any claim that is wrong, rounded misleadingly, or ` +
-    `unsupported, with the value you computed vs the value stated. A confirmed-correct number is NOT a ` +
-    `finding. Exclude rejected CVEs unless the claim says otherwise.` },
+    `KEV is processed/kev_catalog.json; product-id coverage is processed/product_id_coverage.parquet ` +
+    `and per-CVE flags in processed/product_id_cve_flags.parquet; raw records under data/cvelistV5/cves). ` +
+    `Report any claim that is wrong, rounded misleadingly, or unsupported, with the value you computed ` +
+    `vs the value stated. A confirmed-correct number is NOT a finding. Exclude rejected CVEs unless the ` +
+    `claim says otherwise.\n` +
+    `SUM/RECONCILE CHECK (treat a failure as a BLOCKER): if the chart shows numbers a reader will ` +
+    `naturally add up — a partition, "parts of a whole", stacked segments, or before/after states that ` +
+    `should each total 100% — verify the DISPLAYED numbers actually sum/reconcile as shown (mind ` +
+    `rounding). If 64+26+2.6 style overlap makes them not sum, or a "sums to 100%" claim is false, that ` +
+    `is a blocker, not a nitpick.` },
   { key: 'domain-skeptic', prompt:
     `You are a hostile DOMAIN SKEPTIC (senior vuln-management / detection engineer). Attack the ` +
     `technical framing and any overclaim: causation dressed as correlation, "most/every/always" that ` +
