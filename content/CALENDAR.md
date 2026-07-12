@@ -22,6 +22,15 @@ cwe → vendor → product → rhythm → cvss_drift → time_to_kev → id_burn
 - **Big KEV week** — an unusually large batch of KEV additions warrants a same-day post.
 
 ## Log
-| Date | Chart | Platforms | Link |
-|------|-------|-----------|------|
-| _first post_ | pace | LI · X · Masto · Bsky · IG | |
+Newest first. Fill Date/Link as each goes live. Rows marked `confirm` are known to
+have posted this week but need their exact date/link filled in by Jerry.
+
+| Date | Chart | Platforms | Link | Notes |
+|------|-------|-----------|------|-------|
+| 2026-07-13 (planned) | product_id | LI · X | | Mon: CPE vs PURL vs free text; "most CVEs can't tell a machine what they affect" |
+| 2026-07-12 | foxit_batch | LI | | Sunday curio; confirmed live via LinkedIn activity export |
+| 2026-07-?? `confirm` | kev_severity | LI · X | | "how severe are exploited bugs"; grew out of Sasha Romanosky's question |
+| 2026-07-?? `confirm` | exploited_cwe | LI · X | | "the bugs you see most aren't the bugs exploited"; Sasha commented |
+| 2026-07-?? `confirm` | cwe_spread | LI | | "a CVSS score is an opinion with a decimal point" |
+| 2026-07-?? `confirm` | cna_spread | LI | | XSS CVSS spread by CNA |
+| 2026-07-?? `confirm` | ridgeline_severity | LI | | CVSS v3 vs v4 by year; led to the v4 data fix |
