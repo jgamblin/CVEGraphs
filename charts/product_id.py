@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-How do CVEs say what software they affect? CPE vs PURL vs nothing machine-readable.
+What CVE enrichment fixes, and what it ignores: CPE vs PURL, before and after backfill.
 
-For the current year, the share of published CVEs that carry a standard product
-identifier in the CNA container as authored: CPE (the nearly-two-decade-old identifier
-scanners use), PURL (the package-native newcomer), or neither (a record whose product
-is named only in free-text vendor/product fields, with no standardized cross-reference
-ID). Most CVEs still ship without a standard ID; NVD backfills CPE downstream, and PURL
-is only now appearing at all.
+For the current year, the share of CVEs carrying each identifier as the CNA writes it
+(solid) versus after NVD and CISA enrichment (shaded). CPE gets a big backfill (about
+26% to 59%); PURL gets nothing, because NVD is CPE-only and the CISA ADP container
+carries no PURLs. So PURL, pitched as CPE's modern replacement, is neither adopted by
+CNAs nor added by enrichers.
 
-Data: processed/product_id_coverage.parquet (per-year scan of the CVE List V5
-clone, written by scripts_precompute_product_id.py) + NVD for enriched CPE coverage.
+Data: processed/product_id_coverage.parquet (per-year scan of the CVE List V5 clone,
+written by scripts_precompute_product_id.py) + NVD for enriched CPE coverage. The
+zero-PURL-backfill finding is from a scan of the ADP containers (see the caption).
 """
 
 from pathlib import Path
@@ -58,46 +58,57 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     purl_years = share[share["ps"] >= 0.001]["year"]
     purl_first = int(purl_years.min()) if len(purl_years) else cur
 
-    # Three unstacked bars, one per group. They partition every record, so they sum
-    # to 100. Labels are what the group actually is, not a vague "package id".
-    bars = [
-        ("No product ID", "free-text vendor and product only", bare_now, COLORS["neutral"]),
-        ("CPE", "the incumbent standard identifier", cpe_now, COLORS["accent"]),
-        ("Package or plugin name", "WordPress, npm, Maven, no CPE", pkg_only, COLORS["light"]),
+    # Two identifiers, each shown as-authored (solid) plus what NVD/CISA backfill
+    # adds (shaded). CPE gets a big lift; PURL gets nothing (NVD is CPE-only, and
+    # the CISA ADP container carries 0.0% PURL). purl_enr == purl_auth by that scan.
+    cpe_auth, cpe_enr = cpe_now, nvd_cpe
+    purl_auth, purl_enr = purl_now, purl_now
+    rows_ = [
+        ("CPE", "the incumbent standard", cpe_auth, cpe_enr, COLORS["accent"]),
+        ("PURL", "the proposed replacement", purl_auth, purl_enr, COLORS["primary"]),
     ]
 
-    title1 = "Most CVEs ship without a standard product ID at publication"
-    title2 = (f"How every {cur} CVE identifies the affected product, as the assigning CNA "
-              f"writes it. The three groups sum to 100%.")
-
-    # PURL is not one of the bars: it mostly rides along with a CPE, so it is a callout.
-    purl_note = (f"PURL, pitched as the modern replacement for CPE, is on only {purl_now:.1f}% "
-                 f"and almost always rides alongside a CPE, not on its own.")
-    nvd_note = (f"NVD later backfills CPE from {cpe_now:.0f}% to about {nvd_cpe:.0f}% "
-                f"after publication.")
+    title1 = "CVE enrichment rescues CPE. It does nothing for PURL."
+    title2 = (f"Share of {cur} CVEs carrying each identifier, as the CNA writes it (solid) "
+              f"and after NVD and CISA backfill (shaded).")
 
     out = []
     for ratio in ratios:
         fig, ax = plt.subplots(figsize=figsize_for(ratio))
-        pos = np.arange(len(bars))[::-1]  # first bar on top
+        pos = np.arange(len(rows_))[::-1]
 
-        for y, (name, sub, val, color) in zip(pos, bars):
-            ax.barh(y, val, height=0.62, color=color, edgecolor="white", linewidth=1.0, zorder=2)
-            ax.text(val + 1.0, y, f"{val:.0f}%", fontsize=13, fontweight="bold",
-                    color=COLORS["text"], ha="left", va="center")
-            ax.text(-0.02, y + 0.17, name, transform=ax.get_yaxis_transform(), fontsize=12,
+        for y, (name, sub, auth, enr, color) in zip(pos, rows_):
+            ax.barh(y, auth, height=0.52, color=color, edgecolor="white", linewidth=1.0, zorder=3)
+            if enr > auth + 0.5:
+                ax.barh(y, enr - auth, left=auth, height=0.52, color=COLORS["light"],
+                        edgecolor="white", linewidth=1.0, zorder=2)
+                ax.text(auth - 1.0, y, f"{auth:.0f}%", fontsize=12, fontweight="bold",
+                        color="white", ha="right", va="center", zorder=4)
+                ax.text(enr + 1.0, y, f"{enr:.0f}%", fontsize=13, fontweight="bold",
+                        color=COLORS["text"], ha="left", va="center")
+                ax.text((auth + enr) / 2, y + 0.40,
+                        f"+{round(enr) - round(auth):.0f} points from backfill",
+                        fontsize=9, fontweight="bold", color=COLORS["secondary"],
+                        ha="center", va="bottom")
+            else:
+                ax.text(auth + 1.0, y, f"{auth:.1f}%", fontsize=13, fontweight="bold",
+                        color=COLORS["text"], ha="left", va="center")
+                ax.text(auth + 8.0, y, "backfill adds nothing", fontsize=10, fontweight="bold",
+                        color=COLORS["primary"], ha="left", va="center")
+            ax.text(-0.02, y + 0.17, name, transform=ax.get_yaxis_transform(), fontsize=13,
                     fontweight="bold", color=COLORS["text"], ha="right", va="center")
-            ax.text(-0.02, y - 0.18, sub, transform=ax.get_yaxis_transform(), fontsize=8.5,
+            ax.text(-0.02, y - 0.19, sub, transform=ax.get_yaxis_transform(), fontsize=8.5,
                     color=COLORS["secondary"], ha="right", va="center")
 
-        ax.text(0, -1.05, "■", fontsize=11, color=COLORS["primary"], ha="left", va="center")
-        ax.text(2.6, -1.05, purl_note, fontsize=9.5, color=COLORS["text"], ha="left", va="center")
-        ax.text(0, -1.42, "■", fontsize=11, color=COLORS["accent"], ha="left", va="center")
-        ax.text(2.6, -1.42, nvd_note, fontsize=9.5, color=COLORS["text"], ha="left", va="center")
+        # legend for solid vs shaded
+        ax.barh(-1.15, 4, height=0.34, color=COLORS["accent"], zorder=3)
+        ax.text(6, -1.15, "as the CNA writes it", fontsize=9.5, color=COLORS["text"], va="center")
+        ax.barh(-1.15, 4, left=34, height=0.34, color=COLORS["light"], zorder=3)
+        ax.text(40, -1.15, "added by NVD + CISA backfill", fontsize=9.5, color=COLORS["text"], va="center")
 
         ax.set_yticks([])
-        ax.set_xlim(0, 74)
-        ax.set_ylim(-1.7, len(bars) - 0.35)
+        ax.set_xlim(0, 72)
+        ax.set_ylim(-1.6, len(rows_) - 0.4)
         for s in ("left", "right", "top", "bottom"):
             ax.spines[s].set_visible(False)
         ax.tick_params(axis="both", length=0)
@@ -105,13 +116,13 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
         foot_size = {"wide": 9, "square": 8, "portrait": 8}[ratio]
         fig.text(0.05, 0.12,
-                 f"As-authored in the CVE List CNA container, {n:,} non-rejected CVEs in {cur}. "
-                 f"Free-text share was {bare_then:.0f}% in {int(base['year'])}. Source: CVE List V5 + NVD.",
+                 f"{n:,} non-rejected {cur} CVEs. As authored, {bare_now:.0f}% carry neither CPE nor "
+                 f"PURL. Enriched CPE per NVD; CISA ADP adds no PURLs. Source: CVE List V5 + NVD.",
                  fontsize=foot_size, color=COLORS["neutral"], ha="left", va="top")
 
         top_m = {"wide": 0.82, "square": 0.85, "portrait": 0.87}[ratio]
-        t1 = {"wide": 20, "square": 17, "portrait": 17}[ratio]
-        fig.subplots_adjust(top=top_m, bottom=0.22, left=0.26, right=0.95)
+        t1 = {"wide": 20, "square": 16, "portrait": 16}[ratio]
+        fig.subplots_adjust(top=top_m, bottom=0.22, left=0.22, right=0.95)
         fig.text(0.05, 0.965, title1, fontsize=t1, fontweight="bold",
                  color=COLORS["text"], ha="left", va="top")
         fig.text(0.05, 0.915, title2, fontsize=10.5, fontweight="bold",
