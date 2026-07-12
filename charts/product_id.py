@@ -3,10 +3,11 @@
 How do CVEs say what software they affect? CPE vs PURL vs nothing machine-readable.
 
 For the current year, the share of published CVEs that carry a standard product
-identifier in the CNA container as authored: CPE (the 25-year-old identifier
-scanners use), PURL (the package-native newcomer), or neither (a bare free-text
-vendor/product record). Most CVEs still ship with no machine-readable identifier;
-NVD backfills CPE downstream, and PURL is only now appearing at all.
+identifier in the CNA container as authored: CPE (the nearly-two-decade-old identifier
+scanners use), PURL (the package-native newcomer), or neither (a record whose product
+is named only in free-text vendor/product fields, with no standardized cross-reference
+ID). Most CVEs still ship without a standard ID; NVD backfills CPE downstream, and PURL
+is only now appearing at all.
 
 Data: processed/product_id_coverage.parquet (per-year scan of the CVE List V5
 clone, written by scripts_precompute_product_id.py) + NVD for enriched CPE coverage.
@@ -60,13 +61,13 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
          f"first appeared in {purl_first}"),
         ("CPE", "as the CNA authors it", cpe_now, COLORS["accent"],
          f"up from {cpe_then:.0f}% in {int(base['year'])}"),
-        ("No machine-readable ID", "free-text product name only", bare_now, COLORS["neutral"],
+        ("No standard product ID", "vendor and product text only", bare_now, COLORS["secondary"],
          f"down from {bare_then:.0f}% in {int(base['year'])}"),
     ]
 
-    title1 = "Most CVEs still can't tell a machine what they affect"
-    title2 = (f"Share of {cur} CVEs that carry a standard machine-readable product "
-              f"identifier, as the assigning CNA writes it.")
+    title1 = "Most CVEs ship without a standard product ID at publication"
+    title2 = (f"Share of {cur} CVEs that carry a standard product identifier (CPE or PURL), "
+              f"as the assigning CNA writes it.")
 
     out = []
     for ratio in ratios:
@@ -82,13 +83,16 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
                     fontsize=11, fontweight="bold", color=COLORS["text"],
                     ha="right", va="center")
             ax.text(-0.02, i - 0.17, f"{sub} · {trend}", transform=ax.get_yaxis_transform(),
-                    fontsize=7.5, color=COLORS["neutral"], ha="right", va="center")
+                    fontsize=8, color=COLORS["secondary"], ha="right", va="center")
 
-        # NVD backfill marker on the CPE bar (index 1): where enrichment lifts CPE to.
-        ax.plot([nvd_cpe, nvd_cpe], [1 - 0.36, 1 + 0.36], color=COLORS["text"],
-                lw=1.8, zorder=5, solid_capstyle="round")
-        ax.text(nvd_cpe, 1 + 0.46, f"{nvd_cpe:.0f}% after NVD backfill", fontsize=8.5,
-                fontweight="bold", color=COLORS["text"], ha="center", va="bottom")
+        # CPE more than doubles once NVD backfills it: a ghost extension of the CPE bar
+        # (index 1) from its as-authored value out to NVD's enriched coverage.
+        ax.barh(1, nvd_cpe - cpe_now, left=cpe_now, height=0.6, color=COLORS["light"],
+                edgecolor="white", linewidth=1.0, zorder=1)
+        ax.text(nvd_cpe + 1.2, 1, f"{nvd_cpe:.0f}%", fontsize=10, fontweight="bold",
+                color=COLORS["secondary"], ha="left", va="center")
+        ax.text(nvd_cpe, 1 + 0.42, "after NVD backfill", fontsize=8, fontweight="bold",
+                color=COLORS["secondary"], ha="center", va="bottom")
 
         ax.set_yticks([])
         ax.set_xlim(0, 100)
