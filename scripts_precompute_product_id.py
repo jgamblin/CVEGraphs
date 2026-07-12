@@ -23,11 +23,13 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 ROOT = HERE / "data" / "cvelistV5" / "cves"
 OUT = HERE / "processed" / "product_id_coverage.parquet"
+OUT_FLAGS = HERE / "processed" / "product_id_cve_flags.parquet"
 YEARS = ["2022", "2023", "2024", "2025", "2026"]
 
 
-def scan_year(yr):
+def scan_year(yr, collect=False):
     n = cpe = purl = fam = bare = 0
+    flags = []
     for fp in glob.glob(os.path.join(ROOT, yr, "**", "CVE-*.json"), recursive=True):
         try:
             d = json.load(open(fp))
@@ -49,20 +51,34 @@ def scan_year(yr):
             fam += 1
         if not (has_cpe or has_fam):
             bare += 1
-    return {"year": int(yr), "records": n, "cpe": cpe, "purl": purl,
-            "pkg_family": fam, "bare": bare}
+        if collect:
+            cid = d.get("cveMetadata", {}).get("cveId")
+            if cid:
+                flags.append((cid, has_cpe, has_purl))
+    agg = {"year": int(yr), "records": n, "cpe": cpe, "purl": purl,
+           "pkg_family": fam, "bare": bare}
+    return (agg, flags) if collect else agg
 
 
 def main():
     rows = []
+    latest = max(int(y) for y in YEARS)
     for yr in YEARS:
-        r = scan_year(yr)
+        collect = int(yr) == latest  # keep per-CVE flags for the newest year
+        res = scan_year(yr, collect=collect)
+        r, flags = res if collect else (res, None)
         if r["records"]:
             rows.append(r)
             print(f"  {yr}: {r['records']:,} records, "
                   f"CPE {r['cpe']/r['records']*100:.1f}%, "
                   f"PURL {r['purl']/r['records']*100:.1f}%, "
                   f"bare {r['bare']/r['records']*100:.1f}%")
+        if collect and flags:
+            fdf = pd.DataFrame(flags, columns=["cve_id", "cpe_cna", "purl"]).drop_duplicates("cve_id")
+            fdf["year"] = int(yr)
+            OUT_FLAGS.parent.mkdir(exist_ok=True)
+            fdf.to_parquet(OUT_FLAGS, index=False)
+            print(f"wrote {OUT_FLAGS} ({len(fdf):,} rows for {yr})")
     df = pd.DataFrame(rows)
     OUT.parent.mkdir(exist_ok=True)
     df.to_parquet(OUT, index=False)
