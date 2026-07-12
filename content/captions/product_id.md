@@ -37,11 +37,11 @@ The new hotness never launched.
 
 ## Alt text
 ```
-Two horizontal bars comparing product-identifier coverage in 2026 CVEs, as authored by the
-CNA (solid) versus after NVD and CISA enrichment (shaded). CPE is 26% as written and grows
-to 59% after backfill, a gain of 33 points. PURL is 2.6% as written and stays 2.6%: backfill
-adds nothing, because NVD is CPE-only and the CISA ADP container carries no PURLs. A footnote
-notes that as authored, 64% of CVEs carry neither CPE nor PURL. Source: CVE List V5 and NVD.
+Grouped vertical bar chart comparing product-identifier coverage in 2026 CVEs, before and
+after NVD/CISA enrichment. For CPE (the incumbent standard), the as-authored bar is 26% and
+the after-enrichment bar jumps to 59%. For PURL (the proposed replacement), both bars are
+2.6%: enrichment adds nothing, because NVD is CPE-only and the CISA ADP container carries no
+PURLs. The subtitle notes that 64% of 2026 CVEs carry neither identifier. Source: CVE List V5 and NVD.
 ```
 
 ## Notes / caveats
@@ -49,9 +49,10 @@ notes that as authored, 64% of CVEs carry neither CPE nor PURL. Source: CVE List
   or a `cpeApplicability` block; PURL if a `pkg:` package-URL string appears; "bare" if
   neither CPE nor any package-style field (purl / packageName / collectionURL) is present.
   Bare records still name vendor/product in free text; they just lack a standard ID.
-- Chart is a before/after enrichment comparison (two coverage bars, NOT a partition):
-  solid = as the CNA authors it, shaded = added by NVD/CISA backfill. CPE 26% -> 59%
-  (+33 pts); PURL 2.6% -> 2.6% (+0).
+- Chart is a plain grouped bar chart (two identifiers x before/after enrichment), NOT a
+  partition. Bars: CPE 26% -> 59%, PURL 2.6% -> 2.6%. Rebuilt from scratch after earlier
+  versions accreted too many custom elements (stacked partition, ghost extensions, banners);
+  keep it a normal bar graph.
 - The zero-PURL-backfill finding: scanning the `containers.adp` (CISA ADP / Vulnrichment)
   for `pkg:` strings gives 0.0%; NVD's data model is CPE-only. So no enricher adds PURL.
   ADP adds ~3.5 pts of CPE; NVD's database is where CPE reaches 59%.
