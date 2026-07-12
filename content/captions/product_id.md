@@ -35,12 +35,12 @@ The link between a CVE and your asset inventory is missing from most of them.
 
 ## Alt text
 ```
-A single horizontal 100% stacked bar of how 2026 CVEs identify the affected product, as
-the assigning CNA writes it, split into three mutually-exclusive groups that sum to 100%:
-"No standard ID" (vendor and product text only) 64%, "CPE" 26%, and "Package ID, no CPE"
-10%. Two notes below: PURL, the package-native newcomer, is on just 2.6% (new since 2025,
-usually alongside a CPE); NVD later backfills CPE from 26% to about 59% after publication.
-Source: CVE List V5 and NVD.
+Horizontal bar chart of how 2026 CVEs identify the affected product, as the assigning CNA
+writes it, in three mutually-exclusive groups that sum to 100%: "No product ID" (free-text
+vendor and product only) 64%, "CPE" (the incumbent standard) 26%, and "Package or plugin
+name" (WordPress, npm, Maven, no CPE) 10%. Two notes below: PURL, the modern package-URL
+standard, is on only 2.6% of records and almost always alongside a CPE, not on its own;
+NVD later backfills CPE from 26% to about 59% after publication. Source: CVE List V5 and NVD.
 ```
 
 ## Notes / caveats
@@ -49,9 +49,14 @@ Source: CVE List V5 and NVD.
   neither CPE nor any package-style field (purl / packageName / collectionURL) is present.
   Bare records still name vendor/product in free text; they just lack a standard ID.
 - The chart is a mutually-exclusive partition (priority CPE > package > none), so the three
-  segments sum to 100: bare 64%, has-CPE 26%, package-id-but-no-CPE 10%. PURL (2.6%) is NOT
-  a fourth slice because it mostly co-occurs with CPE; it is shown as a callout, not a
-  segment. Do NOT reintroduce independent overlapping bars (they invite a false sum).
+  bars sum to 100: no product ID 64%, has-CPE 26%, package-or-plugin-name-but-no-CPE 10%.
+- The 10% bucket is `packageName`/`collectionURL` records with no CPE: dominated by
+  WordPress plugins/themes (~half, via wordpress.org/plugins + themeforest), then Maven,
+  CPAN, PyPI, Go. Labeled "Package or plugin name" for accuracy.
+- PURL (2.6%) is NOT a fourth bar: ~9 of 10 PURL records ALSO carry a CPE (only ~0.3% are
+  PURL-without-CPE), so it mostly rides inside the CPE bar. Shown as a callout, and the
+  callout says "alongside a CPE" so no one reads it as part of the 10% bucket. Do NOT
+  reintroduce independent overlapping bars (they invite a false sum, and confused the author).
 - Two provenance layers: the CNA-authored container (CPE 26%) vs NVD enrichment (CPE 59%).
   The chart shows CNA-as-authored, with the NVD lift as a callout. Same provenance theme
   as `exploited_cwe` (CNA feed sparse, NVD/CISA backfill).

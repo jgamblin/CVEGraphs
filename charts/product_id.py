@@ -58,53 +58,48 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     purl_years = share[share["ps"] >= 0.001]["year"]
     purl_first = int(purl_years.min()) if len(purl_years) else cur
 
-    # Left -> right along one 100% bar; lead with the problem (no id).
-    segs = [
-        ("No standard ID", bare_now, COLORS["neutral"], "white"),
-        ("CPE", cpe_now, COLORS["accent"], "white"),
-        ("Package ID, no CPE", pkg_only, COLORS["light"], COLORS["text"]),
+    # Three unstacked bars, one per group. They partition every record, so they sum
+    # to 100. Labels are what the group actually is, not a vague "package id".
+    bars = [
+        ("No product ID", "free-text vendor and product only", bare_now, COLORS["neutral"]),
+        ("CPE", "the incumbent standard identifier", cpe_now, COLORS["accent"]),
+        ("Package or plugin name", "WordPress, npm, Maven, no CPE", pkg_only, COLORS["light"]),
     ]
 
     title1 = "Most CVEs ship without a standard product ID at publication"
     title2 = (f"How every {cur} CVE identifies the affected product, as the assigning CNA "
-              f"writes it. Every CVE falls in exactly one group.")
+              f"writes it. The three groups sum to 100%.")
+
+    # PURL is not one of the bars: it mostly rides along with a CPE, so it is a callout.
+    purl_note = (f"PURL, the modern package-URL standard, is on only {purl_now:.1f}% of records, "
+                 f"and almost always alongside a CPE, not on its own.")
+    nvd_note = (f"NVD later backfills CPE from {cpe_now:.0f}% to about {nvd_cpe:.0f}% "
+                f"after publication.")
 
     out = []
     for ratio in ratios:
         fig, ax = plt.subplots(figsize=figsize_for(ratio))
+        pos = np.arange(len(bars))[::-1]  # first bar on top
 
-        left = 0.0
-        for name, val, color, txtcolor in segs:
-            ax.barh(0, val, left=left, height=0.5, color=color, edgecolor="white",
-                    linewidth=1.5, zorder=2)
-            mid = left + val / 2
-            if val >= 14:  # label inside wide segments
-                ax.text(mid, 0, f"{name}\n{val:.0f}%", fontsize=11, fontweight="bold",
-                        color=txtcolor, ha="center", va="center", zorder=3)
-            else:          # label above narrow segments
-                ax.text(mid, 0.31, f"{name}\n{val:.0f}%", fontsize=9, fontweight="bold",
-                        color=COLORS["text"], ha="center", va="bottom", zorder=3)
-                ax.plot([mid, mid], [0.26, 0.30], color=COLORS["neutral"], lw=0.8, zorder=3)
-            left += val
+        for y, (name, sub, val, color) in zip(pos, bars):
+            ax.barh(y, val, height=0.62, color=color, edgecolor="white", linewidth=1.0, zorder=2)
+            ax.text(val + 1.0, y, f"{val:.0f}%", fontsize=13, fontweight="bold",
+                    color=COLORS["text"], ha="left", va="center")
+            ax.text(-0.02, y + 0.17, name, transform=ax.get_yaxis_transform(), fontsize=12,
+                    fontweight="bold", color=COLORS["text"], ha="right", va="center")
+            ax.text(-0.02, y - 0.18, sub, transform=ax.get_yaxis_transform(), fontsize=8.5,
+                    color=COLORS["secondary"], ha="right", va="center")
 
-        # Two annotations under the bar: PURL (cross-cuts CPE) and the NVD backfill.
-        purl_note = (f"PURL, the package-native newcomer, is on just {purl_now:.1f}% "
-                     f"(new since {purl_first}, and usually alongside a CPE).")
-        nvd_note = (f"NVD later backfills CPE from {cpe_now:.0f}% to about {nvd_cpe:.0f}% "
-                    f"after publication.")
-        ax.text(0, -0.55, "■", fontsize=11, color=COLORS["primary"], ha="left", va="center")
-        ax.text(3.2, -0.55, purl_note, fontsize=9.5, color=COLORS["text"], ha="left", va="center")
-        ax.text(0, -0.85, "■", fontsize=11, color=COLORS["accent"], ha="left", va="center")
-        ax.text(3.2, -0.85, nvd_note, fontsize=9.5, color=COLORS["text"], ha="left", va="center")
+        ax.text(0, -1.05, "■", fontsize=11, color=COLORS["primary"], ha="left", va="center")
+        ax.text(2.6, -1.05, purl_note, fontsize=9.5, color=COLORS["text"], ha="left", va="center")
+        ax.text(0, -1.42, "■", fontsize=11, color=COLORS["accent"], ha="left", va="center")
+        ax.text(2.6, -1.42, nvd_note, fontsize=9.5, color=COLORS["text"], ha="left", va="center")
 
         ax.set_yticks([])
-        ax.set_xlim(0, 100)
-        ax.set_ylim(-1.05, 0.72)
-        ax.set_xticks(np.arange(0, 101, 20))
-        ax.set_xticklabels([f"{v}%" for v in range(0, 101, 20)])
-        for s in ("left", "right", "top"):
+        ax.set_xlim(0, 74)
+        ax.set_ylim(-1.7, len(bars) - 0.35)
+        for s in ("left", "right", "top", "bottom"):
             ax.spines[s].set_visible(False)
-        ax.spines["bottom"].set_visible(False)
         ax.tick_params(axis="both", length=0)
         ax.set_xticks([])
 
@@ -116,7 +111,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
         top_m = {"wide": 0.82, "square": 0.85, "portrait": 0.87}[ratio]
         t1 = {"wide": 20, "square": 17, "portrait": 17}[ratio]
-        fig.subplots_adjust(top=top_m, bottom=0.24, left=0.06, right=0.96)
+        fig.subplots_adjust(top=top_m, bottom=0.22, left=0.26, right=0.95)
         fig.text(0.05, 0.965, title1, fontsize=t1, fontweight="bold",
                  color=COLORS["text"], ha="left", va="top")
         fig.text(0.05, 0.915, title2, fontsize=10.5, fontweight="bold",
