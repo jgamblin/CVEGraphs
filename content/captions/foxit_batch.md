@@ -17,13 +17,9 @@ at a version bump is their normal cadence, so 28 is the largest batch so far, no
 ## LinkedIn / Mastodon
 Attach: `foxit_batch_wide_<date>.png`.
 ```
-Earlier this week I posted that the bugs attackers actually exploit skew hard to memory corruption and injection, with use-after-free near the top, not the common web bugs like XSS and CSRF. Here is a vivid example from the same week's CVE feed.
+Foxit shipped its routine 2026.1.2 update this week, and it fixed 28 CVEs in PDF Editor. 26 are memory-safety bugs, 15 of them use-after-free, and 20 land on the exact same CVSS score, 7.8.
 
-Foxit disclosed 28 CVEs in its PDF Editor in one release. 26 of the 28 are memory-safety bugs. Fifteen are use-after-free, and 20 of the 28 land on the exact same CVSS score, 7.8. The other memory-safety ones are out-of-bounds reads (and one write), a type confusion, and three other memory-corruption classes. Two of the 28 are not memory bugs at all: an XML-parsing flaw and one with no assigned class. The shelf attackers shop from, restocked in one update.
-
-To be clear, this is not a Foxit problem, and to their credit they found these, fixed them, and disclosed them, which is exactly what you want a vendor to do. This shipped as a routine scheduled release, Foxit PDF Editor 2026.1.2, and bundling security fixes into a version bump is their normal cadence. This is the largest batch so far, but not an anomaly. Any large C or C++ program that parses untrusted files produces this shape of bug, and a PDF is untrusted input by definition. It is why document parsers have been an exploitation workhorse for two decades, and why the whole industry keeps pushing memory safety and sandboxing.
-
-The interesting part is the mix, not the size. Fifteen of the 28 are use-after-free, which sits near the top of what actually gets exploited, and most of the rest are the memory-corruption family alongside it. They all land around 7.8, which clears a critical-only filter but not a High SLA. The real question is whether a use-after-free in a file parser should jump the rest of your 7.x queue, not whether it shows up at all.
+This is not a knock on Foxit. Batch fixes at a version bump are their normal cadence, and any large program that parses untrusted files produces this bug shape. The interesting part is the mix: nearly all memory corruption, the class that actually gets exploited, sitting at a 7.8 that clears a critical-only filter but not a High SLA.
 
 Would you triage a use-after-free in a file parser differently from the same CVSS somewhere else?
 
@@ -36,7 +32,7 @@ This week I posted that attackers exploit memory corruption and injection far mo
 
 A vivid example from this week's CVE disclosures: Foxit disclosed 28 CVEs for its PDF Editor in one release. 26 of 28 are memory-safety bugs. 15 are use-after-free.
 
-The shelf attackers shop from, restocked in one release.
+All patched. But memory-safety in a file parser is the exact bug class attackers reach for.
 ```
 
 ## Alt text

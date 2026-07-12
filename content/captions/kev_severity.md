@@ -17,30 +17,22 @@ with a v3 score: mean 8.4 / median 8.8. The 12 shown classes cover ~850 of 1,635
 ## LinkedIn / Mastodon
 Attach: `kev_severity_wide_<date>.png`.
 ```
-Someone asked a sharp question on my exploited-bugs post: fine, attackers reach for memory corruption and code execution, but how severe are those bugs actually scored?
+How severe are the bugs that actually get exploited?
 
-So I plotted every CVE on CISA's Known Exploited Vulnerabilities list at its CVSS v3 score, split by weakness class. Each bubble is a score, sized by how many CVEs land there, with the class median marked in red.
+I plotted every CVE on CISA's Known Exploited Vulnerabilities list at its CVSS v3 score, by weakness class. Each bubble is a score, sized by count, with the class median in red.
 
-Two things stand out.
+Exploited bugs cluster high, but the classes separate at the top. Code execution rides the ceiling: code injection, OS command injection, and deserialization all median 9.8. Memory corruption lands a notch lower near 8.8, with out-of-bounds write lowest at 7.8.
 
-Exploited bugs really do cluster high. Across the whole KEV list the median is 8.8, and almost nothing sits in the medium range. If you are looking for a floor, "it got exploited" and "it scored high" mostly travel together here.
-
-But the ceiling is where the classes separate. Code execution rides it: code injection, OS command injection, and deserialization all carry a median of 9.8, with most of their mass piled at the very top. Memory corruption lands about a point lower: use-after-free, memory buffer errors, and type confusion cluster around 8.8, and out-of-bounds write sits lowest of the group at a median of 7.8. Grouped up, code execution averages about 9.0 and memory corruption about 8.4.
-
-One honest caveat, because a CVSS co-author was asking. These scores blend NVD and CNA scorers, and the 9.8 pile in the remote-code classes partly reflects NVD's habit of scoring remote code execution at 9.8. Some of that gap is the scorer, not the bug.
-
-The takeaway is not "CVSS works." KEV is what already got caught, so conditioning on it and then reading the scores is not a test of whether severity predicts exploitation. It is a description of where the exploited bugs happen to sit, and they sit high, with code execution highest.
-
-If you triaged only by score, which of these classes would you still miss?
+If you triaged only by score, which of these would you still miss?
 
 #vulnerabilitymanagement #cybersecurity #CVE
 ```
 
 ## X / Bluesky
 ```
-Someone asked: how severe are the bugs that actually get exploited?
+How severe are the bugs that actually get exploited?
 
-Every CVE on CISA's KEV list, by CVSS v3 and weakness class. Median across the whole list is 8.8.
+Every CVE on CISA's KEV list, by CVSS v3 and weakness class. List median is 8.8.
 
 Code execution rides the ceiling (median 9.8). Memory corruption sits a notch lower (median 8.8). Almost nothing is "medium."
 ```
