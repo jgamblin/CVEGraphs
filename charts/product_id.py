@@ -46,8 +46,10 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     def share(mask):
         return 100.0 * mask.mean()
 
-    cpe_auth, cpe_enr = share(j["cpe_cna"]), share(j["has_cpe"])
+    # Exclusive groups (priority PURL > CPE > neither) so each column sums to 100.
     purl_val = share(j["purl"])                              # no backfill: PURL is unchanged
+    cpe_auth = share(j["cpe_cna"] & ~j["purl"])              # CPE, no PURL
+    cpe_enr = share(j["has_cpe"] & ~j["purl"])
     neither_auth = share(~j["cpe_cna"] & ~j["purl"])
     neither_enr = share(~j["has_cpe"] & ~j["purl"])
 
@@ -59,8 +61,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     ]
 
     title1 = "Enrichment cuts the no-ID pile in half, all through CPE. PURL adds nothing."
-    title2 = (f"Share of {cur} CVEs with each product identifier, as the CNA writes it and "
-              f"after NVD and CISA enrichment.")
+    title2 = (f"How every {cur} CVE is identified, as the CNA writes it and after NVD and "
+              f"CISA enrichment. Each group is exclusive; a column sums to 100%.")
 
     out = []
     for ratio in ratios:
@@ -75,8 +77,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             ax.barh(y - h / 2, enr, height=h, color=COLORS["primary"], edgecolor="white",
                     linewidth=1.0, zorder=3, label="After NVD + CISA enrichment" if first else None)
             for val, yy in ((auth, y + h / 2), (enr, y - h / 2)):
-                lbl = f"{val:.0f}%" if val >= 10 else f"{val:.1f}%"
-                ax.text(val + 1.2, yy, lbl, ha="left", va="center", fontsize=11,
+                ax.text(val + 1.2, yy, f"{round(val)}%", ha="left", va="center", fontsize=11,
                         fontweight="bold", color=COLORS["text"])
             ax.text(-0.02, y + 0.20, name, transform=ax.get_yaxis_transform(), ha="right",
                     va="center", fontsize=12.5, fontweight="bold", color=COLORS["text"])
@@ -101,8 +102,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
         foot_size = {"wide": 9, "square": 8, "portrait": 8}[ratio]
         fig.text(0.05, 0.05,
-                 f"{n:,} {cur} CVEs in both CVE List and NVD. Enriched CPE per NVD; the CISA ADP "
-                 f"container adds no PURLs. Source: CVE List V5 + NVD.",
+                 f"{n:,} {cur} CVEs in both CVE List and NVD. Groups are exclusive: a CVE with "
+                 f"both CPE and PURL counts under PURL. Source: CVE List V5 + NVD.",
                  fontsize=foot_size, color=COLORS["neutral"], ha="left", va="bottom")
 
         top_m = {"wide": 0.82, "square": 0.85, "portrait": 0.87}[ratio]

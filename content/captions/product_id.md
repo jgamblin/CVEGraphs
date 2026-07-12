@@ -7,12 +7,14 @@ Data: per-year scan of the CVE List V5 clone (`scripts_precompute_product_id.py`
 Finding (verified, same-cohort join of CVE List CNA-authored flags to NVD enriched CPE,
 31,076 non-rejected 2026 CVEs present in both):
 As authored, 74% of CVEs carry neither CPE nor PURL. NVD/CISA enrichment cuts that to 38%,
-entirely by backfilling CPE, which rises from 25.6% to 61%. PURL is on 2.6% as authored and
-STAYS 2.6% after enrichment: the CISA ADP container carries 0.0% PURL, and NVD is CPE-only,
-so no enricher adds a PURL. Of the 2.6% with a PURL, ~9 in 10 also carry a CPE (only ~0.3%
-are PURL-without-CPE). PURL first appeared in 2025 (0.3%), 0.0% before. Note: "neither CPE
-nor PURL" (74%) is broader than "no product ID at all / free text only" (~64%, which also
-excludes bare package names). Trend of the "bare" share: 84% (2022) -> 77 -> 73 ->
+entirely by backfilling CPE. The chart uses an EXCLUSIVE partition (each CVE counted once,
+priority PURL > CPE > neither) so each column sums to 100: No CPE or PURL 74->38, CPE 23->59,
+PURL 3 (2.6% precisely) flat. Total CPE coverage (has a CPE, incl. those that also carry a
+PURL) is 26->61; it shows as 23->59 here because the ~2.3% with both are counted under PURL.
+PURL stays 2.6% because NVD is CPE-only and the CISA ADP container carries 0.0% PURL. Of the
+2.6% with a PURL, ~9 in 10 also carry a CPE (only ~0.3% are PURL-without-CPE). PURL first
+appeared in 2025 (0.3%), 0.0% before. "Neither CPE nor PURL" (74%) is broader than "no
+product ID at all / free text only" (~64%, which also excludes bare package names). Trend of the "bare" share: 84% (2022) -> 77 -> 73 ->
 65 -> 64% (2026). CPE-in-CNA: 12 -> 11 -> 15 -> 17 -> 26%. CPE and PURL are counted
 independently (a record can carry both), so they do not sum with "bare" to 100.
 
@@ -21,7 +23,7 @@ Attach: `product_id_wide_<date>.png`.
 ```
 PURL was supposed to be the upgrade. A package-native identifier built for the open-source world that CPE never described well, and long pitched as the modern replacement. Here is where it actually landed: 2.6% of 2026 CVEs.
 
-And nothing is coming to save it. As CNAs write them, 74% of CVEs carry neither CPE nor PURL. Then NVD and CISA go to work: they backfill CPEs and cut that no-ID pile to 38%, more than doubling CPE coverage from 26% to 61%. They add zero PURLs, because the whole enrichment pipeline is built around CPE.
+And nothing is coming to save it. As CNAs write them, 74% of CVEs carry neither CPE nor PURL. Then NVD and CISA go to work: they backfill CPEs and cut that no-ID pile to 38%. Every point of that improvement is CPE. They add zero PURLs, because the whole enrichment pipeline is built around CPE.
 
 So the format meant to modernize product matching is barely used by the people who write CVEs, and untouched by the machine that fixes everything else. If PURL is the answer, why is nobody, human or automated, reaching for it?
 
@@ -39,11 +41,11 @@ The new hotness never launched.
 
 ## Alt text
 ```
-Horizontal grouped bar chart comparing product-identifier coverage in 2026 CVEs, as the CNA
-writes it versus after NVD/CISA enrichment, on the same set of CVEs. "No CPE or PURL" falls
-from 74% to 38% after enrichment. CPE (the incumbent standard) rises from 26% to 61%. PURL
-(the proposed replacement) is 2.6% in both bars: enrichment adds nothing, because NVD is
-CPE-only and the CISA ADP container carries no PURLs. Source: CVE List V5 and NVD.
+Horizontal grouped bar chart of how every 2026 CVE is identified, as the CNA writes it versus
+after NVD/CISA enrichment, on the same set of CVEs, in three exclusive groups that each sum to
+100%. "No CPE or PURL" falls from 74% to 38% after enrichment. CPE (the incumbent standard)
+rises from 23% to 59%. PURL (the proposed replacement) is 3% in both bars: enrichment adds
+nothing, because NVD is CPE-only and the CISA ADP container carries no PURLs. Source: CVE List V5 and NVD.
 ```
 
 ## Notes / caveats
@@ -51,8 +53,10 @@ CPE-only and the CISA ADP container carries no PURLs. Source: CVE List V5 and NV
   or a `cpeApplicability` block; PURL if a `pkg:` package-URL string appears; "bare" if
   neither CPE nor any package-style field (purl / packageName / collectionURL) is present.
   Bare records still name vendor/product in free text; they just lack a standard ID.
-- Chart is a plain horizontal grouped bar chart: three groups (No CPE or PURL / CPE / PURL)
-  x before/after enrichment. Bars: no-ID 74->38, CPE 26->61, PURL 2.6->2.6. Keep it a normal
+- Chart is a plain horizontal grouped bar chart: three EXCLUSIVE groups (No CPE or PURL / CPE
+  / PURL) x before/after enrichment, so each state (column) sums to 100. Bars: no-ID 74->38,
+  CPE 23->59, PURL 3->3. Priority PURL > CPE > neither, so the ~2.3% with both count under
+  PURL (this is why CPE shows 23/59 here, vs 26/61 total has-CPE coverage). Keep it a normal
   bar graph (earlier versions accreted stacked partitions, ghost extensions, and banners).
 - SAME-COHORT numbers: computed on the 31,076 CVEs present in BOTH the CVE List clone and NVD
   (join in processed/product_id_cve_flags.parquet + NVD has_cpe), so "as authored" and "after
