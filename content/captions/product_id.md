@@ -35,11 +35,12 @@ The link between a CVE and your asset inventory is missing from most of them.
 
 ## Alt text
 ```
-Horizontal bar chart of how 2026 CVEs identify the affected product, as the assigning
-CNA writes it. "No standard product ID" (vendor and product text only) is 64%, down from
-84% in 2022. "CPE" is 26%, up from 12% in 2022, with a ghost bar showing it reaches 59%
-after NVD backfills it. "PURL", the package-native identifier, is 2.6%, first appearing
-in 2025. CPE and PURL are counted independently. Source: CVE List V5 and NVD.
+A single horizontal 100% stacked bar of how 2026 CVEs identify the affected product, as
+the assigning CNA writes it, split into three mutually-exclusive groups that sum to 100%:
+"No standard ID" (vendor and product text only) 64%, "CPE" 26%, and "Package ID, no CPE"
+10%. Two notes below: PURL, the package-native newcomer, is on just 2.6% (new since 2025,
+usually alongside a CPE); NVD later backfills CPE from 26% to about 59% after publication.
+Source: CVE List V5 and NVD.
 ```
 
 ## Notes / caveats
@@ -47,9 +48,13 @@ in 2025. CPE and PURL are counted independently. Source: CVE List V5 and NVD.
   or a `cpeApplicability` block; PURL if a `pkg:` package-URL string appears; "bare" if
   neither CPE nor any package-style field (purl / packageName / collectionURL) is present.
   Bare records still name vendor/product in free text; they just lack a standard ID.
+- The chart is a mutually-exclusive partition (priority CPE > package > none), so the three
+  segments sum to 100: bare 64%, has-CPE 26%, package-id-but-no-CPE 10%. PURL (2.6%) is NOT
+  a fourth slice because it mostly co-occurs with CPE; it is shown as a callout, not a
+  segment. Do NOT reintroduce independent overlapping bars (they invite a false sum).
 - Two provenance layers: the CNA-authored container (CPE 26%) vs NVD enrichment (CPE 59%).
-  The chart shows CNA-as-authored, with the NVD number as a backfill marker. Same
-  provenance theme as `exploited_cwe` (CNA feed sparse, NVD/CISA backfill).
+  The chart shows CNA-as-authored, with the NVD lift as a callout. Same provenance theme
+  as `exploited_cwe` (CNA feed sparse, NVD/CISA backfill).
 - PURL "first year" uses the first year its share reaches >=0.1% (2025), not a stray
   record; a handful of `pkg:` strings appear earlier and round to 0.0%.
 - The local CVE List clone can lag the NVD mirror slightly (2026 record counts differ:

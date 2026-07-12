@@ -41,9 +41,12 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     def pct(r, col):
         return 100.0 * r[col] / r["records"]
 
+    # A true partition of every record (priority CPE > package > none), so the
+    # segments sum to exactly 100 and a reader can add them up.
     bare_now, bare_then = pct(row, "bare"), pct(base, "bare")
-    cpe_now, cpe_then = pct(row, "cpe"), pct(base, "cpe")
-    purl_now = pct(row, "purl")
+    cpe_now = pct(row, "cpe")                       # has a CPE (may also list a PURL)
+    pkg_only = 100.0 - bare_now - cpe_now           # a package id but no CPE
+    purl_now = pct(row, "purl")                     # PURL share (cross-cuts CPE), a callout
 
     # NVD's enriched CPE coverage for the same year (the downstream backfill).
     pub = pd.to_datetime(nvd["published"], utc=True, errors="coerce")
@@ -55,65 +58,65 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     purl_years = share[share["ps"] >= 0.001]["year"]
     purl_first = int(purl_years.min()) if len(purl_years) else cur
 
-    # bottom -> top
-    bars = [
-        ("PURL", "package-native identifier", purl_now, COLORS["primary"],
-         f"first appeared in {purl_first}"),
-        ("CPE", "as the CNA authors it", cpe_now, COLORS["accent"],
-         f"up from {cpe_then:.0f}% in {int(base['year'])}"),
-        ("No standard product ID", "vendor and product text only", bare_now, COLORS["secondary"],
-         f"down from {bare_then:.0f}% in {int(base['year'])}"),
+    # Left -> right along one 100% bar; lead with the problem (no id).
+    segs = [
+        ("No standard ID", bare_now, COLORS["neutral"], "white"),
+        ("CPE", cpe_now, COLORS["accent"], "white"),
+        ("Package ID, no CPE", pkg_only, COLORS["light"], COLORS["text"]),
     ]
 
     title1 = "Most CVEs ship without a standard product ID at publication"
-    title2 = (f"Share of {cur} CVEs that carry a standard product identifier (CPE or PURL), "
-              f"as the assigning CNA writes it.")
+    title2 = (f"How every {cur} CVE identifies the affected product, as the assigning CNA "
+              f"writes it. Every CVE falls in exactly one group.")
 
     out = []
     for ratio in ratios:
         fig, ax = plt.subplots(figsize=figsize_for(ratio))
 
-        for i, (name, sub, val, color, trend) in enumerate(bars):
-            ax.barh(i, val, height=0.6, color=color, edgecolor="white",
-                    linewidth=1.0, zorder=2)
-            ax.text(val + 1.2, i, f"{val:.1f}%" if val < 10 else f"{val:.0f}%",
-                    fontsize=11, fontweight="bold", color=COLORS["text"],
-                    ha="left", va="center")
-            ax.text(-0.02, i + 0.16, name, transform=ax.get_yaxis_transform(),
-                    fontsize=11, fontweight="bold", color=COLORS["text"],
-                    ha="right", va="center")
-            ax.text(-0.02, i - 0.17, f"{sub} · {trend}", transform=ax.get_yaxis_transform(),
-                    fontsize=8, color=COLORS["secondary"], ha="right", va="center")
+        left = 0.0
+        for name, val, color, txtcolor in segs:
+            ax.barh(0, val, left=left, height=0.5, color=color, edgecolor="white",
+                    linewidth=1.5, zorder=2)
+            mid = left + val / 2
+            if val >= 14:  # label inside wide segments
+                ax.text(mid, 0, f"{name}\n{val:.0f}%", fontsize=11, fontweight="bold",
+                        color=txtcolor, ha="center", va="center", zorder=3)
+            else:          # label above narrow segments
+                ax.text(mid, 0.31, f"{name}\n{val:.0f}%", fontsize=9, fontweight="bold",
+                        color=COLORS["text"], ha="center", va="bottom", zorder=3)
+                ax.plot([mid, mid], [0.26, 0.30], color=COLORS["neutral"], lw=0.8, zorder=3)
+            left += val
 
-        # CPE more than doubles once NVD backfills it: a ghost extension of the CPE bar
-        # (index 1) from its as-authored value out to NVD's enriched coverage.
-        ax.barh(1, nvd_cpe - cpe_now, left=cpe_now, height=0.6, color=COLORS["light"],
-                edgecolor="white", linewidth=1.0, zorder=1)
-        ax.text(nvd_cpe + 1.2, 1, f"{nvd_cpe:.0f}%", fontsize=10, fontweight="bold",
-                color=COLORS["secondary"], ha="left", va="center")
-        ax.text(nvd_cpe, 1 + 0.42, "after NVD backfill", fontsize=8, fontweight="bold",
-                color=COLORS["secondary"], ha="center", va="bottom")
+        # Two annotations under the bar: PURL (cross-cuts CPE) and the NVD backfill.
+        purl_note = (f"PURL, the package-native newcomer, is on just {purl_now:.1f}% "
+                     f"(new since {purl_first}, and usually alongside a CPE).")
+        nvd_note = (f"NVD later backfills CPE from {cpe_now:.0f}% to about {nvd_cpe:.0f}% "
+                    f"after publication.")
+        ax.text(0, -0.55, "■", fontsize=11, color=COLORS["primary"], ha="left", va="center")
+        ax.text(3.2, -0.55, purl_note, fontsize=9.5, color=COLORS["text"], ha="left", va="center")
+        ax.text(0, -0.85, "■", fontsize=11, color=COLORS["accent"], ha="left", va="center")
+        ax.text(3.2, -0.85, nvd_note, fontsize=9.5, color=COLORS["text"], ha="left", va="center")
 
         ax.set_yticks([])
         ax.set_xlim(0, 100)
-        ax.set_ylim(-0.7, len(bars) - 0.3)
+        ax.set_ylim(-1.05, 0.72)
         ax.set_xticks(np.arange(0, 101, 20))
         ax.set_xticklabels([f"{v}%" for v in range(0, 101, 20)])
         for s in ("left", "right", "top"):
             ax.spines[s].set_visible(False)
-        ax.tick_params(axis="y", length=0)
-        ax.grid(axis="x", color=COLORS["grid"], lw=0.6, alpha=0.8)
-        ax.set_axisbelow(True)
+        ax.spines["bottom"].set_visible(False)
+        ax.tick_params(axis="both", length=0)
+        ax.set_xticks([])
 
         foot_size = {"wide": 9, "square": 8, "portrait": 8}[ratio]
-        fig.text(0.05, 0.10,
-                 f"As-authored in the CVE List CNA container, {n:,} CVEs in {cur}. CPE and PURL "
-                 f"counted independently. Source: CVE List V5 + NVD.",
+        fig.text(0.05, 0.12,
+                 f"As-authored in the CVE List CNA container, {n:,} non-rejected CVEs in {cur}. "
+                 f"Free-text share was {bare_then:.0f}% in {int(base['year'])}. Source: CVE List V5 + NVD.",
                  fontsize=foot_size, color=COLORS["neutral"], ha="left", va="top")
 
-        top_m = {"wide": 0.83, "square": 0.85, "portrait": 0.87}[ratio]
+        top_m = {"wide": 0.82, "square": 0.85, "portrait": 0.87}[ratio]
         t1 = {"wide": 20, "square": 17, "portrait": 17}[ratio]
-        fig.subplots_adjust(top=top_m, bottom=0.22, left=0.30, right=0.94)
+        fig.subplots_adjust(top=top_m, bottom=0.24, left=0.06, right=0.96)
         fig.text(0.05, 0.965, title1, fontsize=t1, fontweight="bold",
                  color=COLORS["text"], ha="left", va="top")
         fig.text(0.05, 0.915, title2, fontsize=10.5, fontweight="bold",
