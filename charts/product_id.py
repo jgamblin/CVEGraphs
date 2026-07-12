@@ -100,6 +100,14 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             ax.text(-0.02, y - 0.19, sub, transform=ax.get_yaxis_transform(), fontsize=8.5,
                     color=COLORS["secondary"], ha="right", va="center")
 
+        # Context banner up top: most CVEs carry neither identifier to begin with.
+        ax.text(0, 2.15, f"{bare_now:.0f}%", fontsize=34, fontweight="bold",
+                color=COLORS["secondary"], ha="left", va="center")
+        ax.text(13.5, 2.28, "of 2026 CVEs carry neither CPE nor PURL,", fontsize=11.5,
+                fontweight="bold", color=COLORS["text"], ha="left", va="center")
+        ax.text(13.5, 2.02, "as the assigning CNA writes them.", fontsize=11.5,
+                color=COLORS["secondary"], ha="left", va="center")
+
         # legend for solid vs shaded
         ax.barh(-1.15, 4, height=0.34, color=COLORS["accent"], zorder=3)
         ax.text(6, -1.15, "as the CNA writes it", fontsize=9.5, color=COLORS["text"], va="center")
@@ -108,7 +116,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
         ax.set_yticks([])
         ax.set_xlim(0, 72)
-        ax.set_ylim(-1.6, len(rows_) - 0.4)
+        ax.set_ylim(-1.6, 2.7)
         for s in ("left", "right", "top", "bottom"):
             ax.spines[s].set_visible(False)
         ax.tick_params(axis="both", length=0)
@@ -116,8 +124,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
         foot_size = {"wide": 9, "square": 8, "portrait": 8}[ratio]
         fig.text(0.05, 0.12,
-                 f"{n:,} non-rejected {cur} CVEs. As authored, {bare_now:.0f}% carry neither CPE nor "
-                 f"PURL. Enriched CPE per NVD; CISA ADP adds no PURLs. Source: CVE List V5 + NVD.",
+                 f"{n:,} non-rejected {cur} CVEs. Enriched CPE per NVD; the CISA ADP container "
+                 f"adds no PURLs. Source: CVE List V5 + NVD.",
                  fontsize=foot_size, color=COLORS["neutral"], ha="left", va="top")
 
         top_m = {"wide": 0.82, "square": 0.85, "portrait": 0.87}[ratio]
