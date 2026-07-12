@@ -702,6 +702,16 @@ def main():
     # NVD's mirrored v4 is unreliable; prefer the CNA's authoritative CVE List v4.
     reconcile_nvd_v4(nvd_df, cvelist_df)
 
+    # Derived datasets that scan the raw CVE List clone (kept separate from the main
+    # parquet build so they can evolve on their own). Must run on every refresh or the
+    # product_id chart renders a fresh date over stale numbers.
+    print("  Building product-identifier datasets (product_id) ...")
+    try:
+        import scripts_precompute_product_id as _pid
+        _pid.main()
+    except Exception as e:
+        print(f"  [product_id] precompute failed: {e}; leaving existing parquets")
+
     print("\n[3/3] Fetching feeds ...")
     fetch_feeds()
 
