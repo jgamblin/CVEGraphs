@@ -55,9 +55,9 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
     # top -> bottom
     rows_ = [
-        ("No CPE or PURL", "free text or a bare package name", neither_auth, neither_enr),
-        ("CPE", "the incumbent standard", cpe_auth, cpe_enr),
-        ("PURL", "the proposed replacement", purl_val, purl_val),
+        ("No CPE or PURL", "Free text or package name", neither_auth, neither_enr),
+        ("CPE", "The incumbent standard", cpe_auth, cpe_enr),
+        ("PURL", "The proposed replacement", purl_val, purl_val),
     ]
 
     title1 = "Enrichment cuts the no-ID pile in half, all through CPE. It adds no PURLs."

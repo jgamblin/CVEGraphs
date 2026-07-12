@@ -115,8 +115,12 @@ const VISUAL = [
     `You are a meticulous VISUAL DESIGNER judging whether this looks professionally made. OPEN AND LOOK ` +
     `AT the image at ${png} (Read tool). Scrutinize: title/subtitle hierarchy, typography and font ` +
     `sizes, label collisions or truncation, alignment, spacing and margins, legend placement, ` +
-    `overlapping elements, and overall polish. Point to the exact element and say what a designer would ` +
-    `change.` },
+    `overlapping elements, and overall polish. ` +
+    `ALSO read the TEXT itself as a designer would and flag anything that looks unprofessional on a ` +
+    `published chart: inconsistent capitalization, lowercase sentence fragments or orphan sub-labels ` +
+    `("free text or a bare package name"), labels that are not parallel in structure or case, awkward ` +
+    `truncations, and title/subtitle/axis wording that is not clean. Every visible string should look ` +
+    `deliberate. Point to the exact element and say what a designer would change.` },
   { key: 'color-accessibility', prompt:
     `You are an ACCESSIBILITY and color reviewer. OPEN AND LOOK AT the image at ${png} (Read tool). ` +
     `Check: color-blind safety (deuteranopia/protanopia), contrast of text and marks, whether the ` +
