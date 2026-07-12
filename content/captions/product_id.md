@@ -21,22 +21,22 @@ independently (a record can carry both), so they do not sum with "bare" to 100.
 ## LinkedIn / Mastodon
 Attach: `product_id_wide_<date>.png`.
 ```
-PURL was supposed to be the upgrade. A package-native identifier built for the open-source world that CPE never described well, and long pitched as the modern replacement. Here is where it actually landed: 2.6% of 2026 CVEs.
+PURL was supposed to be the upgrade. A package-native identifier built to describe the open-source packages CPE never handled well. Here is where it actually landed in the CVE feed: 2.6% of 2026 CVEs, and most of that from a single third-party CNA.
 
-And nothing is coming to save it. As CNAs write them, 74% of CVEs carry neither CPE nor PURL. Then NVD and CISA go to work: they backfill CPEs and cut that no-ID pile to 38%. Every point of that improvement is CPE. They add zero PURLs, because the whole enrichment pipeline is built around CPE.
+As CNAs write them, 74% of CVEs carry neither CPE nor PURL. Then NVD and CISA go to work: they backfill CPEs and cut that no-ID pile to 38%. Every point of that improvement is CPE. They add zero PURLs, and not by choice. NVD has no PURL field to fill.
 
-So the format meant to modernize product matching is barely used by the people who write CVEs, and untouched by the machine that fixes everything else. If PURL is the answer, why is nobody, human or automated, reaching for it?
+Here is the strange part. PURL is alive and well outside this pipeline, in OSV, GitHub Security Advisories, and every SBOM and SCA tool. It just never made it into the CVE and NVD pipeline that most of the industry still triages from. The problem is not PURL. It is that the feed everyone relies on structurally cannot see it. How long do we keep matching CVEs to assets through a format that cannot name a package?
 
 #vulnerabilitymanagement #cybersecurity #CVE
 ```
 
 ## X / Bluesky
 ```
-PURL was pitched as the modern replacement for CPE, built for open source. It is on 2.6% of 2026 CVEs.
+PURL was built to identify open-source packages, the thing CPE never did well.
 
-And nothing is coming to save it. NVD and CISA backfill missing CPEs, cutting the no-ID pile from 74% to 38%, but they add zero PURLs. No CNA uses it, no enricher adds it.
+Where it landed in the CVE feed: 2.6% of 2026 CVEs. NVD and CISA backfill missing CPEs, cutting the no-ID pile from 74% to 38%, but they add zero PURLs, because NVD has no PURL field.
 
-The new hotness never launched.
+PURL is thriving in OSV, GitHub advisories, and SBOM tools. It just never made it into the pipeline everyone triages from.
 ```
 
 ## Alt text
@@ -68,6 +68,13 @@ nothing, because NVD is CPE-only and the CISA ADP container carries no PURLs. So
 - The zero-PURL-backfill finding: scanning the `containers.adp` (CISA ADP / Vulnrichment)
   for `pkg:` strings gives 0.0%; NVD's data model is CPE-only. So no enricher adds PURL.
   ADP adds ~3.5 pts of CPE; NVD's database is where CPE reaches 59%.
+- SCOPE GUARDRAIL (post-review blocker): do NOT claim PURL is dead / "never launched" /
+  "nobody uses it". PURL is the native identifier of OSV, GitHub Security Advisories,
+  deps.dev, and SBOM/SCA tooling (SPDX, CycloneDX). The finding is scoped to the CVE/NVD
+  pipeline: PURL is a rounding error THERE, and NVD structurally can't add it (no PURL field).
+- Of the 812 2026 CVEs with a PURL in the CNA container, 622 (77%) come from one CNA
+  (VulnCheck); GitHub does not emit PURL in its CVE records. Copy says "most from a single
+  third-party CNA" without naming it (avoids a company callout); swap in the name if desired.
 - Denominator caveat: CNA-authored shares are over the 31,102 CVE List clone records; the
   59% enriched CPE is NVD's database figure (37.9k records). The clone can lag NVD, so
   treat the 26%->59% as "roughly doubles," not an exact same-cohort delta.

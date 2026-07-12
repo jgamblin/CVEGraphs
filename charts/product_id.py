@@ -60,9 +60,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         ("PURL", "the proposed replacement", purl_val, purl_val),
     ]
 
-    title1 = "Enrichment cuts the no-ID pile in half, all through CPE. PURL adds nothing."
-    title2 = (f"How every {cur} CVE is identified, as the CNA writes it and after NVD and "
-              f"CISA enrichment. Each group is exclusive; a column sums to 100%.")
+    title1 = "Enrichment cuts the no-ID pile in half, all through CPE. It adds no PURLs."
+    title2 = f"How every {cur} CVE is identified, before and after NVD and CISA enrichment."
 
     out = []
     for ratio in ratios:
