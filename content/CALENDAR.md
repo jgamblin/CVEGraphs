@@ -22,15 +22,18 @@ cwe → vendor → product → rhythm → cvss_drift → time_to_kev → id_burn
 - **Big KEV week** — an unusually large batch of KEV additions warrants a same-day post.
 
 ## Log
-Newest first. Fill Date/Link as each goes live. Rows marked `confirm` are known to
-have posted this week but need their exact date/link filled in by Jerry.
+Newest first. Dates for posted rows are derived from LinkedIn relative timestamps
+(pulled from recent-activity on 2026-07-12), so treat them as +/- a day. Engagement
+is a snapshot at pull time. Reposts of others' content are omitted from this chart log.
 
-| Date | Chart | Platforms | Link | Notes |
-|------|-------|-----------|------|-------|
-| 2026-07-13 (planned) | product_id | LI · X | | Mon: CPE vs PURL vs free text; "most CVEs can't tell a machine what they affect" |
-| 2026-07-12 | foxit_batch | LI | | Sunday curio; confirmed live via LinkedIn activity export |
-| 2026-07-?? `confirm` | kev_severity | LI · X | | "how severe are exploited bugs"; grew out of Sasha Romanosky's question |
-| 2026-07-?? `confirm` | exploited_cwe | LI · X | | "the bugs you see most aren't the bugs exploited"; Sasha commented |
-| 2026-07-?? `confirm` | cwe_spread | LI | | "a CVSS score is an opinion with a decimal point" |
-| 2026-07-?? `confirm` | cna_spread | LI | | XSS CVSS spread by CNA |
-| 2026-07-?? `confirm` | ridgeline_severity | LI | | CVSS v3 vs v4 by year; led to the v4 data fix |
+| Date | Chart | Platforms | Impressions | Engagement | Notes |
+|------|-------|-----------|-------------|------------|-------|
+| 2026-07-13 (planned) | product_id | LI · X | | | Mon: CPE vs PURL vs free text; "most CVEs can't tell a machine what they affect" |
+| 2026-07-12 | foxit_batch | LI | 105 | 3 reactions | Sunday curio; routine 2026.1.2 release, memory-safety batch |
+| 2026-07-11 | kev_severity | LI | 609 | 13 react · 1 comment · 2 reposts | "How severe are the bugs that actually get exploited?" |
+| 2026-07-11 | exploited_cwe | LI | 1,569 | 33 react · 6 comments · 2 reposts | "The bugs that get exploited are not the ones you see most"; Sasha Romanosky commented |
+| 2026-07-10 | cwe_spread | LI | 846 | 20 react · 3 comments · 3 reposts | "Stop triaging by bug class" |
+| 2026-07-09 | cna_spread | LI | 2,952 | 55 react · 10 comments · 5 reposts | **Top performer.** XSS CVSS spread by CNA; "opinion with a decimal point" |
+| 2026-07-08 | ridgeline_severity | LI | 1,910 | 37 react · 11 comments · 1 repost | "How severe are CVEs, year by year?"; v3 vs v4, led to the v4 data fix |
+| 2026-07-07 | cna_bump | LI | | 25 react · 1 comment · 3 reposts | "GitHub and MITRE trade places" |
+| 2026-07-06 | chrome_day | LI | | | "Out with Patch Tuesday, in with Chrome Day" |
