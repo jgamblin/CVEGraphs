@@ -71,8 +71,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
               f"writes it. The three groups sum to 100%.")
 
     # PURL is not one of the bars: it mostly rides along with a CPE, so it is a callout.
-    purl_note = (f"PURL, the modern package-URL standard, is on only {purl_now:.1f}% of records, "
-                 f"and almost always alongside a CPE, not on its own.")
+    purl_note = (f"PURL, pitched as the modern replacement for CPE, is on only {purl_now:.1f}% "
+                 f"and almost always rides alongside a CPE, not on its own.")
     nvd_note = (f"NVD later backfills CPE from {cpe_now:.0f}% to about {nvd_cpe:.0f}% "
                 f"after publication.")
 

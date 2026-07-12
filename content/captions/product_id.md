@@ -15,22 +15,22 @@ independently (a record can carry both), so they do not sum with "bare" to 100.
 ## LinkedIn / Mastodon
 Attach: `product_id_wide_<date>.png`.
 ```
-How does a CVE tell you what software it affects, in a form a scanner can match? In 2026, mostly it doesn't.
+PURL was supposed to be the upgrade. A package-native identifier built for the open-source world that CPE never described well, and long pitched as the modern replacement. Here is where it actually landed: 2.6% of 2026 CVEs.
 
-About 64% of this year's CVEs carry no standardized identifier a scanner can match against your inventory, just a free-text vendor and product name. CPE, the identifier scanners have leaned on for nearly two decades, is in 26% as the CNA authors it, and NVD backfills more later, to around 59%. PURL, the package-native identifier meant to fix this for open source, first appeared last year and reaches 2.6% now.
+And it is not replacing anything. Almost every CVE that carries a PURL also carries a CPE, so it rides along instead of standing on its own. Meanwhile CPE, the incumbent, is on just 26% of records as the CNA writes them, and 64% still ship with no standard product ID at all, only a free-text vendor and product name.
 
-If nearly two-thirds of advisories arrive with no standardized ID to match against your inventory, only vendor and product text, what closes that gap in your pipeline?
+The identifier meant to make open-source CVEs machine-matchable is standardized, available, and almost unused. If PURL is the answer, why is adoption still rounding to zero?
 
 #vulnerabilitymanagement #cybersecurity #CVE
 ```
 
 ## X / Bluesky
 ```
-How does a CVE say what software it affects? In 2026, mostly it doesn't.
+PURL was pitched as the modern replacement for CPE, built for open source.
 
-About 64% carry no standardized ID (CPE or PURL) to match against your inventory, just vendor and product text. CPE, nearly 20 years old, is in 26% as written. PURL, the modern fix for open source, first appeared last year and reaches 2.6%.
+Reality: it is on 2.6% of 2026 CVEs, and almost always bolted onto a CPE rather than replacing it. Meanwhile 64% of CVEs still ship with no standard product ID at all.
 
-The link between a CVE and your asset inventory is missing from most of them.
+The new hotness never launched.
 ```
 
 ## Alt text
