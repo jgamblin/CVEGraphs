@@ -53,11 +53,27 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     neither_auth = share(~j["cpe_cna"] & ~j["purl"])
     neither_enr = share(~j["has_cpe"] & ~j["purl"])
 
-    # top -> bottom
+    # Round for display so the labels sum to exactly 100 (naive rounding can give 101).
+    # PURL is pinned to one value across both columns (it does not change), and the two
+    # larger groups take the rounding remainder via largest-remainder.
+    purl_disp = round(purl_val)
+
+    def _pair(a, b, target):
+        fa, fb = int(a), int(b)
+        out = [fa, fb]
+        order = sorted(((a - fa, 0), (b - fb, 1)), reverse=True)
+        for k in range(target - fa - fb):
+            out[order[k][1]] += 1
+        return out
+
+    nei_a, cpe_a = _pair(neither_auth, cpe_auth, 100 - purl_disp)
+    nei_e, cpe_e = _pair(neither_enr, cpe_enr, 100 - purl_disp)
+
+    # top -> bottom  (display integers; each column sums to 100)
     rows_ = [
-        ("No CPE or PURL", "Free text or package name", neither_auth, neither_enr),
-        ("CPE", "The incumbent standard", cpe_auth, cpe_enr),
-        ("PURL", "The proposed replacement", purl_val, purl_val),
+        ("No CPE or PURL", "Free text or package name", nei_a, nei_e),
+        ("CPE", "The incumbent standard", cpe_a, cpe_e),
+        ("PURL", "The proposed replacement", purl_disp, purl_disp),
     ]
 
     title1 = "Enrichment cuts the no-ID pile in half, all through CPE. It adds no PURLs."
