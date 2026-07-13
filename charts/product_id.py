@@ -76,7 +76,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         ("PURL", "The proposed replacement", purl_disp, purl_disp),
     ]
 
-    title1 = f"How {cur} CVEs identify the affected product"
+    title1 = f"How {cur} CVEs Identify the Affected Product"
     title2 = ("Share carrying CPE, PURL, or neither, before and after NVD and CISA enrichment.")
 
     out = []

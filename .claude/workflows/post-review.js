@@ -98,10 +98,11 @@ const COPY = [
     `shots at a vendor, a title question the post does not answer, and whether LinkedIn ends on a ` +
     `question. Suggest tighter wording only where it clearly improves the post.\n` +
     `CHART HEADING RULE (blocker): the on-chart title must be FACTUAL and descriptive, stating what ` +
-    `the chart shows, never preachy / an argument / a verdict. "How 2026 CVEs identify the affected ` +
-    `product" is fine; "Enrichment nearly halves the no-ID pile" is not. The opinion and story live ` +
-    `in the post copy, not the chart title. Flag any editorial heading and give a factual ` +
-    `replacement.\n\n${HOUSE}` },
+    `the chart shows, never preachy / an argument / a verdict, AND in Title Case (keep acronyms ` +
+    `as-is: CVE, CPE, PURL, NVD, CISA). "How 2026 CVEs Identify the Affected Product" is fine; ` +
+    `"Enrichment nearly halves the no-ID pile" fails on both counts. The subtitle stays sentence ` +
+    `case. The opinion and story live in the post copy. Flag any editorial or non-Title-Case ` +
+    `heading and give a corrected replacement.\n\n${HOUSE}` },
   { key: 'consistency', prompt:
     `You are the SERIES EDITOR guarding against repetition and cross-post contradiction. Read ` +
     `content/CALENDAR.md (the post-history log). Flag if this post re-runs a chart or reuses a hook ` +
