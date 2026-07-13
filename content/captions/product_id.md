@@ -16,9 +16,7 @@ container carries 0.0% PURL. Of the PURL records, ~9 in 10 also carry a CPE.
 
 COHORT (important): "2026 CVEs" = CVEs PUBLISHED in 2026 (38,355), NOT CVE-2026-* IDs
 (~31.5k). Counting by ID year undercounts the real year by ~18% because ~6.8k CVEs published
-in 2026 carry older IDs (mostly 2025 backlog). cve.icu and common usage mean published-in-year. Trend of the "bare" share: 84% (2022) -> 77 -> 73 ->
-65 -> 64% (2026). CPE-in-CNA: 12 -> 11 -> 15 -> 17 -> 26%. CPE and PURL are counted
-independently (a record can carry both), so they do not sum with "bare" to 100.
+in 2026 carry older IDs (mostly 2025 backlog). cve.icu and common usage mean published-in-year.
 
 ## LinkedIn / Mastodon
 Attach: `product_id_wide_<date>.png`.
