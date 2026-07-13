@@ -38,6 +38,11 @@ voice:
 > no em dashes, no "n=" (spell it out, e.g. "373 CVEs"), lead with the number,
 > end with a question. Note the `suggested_chart` to attach.
 
+House style for the **chart itself**: the heading is factual and descriptive,
+it states what the chart shows ("How 2026 CVEs identify the affected product"),
+never an argument or verdict ("Enrichment nearly halves the no-ID pile"). The
+angle, the opinion, and the story live in the post copy, not the chart title.
+
 For fully on-brand drafts, run this through the **brand-voice** skill
 (`/brand-voice:enforce-voice`) once its connectors are authorized; until then
 the house style above (from the launch `CAMPAIGN.md`) is enough.

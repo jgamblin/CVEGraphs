@@ -76,8 +76,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         ("PURL", "The proposed replacement", purl_disp, purl_disp),
     ]
 
-    title1 = "Enrichment nearly halves the no-ID pile, all through CPE. It adds no PURLs."
-    title2 = f"How every {cur} CVE is identified, before and after NVD and CISA enrichment."
+    title1 = f"How {cur} CVEs identify the affected product"
+    title2 = ("Share carrying CPE, PURL, or neither, before and after NVD and CISA enrichment.")
 
     out = []
     for ratio in ratios:
