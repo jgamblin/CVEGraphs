@@ -28,7 +28,7 @@ is a snapshot at pull time. Reposts of others' content are omitted from this cha
 
 | Date | Chart | Platforms | Impressions | Engagement | Notes |
 |------|-------|-----------|-------------|------------|-------|
-| 2026-07-13 (planned) | product_id | LI · X | | | Mon: CPE vs PURL vs free text; "most CVEs can't tell a machine what they affect" |
+| 2026-07-13 | product_id | LI · X | | | "How 2026 CVEs Identify the Affected Product"; PURL failed to launch in the CVE/NVD pipeline (2%, no enrichment backfill); data-quality lane |
 | 2026-07-12 | foxit_batch | LI | 105 | 3 reactions | Sunday curio; routine 2026.1.2 release, memory-safety batch |
 | 2026-07-11 | kev_severity | LI | 609 | 13 react · 1 comment · 2 reposts | "How severe are the bugs that actually get exploited?" |
 | 2026-07-11 | exploited_cwe | LI | 1,569 | 33 react · 6 comments · 2 reposts | "The bugs that get exploited are not the ones you see most"; Sasha Romanosky commented |
