@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """
-Precompute per-year product-identifier coverage from the raw CVE List V5 clone.
+Precompute per-CVE product-identifier flags from the raw CVE List V5 clone.
 
-For each publication year, count how many non-rejected CVE records carry, in the
-CNA container as authored:
-  - CPE (an affected[].cpes entry or a cpeApplicability block)
-  - PURL (a "pkg:" package URL string)
-  - any package-style id (PURL, packageName, or collectionURL)
-  - nothing machine-readable (a bare vendor/product free-text record)
+Cohort is CVEs PUBLISHED in the latest year, not CVE-<year>-* IDs: a CVE
+published in 2026 can carry a 2025 (or older) ID, and counting by ID year
+undercounts the real year's volume by ~18% (it would read ~31.5k vs the ~38k
+that cve.icu and everyone else means by "2026 CVEs"). So we take the published
+set from the CVE List parquet and read only those raw records for their
+CNA-authored CPE / PURL flags.
 
-Writes processed/product_id_coverage.parquet. Cheap enough to re-run after a
-refresh; kept separate from the main parquet build so it can evolve on its own.
+Writes processed/product_id_cve_flags.parquet: cve_id, year (publication year),
+cpe_cna (a CNA-container `cpe:2.3`/`cpe:/` string), purl (a `pkg:` string). The
+product_id chart joins this to NVD's enriched has_cpe on the same cohort.
 """
 
 import json
-import glob
 import os
 from pathlib import Path
 
@@ -22,67 +22,47 @@ import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE / "data" / "cvelistV5" / "cves"
-OUT = HERE / "processed" / "product_id_coverage.parquet"
+CVELIST = HERE / "processed" / "cvelist_v5.parquet"
 OUT_FLAGS = HERE / "processed" / "product_id_cve_flags.parquet"
-YEARS = ["2022", "2023", "2024", "2025", "2026"]
 
 
-def scan_year(yr, collect=False):
-    n = cpe = purl = fam = bare = 0
-    flags = []
-    for fp in glob.glob(os.path.join(ROOT, yr, "**", "CVE-*.json"), recursive=True):
-        try:
-            d = json.load(open(fp))
-        except Exception:
-            continue
-        if d.get("cveMetadata", {}).get("state") == "REJECTED":
-            continue
-        cna = d.get("containers", {}).get("cna", {})
-        blob = json.dumps(cna)
-        n += 1
-        has_cpe = ("cpe:2.3" in blob) or ("cpe:/" in blob)
-        has_purl = "pkg:" in blob
-        has_fam = has_purl or ('"packageName"' in blob) or ('"collectionURL"' in blob)
-        if has_cpe:
-            cpe += 1
-        if has_purl:
-            purl += 1
-        if has_fam:
-            fam += 1
-        if not (has_cpe or has_fam):
-            bare += 1
-        if collect:
-            cid = d.get("cveMetadata", {}).get("cveId")
-            if cid:
-                flags.append((cid, has_cpe, has_purl))
-    agg = {"year": int(yr), "records": n, "cpe": cpe, "purl": purl,
-           "pkg_family": fam, "bare": bare}
-    return (agg, flags) if collect else agg
+def _latest_year(cl):
+    """Most recent publication year with real volume (ignores stray future dates)."""
+    yr = pd.to_datetime(cl["date_published"], utc=True, errors="coerce").dt.year
+    counts = yr[cl["is_rejected"] != True].value_counts()
+    return int(counts[counts >= 1000].index.max())
 
 
 def main():
+    cl = pd.read_parquet(CVELIST, columns=["cve_id", "date_published", "is_rejected"])
+    year = _latest_year(cl)
+    pub_year = pd.to_datetime(cl["date_published"], utc=True, errors="coerce").dt.year
+    target = set(cl[(pub_year == year) & (cl["is_rejected"] != True)]["cve_id"])
+    print(f"  target: {len(target):,} CVEs published in {year}")
+
+    # Walk the clone by filename (cheap); only open the raw JSON for target CVEs.
     rows = []
-    latest = max(int(y) for y in YEARS)
-    for yr in YEARS:
-        collect = int(yr) == latest  # keep per-CVE flags for the newest year
-        res = scan_year(yr, collect=collect)
-        r, flags = res if collect else (res, None)
-        if r["records"]:
-            rows.append(r)
-            print(f"  {yr}: {r['records']:,} records, "
-                  f"CPE {r['cpe']/r['records']*100:.1f}%, "
-                  f"PURL {r['purl']/r['records']*100:.1f}%, "
-                  f"bare {r['bare']/r['records']*100:.1f}%")
-        if collect and flags:
-            fdf = pd.DataFrame(flags, columns=["cve_id", "cpe_cna", "purl"]).drop_duplicates("cve_id")
-            fdf["year"] = int(yr)
-            OUT_FLAGS.parent.mkdir(exist_ok=True)
-            fdf.to_parquet(OUT_FLAGS, index=False)
-            print(f"wrote {OUT_FLAGS} ({len(fdf):,} rows for {yr})")
-    df = pd.DataFrame(rows)
-    OUT.parent.mkdir(exist_ok=True)
-    df.to_parquet(OUT, index=False)
-    print(f"wrote {OUT}")
+    for dirpath, _, files in os.walk(ROOT):
+        for name in files:
+            if not (name.startswith("CVE-") and name.endswith(".json")):
+                continue
+            cid = name[:-5]
+            if cid not in target:
+                continue
+            try:
+                d = json.load(open(os.path.join(dirpath, name)))
+            except Exception:
+                continue
+            blob = json.dumps(d.get("containers", {}).get("cna", {}))
+            rows.append((cid, year,
+                         ("cpe:2.3" in blob) or ("cpe:/" in blob),
+                         "pkg:" in blob))
+
+    df = pd.DataFrame(rows, columns=["cve_id", "year", "cpe_cna", "purl"]).drop_duplicates("cve_id")
+    OUT_FLAGS.parent.mkdir(exist_ok=True)
+    df.to_parquet(OUT_FLAGS, index=False)
+    print(f"wrote {OUT_FLAGS} ({len(df):,} rows for {year}): "
+          f"CPE {100 * df['cpe_cna'].mean():.1f}%, PURL {100 * df['purl'].mean():.1f}%")
 
 
 if __name__ == "__main__":

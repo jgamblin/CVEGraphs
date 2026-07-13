@@ -3,14 +3,14 @@
 What CVE enrichment fixes, and what it ignores: CPE vs PURL, before and after backfill.
 
 A horizontal grouped bar chart, three groups (No CPE or PURL / CPE / PURL) each shown as
-the CNA authors it and after NVD/CISA enrichment, measured on the SAME cohort (CVEs in
-both the CVE List clone and NVD). Enrichment cuts the no-ID pile from ~74% to ~38%, all
-by backfilling CPE (about 26% to 61%); PURL stays 2.6% because NVD is CPE-only and the
-CISA ADP container carries no PURLs.
+the CNA authors it and after NVD/CISA enrichment, on the SAME cohort: CVEs PUBLISHED in
+the year (not CVE-<year>-* IDs), so the ~38k denominator matches cve.icu. Enrichment
+nearly halves the no-ID pile (~75% to ~40%), all by backfilling CPE (about 25% to 59%);
+PURL stays ~2% because NVD is CPE-only and the CISA ADP container carries no PURLs.
 
-Data: processed/product_id_cve_flags.parquet (per-CVE CNA-authored CPE/PURL flags for the
-latest year, written by scripts_precompute_product_id.py) joined to NVD's enriched has_cpe.
-The zero-PURL-backfill finding is from a scan of the ADP containers (see the caption).
+Data: processed/product_id_cve_flags.parquet (per-CVE CNA-authored CPE/PURL flags for CVEs
+published in the latest year, written by scripts_precompute_product_id.py) joined to NVD's
+enriched has_cpe. The zero-PURL-backfill finding is from a scan of the ADP containers.
 """
 
 from pathlib import Path
@@ -76,7 +76,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         ("PURL", "The proposed replacement", purl_disp, purl_disp),
     ]
 
-    title1 = "Enrichment cuts the no-ID pile in half, all through CPE. It adds no PURLs."
+    title1 = "Enrichment nearly halves the no-ID pile, all through CPE. It adds no PURLs."
     title2 = f"How every {cur} CVE is identified, before and after NVD and CISA enrichment."
 
     out = []
