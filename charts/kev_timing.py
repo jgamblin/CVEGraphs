@@ -50,7 +50,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
     # Age buckets, youngest (or ahead of publication) to oldest.
     buckets = [
-        ("Before it\nwas public", g <= 0, COLORS["accent"]),
+        ("Before the CVE\nwas published", g <= 0, COLORS["accent"]),
         ("1 to 7\ndays", (g > 0) & (g <= 7), COLORS["accent"]),
         ("8 to 30\ndays", (g > 7) & (g <= 30), COLORS["accent"]),
         ("1 to 12\nmonths", (g > 30) & (g <= 365), COLORS["accent"]),
@@ -66,8 +66,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     pcts = floors
 
     title1 = "How Old CVEs Are When CISA Adds Them to KEV"
-    title2 = (f"Time from a CVE going public to landing on CISA's exploited list, "
-              f"for the {n} CVEs added in the last 24 months.")
+    title2 = (f"Time from the CVE.org record being published to landing on CISA's exploited "
+              f"list, for the {n} CVEs added in the last 24 months.")
 
     out = []
     for ratio in ratios:
@@ -90,8 +90,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
         foot_size = {"wide": 9, "square": 8, "portrait": 8}[ratio]
         fig.text(0.05, 0.055,
-                 "Gap = KEV dateAdded minus CVE List publication date; last 24 months of KEV "
-                 "additions. Source: CISA KEV + CVE List V5.",
+                 "Gap = KEV dateAdded minus the CVE.org record's publication date; last 24 months "
+                 "of KEV additions. Source: CISA KEV + CVE List V5.",
                  fontsize=foot_size, color=COLORS["neutral"], ha="left", va="bottom")
 
         top_m = {"wide": 0.82, "square": 0.85, "portrait": 0.87}[ratio]

@@ -19,7 +19,7 @@ Attach: `kev_timing_wide_<date>.png`.
 ```
 When CISA flags a vulnerability as actively exploited, how old is it? The answer runs to both extremes.
 
-I measured the gap from a CVE going public to landing on CISA's Known Exploited Vulnerabilities list, for everything added in the last two years. The largest share, 24%, tied with the one-to-twelve-month group, landed on the exploited list before the CVE record was even published. Some are true zero-days caught in the wild; others are cases where the CVE record was simply published late. Two Firefox records trailed their KEV listing by 290 days. But the other end is just as loud: 1 in 6 exploited vulnerabilities is more than three years old, and a quarter are over a year old.
+I measured the gap from the CVE.org record being published to landing on CISA's Known Exploited Vulnerabilities list, for everything added in the last two years. The largest share, 24%, tied with the one-to-twelve-month group, landed on the exploited list before the CVE.org record was even published. Some are true zero-days caught in the wild; others are cases where the CVE record was simply published late. Two Firefox records trailed their KEV listing by 290 days. But the other end is just as loud: 1 in 6 exploited vulnerabilities is more than three years old, and a quarter are over a year old.
 
 So freshness is a weak triage signal. The pre-publication cases are a detection and incident-response problem, not a patch-queue one, because there is no ticket to close yet. And a three-year-old KEV entry cannot be dismissed as stale. Which end is your program weaker at?
 
@@ -30,17 +30,18 @@ So freshness is a weak triage signal. The pre-publication cases are a detection 
 ```
 When CISA flags a CVE as exploited, how old is it?
 
-The largest share, 24%, was on the exploited list before the CVE record was published, some true zero-days, some just late-published records. But 1 in 6 is more than three years old.
+The largest share, 24%, was on the exploited list before the CVE.org record was published, some true zero-days, some just late-published records. But 1 in 6 is more than three years old.
 
 Freshness tells you almost nothing: a bug CISA flags as exploited is about as likely to be years old as brand new.
 ```
 
 ## Alt text
 ```
-Vertical bar chart of how long after a CVE is published it lands on CISA's Known Exploited
-Vulnerabilities list, for the 507 CVEs added in the last 24 months, in six age buckets that
-sum to 100%. "Before it was public" is the largest at 24%, then 1 to 7 days 15%, 8 to 30 days
-12%, 1 to 12 months 24%, 1 to 3 years 9%, and over 3 years 16%. Source: CISA KEV and CVE List V5.
+Vertical bar chart of how long after the CVE.org record is published a CVE lands on CISA's
+Known Exploited Vulnerabilities list, for the 507 CVEs added in the last 24 months, in six age
+buckets that sum to 100%. "Before the CVE was published" and "1 to 12 months" tie for largest
+at 24%, then 1 to 7 days 15%, 8 to 30 days 12%, 1 to 3 years 9%, and over 3 years 16%.
+Source: CISA KEV and CVE List V5.
 ```
 
 ## Notes / caveats
