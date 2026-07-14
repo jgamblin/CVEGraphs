@@ -50,12 +50,12 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
     # Age buckets, youngest (or ahead of publication) to oldest.
     buckets = [
-        ("Before it\nwas public", g <= 0, COLORS["primary"]),
+        ("Before it\nwas public", g <= 0, COLORS["accent"]),
         ("1 to 7\ndays", (g > 0) & (g <= 7), COLORS["accent"]),
         ("8 to 30\ndays", (g > 7) & (g <= 30), COLORS["accent"]),
         ("1 to 12\nmonths", (g > 30) & (g <= 365), COLORS["accent"]),
         ("1 to 3\nyears", (g > 365) & (g <= 1095), COLORS["accent"]),
-        ("Over 3\nyears", g > 1095, COLORS["primary"]),
+        ("Over 3\nyears", g > 1095, COLORS["accent"]),
     ]
     # Every CVE lands in exactly one bucket, so display should total 100.
     exact = [100.0 * m.mean() for _, m, _ in buckets]
@@ -87,12 +87,6 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             ax.spines[s].set_visible(False)
         ax.spines["bottom"].set_color(COLORS["grid"])
         ax.tick_params(axis="both", length=0)
-
-        # Anchor the two ends that carry the story.
-        ax.text(0, -max(pcts) * 0.135, "caught before disclosure", ha="center", va="top",
-                fontsize=8.5, style="italic", color=COLORS["secondary"])
-        ax.text(len(buckets) - 1, -max(pcts) * 0.135, "exploited long after", ha="center",
-                va="top", fontsize=8.5, style="italic", color=COLORS["secondary"])
 
         foot_size = {"wide": 9, "square": 8, "portrait": 8}[ratio]
         fig.text(0.05, 0.055,
