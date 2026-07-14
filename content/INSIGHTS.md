@@ -46,6 +46,10 @@ heading AND the chart labels (axis / category / bucket / legend labels) are in
 subtitle and footnote stay sentence case (they are full sentences). The angle,
 the opinion, and the story live in the post copy, not the chart.
 
+**Date stamp:** always stamp the chart with the date it is posted (the render
+date, `today_utc()`), never the data-source date (KEV release, data refresh).
+Data provenance goes in the footnote / Source line, not the corner stamp.
+
 For fully on-brand drafts, run this through the **brand-voice** skill
 (`/brand-voice:enforce-voice`) once its connectors are authorized; until then
 the house style above (from the launch `CAMPAIGN.md`) is enough.

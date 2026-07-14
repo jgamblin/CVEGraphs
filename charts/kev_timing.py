@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 
 from data import load_cvelist
+from rolling_config import today_utc
 from style_social import COLORS, DEFAULT_RATIOS, figsize_for, stamp_and_save
 
 GRAPHS = Path(__file__).resolve().parent.parent / "graphs"
@@ -37,7 +38,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
               .set_index("cve_id")["pub"])
 
     kev = json.load(open(PROCESSED / "kev_catalog.json"))
-    asof = pd.to_datetime(kev.get("dateReleased"), utc=True)
+    stamp = today_utc()  # house rule: stamp the post/render date, not the data date
     k = pd.DataFrame([(v.get("cveID"), v.get("dateAdded")) for v in kev["vulnerabilities"]],
                      columns=["cve_id", "dateAdded"])
     k["added"] = pd.to_datetime(k["dateAdded"], utc=True, errors="coerce")
@@ -111,8 +112,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         fig.text(0.05, 0.915, title2, fontsize=10.5, fontweight="bold",
                  color=COLORS["secondary"], ha="left", va="top")
 
-        path = GRAPHS / f"kev_timing_{ratio}_{asof.strftime('%Y-%m-%d')}.png"
-        stamp_and_save(fig, path, asof.strftime("%b %d, %Y"))
+        path = GRAPHS / f"kev_timing_{ratio}_{stamp.strftime('%Y-%m-%d')}.png"
+        stamp_and_save(fig, path, stamp.strftime("%b %d, %Y"))
         out.append(path)
     return out
 
