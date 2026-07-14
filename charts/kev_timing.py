@@ -2,14 +2,15 @@
 """
 How old a vulnerability is when CISA adds it to the KEV list.
 
-Gap = KEV dateAdded minus the CVE's publication date (CVE List datePublished,
-the canonical public date, not NVD's which lags). Restricted to KEV entries
-CISA added in the last 24 months, so the distribution reflects how CISA flags
+Gap = KEV dateAdded minus the CVE.org record's publication date (CVE List
+datePublished, the canonical public date, not NVD's which lags). Restricted to
+KEV entries CISA added so far this calendar year, so it reflects how CISA flags
 exploitation now, not the 2021 bulk-load of old CVEs when the program started.
+"Before published" requires at least a full day ahead (gap <= -1); KEV dates
+have no time, so a same-day listing is grouped with the within-a-week bucket.
 
-Two ends carry the story: a large "before it was public" bucket (0-days caught
-and cataloged before the CVE record went public), and a stubborn multi-year
-tail (vulnerabilities exploited long after everyone could have patched).
+Two ends carry the story: CVEs flagged a day or more before their CVE.org
+record, and a stubborn multi-year tail exploited long after disclosure.
 
 Data: processed/kev_catalog.json (CISA KEV dateAdded) + CVE List datePublished.
 """
@@ -26,7 +27,6 @@ from style_social import COLORS, DEFAULT_RATIOS, figsize_for, stamp_and_save
 
 GRAPHS = Path(__file__).resolve().parent.parent / "graphs"
 PROCESSED = Path(__file__).resolve().parent.parent / "processed"
-WINDOW_DAYS = 730  # KEV entries added in the last 24 months
 
 
 def render(nvd=None, ratios=DEFAULT_RATIOS):
@@ -44,14 +44,17 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     k = k.dropna(subset=["added", "pub"])
     k["gap"] = (k["added"] - k["pub"]).dt.days
 
-    recent = k[k["added"] >= k["added"].max() - pd.Timedelta(days=WINDOW_DAYS)]
+    year = int(k["added"].max().year)
+    recent = k[k["added"] >= pd.Timestamp(year, 1, 1, tz="UTC")]  # added so far this year
     n = len(recent)
     g = recent["gap"]
 
-    # Age buckets, youngest (or ahead of publication) to oldest.
+    # Age buckets. "Before published" requires at least a full day ahead (gap <= -1):
+    # KEV dates carry no time, so a same-day (gap 0) listing is NOT provably before the
+    # CVE record and is counted with the within-a-week group.
     buckets = [
-        ("Before the CVE\nwas published", g <= 0, COLORS["accent"]),
-        ("1 to 7\ndays", (g > 0) & (g <= 7), COLORS["accent"]),
+        ("Before the CVE\nwas published", g <= -1, COLORS["accent"]),
+        ("Same day to\n7 days", (g >= 0) & (g <= 7), COLORS["accent"]),
         ("8 to 30\ndays", (g > 7) & (g <= 30), COLORS["accent"]),
         ("1 to 12\nmonths", (g > 30) & (g <= 365), COLORS["accent"]),
         ("1 to 3\nyears", (g > 365) & (g <= 1095), COLORS["accent"]),
@@ -67,7 +70,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
     title1 = "How Old CVEs Are When CISA Adds Them to KEV"
     title2 = (f"Time from the CVE.org record being published to landing on CISA's exploited "
-              f"list, for the {n} CVEs added in the last 24 months.")
+              f"list, for the {n} CVEs CISA added so far in {year}.")
 
     out = []
     for ratio in ratios:
@@ -90,8 +93,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
         foot_size = {"wide": 9, "square": 8, "portrait": 8}[ratio]
         fig.text(0.05, 0.055,
-                 "Gap = KEV dateAdded minus the CVE.org record's publication date; last 24 months "
-                 "of KEV additions. Source: CISA KEV + CVE List V5.",
+                 "Gap = KEV dateAdded minus the CVE.org record's publication date (dates only, so "
+                 "same-day is not counted as 'before'). Source: CISA KEV + CVE List V5.",
                  fontsize=foot_size, color=COLORS["neutral"], ha="left", va="bottom")
 
         top_m = {"wide": 0.82, "square": 0.85, "portrait": 0.87}[ratio]
