@@ -13,6 +13,7 @@ output paths written to graphs/.
 import sys
 
 from data import load_nvd
+from rolling_config import data_asof, today_utc
 from charts import (
     calendar_heatmap,
     chrome_day,
@@ -63,6 +64,18 @@ CHARTS = {
 }
 
 
+def _warn_if_stale(nvd, max_age=2):
+    """Charts stamp today's date, so guard against a fresh stamp on stale data."""
+    age = (today_utc() - data_asof(nvd)).days
+    if age > max_age:
+        bar = "!" * 70
+        print(f"\n{bar}")
+        print(f"  WARNING: data is {age} days old (latest CVE {data_asof(nvd).date()}).")
+        print("  Charts stamp TODAY's date, so this puts a fresh stamp on stale data.")
+        print("  Run  python refresh_data.py  before rendering to post.")
+        print(f"{bar}\n")
+
+
 def _render(name, nvd):
     module, _ = CHARTS[name]
     print(f"Rendering {name} ...")
@@ -83,6 +96,7 @@ def main(argv):
 
     # Load data once and share it across every chart in this run.
     nvd = load_nvd()
+    _warn_if_stale(nvd)
 
     if cmd == "all":
         for name in CHARTS:

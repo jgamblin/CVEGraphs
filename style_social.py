@@ -10,10 +10,13 @@ Design language is kept identical to the blog (deep navy, alert red) so the two
 bodies of work read as one brand.
 """
 
+import re
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-from rolling_config import HANDLE, SITE
+from rolling_config import HANDLE, SITE, today_utc
 
 # -----------------------------------------------------------------------------
 # Output aspect ratios (pixels). One render per ratio -> a full posting set.
@@ -103,10 +106,24 @@ def thousands_formatter():
     return ticker.FuncFormatter(_format_thousands)
 
 
-def stamp_and_save(fig, filepath, asof_str):
-    """Stamp handle / site / as-of date and write the file, then close."""
+def stamp_and_save(fig, filepath, asof_str=None):
+    """Stamp handle / site / POST date and write the file, then close.
+
+    House rule: the stamp is always the day the chart is rendered (posted), never
+    the data-source date, so a chart never looks staler or fresher than the day it
+    goes out. Data provenance belongs in the footnote / Source line. The date in the
+    output filename is rewritten to match. ``asof_str`` is ignored (kept for
+    backward compatibility with callers that still pass a date).
+    """
+    today = today_utc()
+    stamp = today.strftime("%b %d, %Y")
+    # Keep the saved filename's date in sync with the stamp.
+    p = Path(filepath)
+    p = p.with_name(re.sub(r"\d{4}-\d{2}-\d{2}(?=\.[^.]+$)", today.strftime("%Y-%m-%d"), p.name))
+    filepath = p
+
     fig.text(
-        0.99, 0.012, f"{HANDLE}  ·  {SITE}  ·  {asof_str}",
+        0.99, 0.012, f"{HANDLE}  ·  {SITE}  ·  {stamp}",
         transform=fig.transFigure,
         fontsize=9, color=COLORS["secondary"],
         alpha=0.7, ha="right", va="bottom",

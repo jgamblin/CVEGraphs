@@ -10,7 +10,7 @@ calendar year, so it reflects how CISA flags exploitation now, not the 2021
 bulk-load of old CVEs when the program started.
 
 The story: most flagged CVEs are recent (over half within a month, ~three
-quarters within a year), but a stubborn multi-year tail (~15% over three years,
+quarters within a year), but a stubborn multi-year tail (~16% over three years,
 some ~17 years old) shows old vulnerabilities coming back.
 
 Data: processed/kev_catalog.json (CISA KEV dateAdded) + CVE List datePublished.
