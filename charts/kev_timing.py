@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+"""
+How old a vulnerability is when CISA adds it to the KEV list.
+
+Gap = KEV dateAdded minus the CVE's publication date (CVE List datePublished,
+the canonical public date, not NVD's which lags). Restricted to KEV entries
+CISA added in the last 24 months, so the distribution reflects how CISA flags
+exploitation now, not the 2021 bulk-load of old CVEs when the program started.
+
+Two ends carry the story: a large "before it was public" bucket (0-days caught
+and cataloged before the CVE record went public), and a stubborn multi-year
+tail (vulnerabilities exploited long after everyone could have patched).
+
+Data: processed/kev_catalog.json (CISA KEV dateAdded) + CVE List datePublished.
+"""
+
+import json
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from data import load_cvelist
+from style_social import COLORS, DEFAULT_RATIOS, figsize_for, stamp_and_save
+
+GRAPHS = Path(__file__).resolve().parent.parent / "graphs"
+PROCESSED = Path(__file__).resolve().parent.parent / "processed"
+WINDOW_DAYS = 730  # KEV entries added in the last 24 months
+
+
+def render(nvd=None, ratios=DEFAULT_RATIOS):
+    cl = load_cvelist()
+    pub = pd.to_datetime(cl["date_published"], utc=True, errors="coerce")
+    pubs = (cl.assign(pub=pub).dropna(subset=["pub"]).drop_duplicates("cve_id")
+              .set_index("cve_id")["pub"])
+
+    kev = json.load(open(PROCESSED / "kev_catalog.json"))
+    asof = pd.to_datetime(kev.get("dateReleased"), utc=True)
+    k = pd.DataFrame([(v.get("cveID"), v.get("dateAdded")) for v in kev["vulnerabilities"]],
+                     columns=["cve_id", "dateAdded"])
+    k["added"] = pd.to_datetime(k["dateAdded"], utc=True, errors="coerce")
+    k["pub"] = k["cve_id"].map(pubs)
+    k = k.dropna(subset=["added", "pub"])
+    k["gap"] = (k["added"] - k["pub"]).dt.days
+
+    recent = k[k["added"] >= k["added"].max() - pd.Timedelta(days=WINDOW_DAYS)]
+    n = len(recent)
+    g = recent["gap"]
+
+    # Age buckets, youngest (or ahead of publication) to oldest.
+    buckets = [
+        ("Before it\nwas public", g <= 0, COLORS["primary"]),
+        ("1 to 7\ndays", (g > 0) & (g <= 7), COLORS["accent"]),
+        ("8 to 30\ndays", (g > 7) & (g <= 30), COLORS["accent"]),
+        ("1 to 12\nmonths", (g > 30) & (g <= 365), COLORS["accent"]),
+        ("1 to 3\nyears", (g > 365) & (g <= 1095), COLORS["accent"]),
+        ("Over 3\nyears", g > 1095, COLORS["primary"]),
+    ]
+    # Every CVE lands in exactly one bucket, so display should total 100.
+    exact = [100.0 * m.mean() for _, m, _ in buckets]
+    floors = [int(v) for v in exact]
+    order = sorted(range(len(exact)), key=lambda i: exact[i] - floors[i], reverse=True)
+    for i in range(100 - sum(floors)):
+        floors[order[i]] += 1
+    pcts = floors
+
+    title1 = "How Old CVEs Are When CISA Adds Them to KEV"
+    title2 = (f"Time from a CVE going public to landing on CISA's exploited list, "
+              f"for the {n} CVEs added in the last 24 months.")
+
+    out = []
+    for ratio in ratios:
+        fig, ax = plt.subplots(figsize=figsize_for(ratio))
+        x = np.arange(len(buckets))
+
+        for xi, (label, _, color), p in zip(x, buckets, pcts):
+            ax.bar(xi, p, width=0.72, color=color, edgecolor="white", linewidth=1.0, zorder=3)
+            ax.text(xi, p + 0.6, f"{p:.0f}%", ha="center", va="bottom", fontsize=12,
+                    fontweight="bold", color=COLORS["text"])
+
+        ax.set_xticks(x)
+        ax.set_xticklabels([b[0] for b in buckets], fontsize=10.5, color=COLORS["text"])
+        ax.set_ylim(0, max(pcts) * 1.22)
+        ax.set_yticks([])
+        for s in ("top", "right", "left"):
+            ax.spines[s].set_visible(False)
+        ax.spines["bottom"].set_color(COLORS["grid"])
+        ax.tick_params(axis="both", length=0)
+
+        # Anchor the two ends that carry the story.
+        ax.text(0, -max(pcts) * 0.135, "caught before disclosure", ha="center", va="top",
+                fontsize=8.5, style="italic", color=COLORS["secondary"])
+        ax.text(len(buckets) - 1, -max(pcts) * 0.135, "exploited long after", ha="center",
+                va="top", fontsize=8.5, style="italic", color=COLORS["secondary"])
+
+        foot_size = {"wide": 9, "square": 8, "portrait": 8}[ratio]
+        fig.text(0.05, 0.055,
+                 "Gap = KEV dateAdded minus CVE List publication date; last 24 months of KEV "
+                 "additions. Source: CISA KEV + CVE List V5.",
+                 fontsize=foot_size, color=COLORS["neutral"], ha="left", va="bottom")
+
+        top_m = {"wide": 0.82, "square": 0.85, "portrait": 0.87}[ratio]
+        t1 = {"wide": 20, "square": 17, "portrait": 17}[ratio]
+        fig.subplots_adjust(top=top_m, bottom=0.20, left=0.06, right=0.96)
+        fig.text(0.05, 0.965, title1, fontsize=t1, fontweight="bold",
+                 color=COLORS["text"], ha="left", va="top")
+        fig.text(0.05, 0.915, title2, fontsize=10.5, fontweight="bold",
+                 color=COLORS["secondary"], ha="left", va="top")
+
+        path = GRAPHS / f"kev_timing_{ratio}_{asof.strftime('%Y-%m-%d')}.png"
+        stamp_and_save(fig, path, asof.strftime("%b %d, %Y"))
+        out.append(path)
+    return out
+
+
+if __name__ == "__main__":
+    for p in render():
+        print(p)
