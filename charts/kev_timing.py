@@ -53,12 +53,13 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     # KEV dates carry no time, so a same-day (gap 0) listing is NOT provably before the
     # CVE record and is counted with the within-a-week group.
     buckets = [
-        ("Before the CVE\nwas published", g <= -1, COLORS["accent"]),
-        ("Same day to\n7 days", (g >= 0) & (g <= 7), COLORS["accent"]),
-        ("8 to 30\ndays", (g > 7) & (g <= 30), COLORS["accent"]),
-        ("1 to 12\nmonths", (g > 30) & (g <= 365), COLORS["accent"]),
-        ("1 to 3\nyears", (g > 365) & (g <= 1095), COLORS["accent"]),
-        ("Over 3\nyears", g > 1095, COLORS["accent"]),
+        ("Before the CVE\nWas Published", g <= -1, COLORS["accent"]),
+        ("Same Day", g == 0, COLORS["accent"]),
+        ("1 to 7\nDays", (g >= 1) & (g <= 7), COLORS["accent"]),
+        ("8 to 30\nDays", (g > 7) & (g <= 30), COLORS["accent"]),
+        ("1 to 12\nMonths", (g > 30) & (g <= 365), COLORS["accent"]),
+        ("1 to 3\nYears", (g > 365) & (g <= 1095), COLORS["accent"]),
+        ("Over 3\nYears", g > 1095, COLORS["accent"]),
     ]
     # Every CVE lands in exactly one bucket, so display should total 100.
     exact = [100.0 * m.mean() for _, m, _ in buckets]

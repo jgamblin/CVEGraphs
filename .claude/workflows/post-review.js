@@ -100,9 +100,10 @@ const COPY = [
     `CHART HEADING RULE (blocker): the on-chart title must be FACTUAL and descriptive, stating what ` +
     `the chart shows, never preachy / an argument / a verdict, AND in Title Case (keep acronyms ` +
     `as-is: CVE, CPE, PURL, NVD, CISA). "How 2026 CVEs Identify the Affected Product" is fine; ` +
-    `"Enrichment nearly halves the no-ID pile" fails on both counts. The subtitle stays sentence ` +
+    `"Enrichment nearly halves the no-ID pile" fails on both counts. Chart LABELS too (axis, ` +
+    `category, bucket, legend) must be Title Case; only the subtitle and footnote stay sentence ` +
     `case. The opinion and story live in the post copy. Flag any editorial or non-Title-Case ` +
-    `heading and give a corrected replacement.\n\n${HOUSE}` },
+    `heading or label and give a corrected replacement.\n\n${HOUSE}` },
   { key: 'consistency', prompt:
     `You are the SERIES EDITOR guarding against repetition and cross-post contradiction. Read ` +
     `content/CALENDAR.md (the post-history log). Flag if this post re-runs a chart or reuses a hook ` +

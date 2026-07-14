@@ -41,9 +41,10 @@ voice:
 House style for the **chart itself**: the heading is factual and descriptive,
 it states what the chart shows ("How 2026 CVEs Identify the Affected Product"),
 never an argument or verdict ("Enrichment nearly halves the no-ID pile"). The
-heading is in **Title Case** (keep acronyms as-is: CVE, CPE, PURL, NVD, CISA).
-The subtitle stays sentence case. The angle, the opinion, and the story live in
-the post copy, not the chart title.
+heading AND the chart labels (axis / category / bucket / legend labels) are in
+**Title Case** (keep acronyms as-is: CVE, CPE, PURL, NVD, CISA). Only the
+subtitle and footnote stay sentence case (they are full sentences). The angle,
+the opinion, and the story live in the post copy, not the chart.
 
 For fully on-brand drafts, run this through the **brand-voice** skill
 (`/brand-voice:enforce-voice`) once its connectors are authorized; until then
