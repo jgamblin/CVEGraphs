@@ -64,7 +64,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         ("8 to 30\nDays", (g > 7) & (g <= 30), COLORS["accent"]),
         ("1 to 12\nMonths", (g > 30) & (g <= 365), COLORS["accent"]),
         ("1 to 3\nYears", (g > 365) & (g <= 1095), COLORS["accent"]),
-        ("Over 3\nYears", g > 1095, COLORS["accent"]),
+        ("Over 3\nYears", g > 1095, COLORS["primary"]),  # accent the aged tail (the story)
     ]
     # Every CVE lands in exactly one bucket, so display should total 100.
     exact = [100.0 * m.mean() for _, m, _ in buckets]
@@ -75,8 +75,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     pcts = floors
 
     title1 = "How Old CVEs Are When CISA Adds Them to KEV"
-    title2 = (f"Days from a CVE.org record's publication to its addition to CISA's exploited "
-              f"list, across the {n} CVEs CISA added so far in {year}.")
+    title2 = (f"Days from a CVE.org record's publication to its CISA KEV (Known Exploited "
+              f"Vulnerabilities) listing, for the {n} CVEs added in {year}.")
 
     out = []
     for ratio in ratios:
