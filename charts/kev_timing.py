@@ -2,15 +2,16 @@
 """
 How old a vulnerability is when CISA adds it to the KEV list.
 
-Gap = KEV dateAdded minus the CVE.org record's publication date (CVE List
-datePublished, the canonical public date, not NVD's which lags). Restricted to
-KEV entries CISA added so far this calendar year, so it reflects how CISA flags
-exploitation now, not the 2021 bulk-load of old CVEs when the program started.
-"Before published" requires at least a full day ahead (gap <= -1); KEV dates
-have no time, so a same-day listing is grouped with the within-a-week bucket.
+Gap = KEV dateAdded minus the CVE.org record's publication date, compared on
+CALENDAR dates (dateAdded is date-only; datePublished carries a time, so a raw
+subtraction floors same-day-published-later gaps to -1 and invents a phantom
+"before publication" bucket). Restricted to KEV entries CISA added so far this
+calendar year, so it reflects how CISA flags exploitation now, not the 2021
+bulk-load of old CVEs when the program started.
 
-Two ends carry the story: CVEs flagged a day or more before their CVE.org
-record, and a stubborn multi-year tail exploited long after disclosure.
+The story: most flagged CVEs are recent (over half within a month, ~three
+quarters within a year), but a stubborn multi-year tail (~15% over three years,
+some ~17 years old) shows old vulnerabilities coming back.
 
 Data: processed/kev_catalog.json (CISA KEV dateAdded) + CVE List datePublished.
 """
@@ -42,18 +43,22 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     k["added"] = pd.to_datetime(k["dateAdded"], utc=True, errors="coerce")
     k["pub"] = k["cve_id"].map(pubs)
     k = k.dropna(subset=["added", "pub"])
-    k["gap"] = (k["added"] - k["pub"]).dt.days
+    # Compare CALENDAR dates: dateAdded is date-only (midnight), datePublished carries a
+    # time, so a raw subtraction floors a same-day-published-later gap to -1 and invents a
+    # phantom "before publication" bucket. Normalize both to dates first.
+    k["gap"] = (k["added"].dt.normalize() - k["pub"].dt.normalize()).dt.days
 
     year = int(k["added"].max().year)
     recent = k[k["added"] >= pd.Timestamp(year, 1, 1, tz="UTC")]  # added so far this year
     n = len(recent)
     g = recent["gap"]
 
-    # Age buckets. "Before published" requires at least a full day ahead (gap <= -1):
-    # KEV dates carry no time, so a same-day (gap 0) listing is NOT provably before the
-    # CVE record and is counted with the within-a-week group.
-    buckets = [
-        ("Before the CVE\nWas Published", g <= -1, COLORS["accent"]),
+    # Calendar-day age buckets. A "Before Publication" bucket (KEV listed a full calendar
+    # day before the CVE.org record) is included only if it is non-empty; it is 0 for 2026.
+    buckets = []
+    if (g <= -1).any():
+        buckets.append(("Before\nPublication", g <= -1, COLORS["accent"]))
+    buckets += [
         ("Same Day", g == 0, COLORS["accent"]),
         ("1 to 7\nDays", (g >= 1) & (g <= 7), COLORS["accent"]),
         ("8 to 30\nDays", (g > 7) & (g <= 30), COLORS["accent"]),
@@ -70,8 +75,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     pcts = floors
 
     title1 = "How Old CVEs Are When CISA Adds Them to KEV"
-    title2 = (f"Time from the CVE.org record being published to landing on CISA's exploited "
-              f"list, for the {n} CVEs CISA added so far in {year}.")
+    title2 = (f"Days from a CVE.org record's publication to its addition to CISA's exploited "
+              f"list, across the {n} CVEs CISA added so far in {year}.")
 
     out = []
     for ratio in ratios:
@@ -94,9 +99,9 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
 
         foot_size = {"wide": 9, "square": 8, "portrait": 8}[ratio]
         fig.text(0.05, 0.055,
-                 "Gap = KEV dateAdded minus the CVE.org record's publication date (dates only, so "
-                 "same-day is not counted as 'before'). Source: CISA KEV + CVE List V5.",
-                 fontsize=foot_size, color=COLORS["neutral"], ha="left", va="bottom")
+                 "Gap = KEV add date minus the CVE.org record's publication date (calendar "
+                 "dates). Source: CISA KEV + CVE List V5.",
+                 fontsize=foot_size, color=COLORS["secondary"], ha="left", va="bottom")
 
         top_m = {"wide": 0.82, "square": 0.85, "portrait": 0.87}[ratio]
         t1 = {"wide": 20, "square": 17, "portrait": 17}[ratio]
