@@ -62,10 +62,6 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
                 ha="left", va="bottom")
 
         # current value
-        ax.plot(x[-1], cur, "o", color=COLORS["primary"], markersize=7, zorder=4)
-        ax.text(x[-1], cur + ymax * 0.03, f"{cur:.0f}", ha="right", va="bottom",
-                fontsize=12, fontweight="bold", color=COLORS["primary"])
-
         ax.set_ylim(0, ymax * 1.15)
         ax.set_yticks(np.arange(0, ymax * 1.15, 50))
         ax.set_yticklabels([f"{v:.0f}" for v in np.arange(0, ymax * 1.15, 50)],
