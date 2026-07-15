@@ -43,7 +43,7 @@ half. Source: NVD.
 
 ## Notes / caveats
 - Seven-day rolling average by NVD publication date, non-rejected, to smooth the Patch-Tuesday
-  spike and weekend lull. Reference line is the 2026 YTD daily average (~199-200/day); the copy
+  spike and weekend lull. Reference line is the 2026 YTD daily average (~200/day, 203 at this refresh); the copy
   still cites the 2025 average (132/day) as the year-over-year comparison, not shown as a line.
 - The last data day is the current (partial) day, so the final rolling point is provisional
   (1 of 7 in the window, so a small effect). As of this refresh July is near the year's peak
