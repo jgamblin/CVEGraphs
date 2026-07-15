@@ -29,15 +29,15 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         nvd = load_nvd()
     asof = data_asof(nvd)
     year = current_year(asof)
-    prev = year - 1
 
     pub = pd.to_datetime(nvd["published"], utc=True, errors="coerce")
     d = nvd.assign(day=pub.dt.floor("D"))
     daily = d[nvd["is_rejected"] != True].dropna(subset=["day"]).groupby("day").size()
 
     idx = pd.date_range(pd.Timestamp(year, 1, 1, tz="UTC"), asof, freq="D", tz="UTC")
-    roll = daily.reindex(idx, fill_value=0).rolling(7).mean()
-    prev_avg = daily.loc[f"{prev}-01-01":f"{prev}-12-31"].mean()
+    dd = daily.reindex(idx, fill_value=0)
+    roll = dd.rolling(7).mean()
+    year_avg = dd.mean()  # this year's average CVEs per day, to date
 
     x = roll.index.tz_localize(None)
     y = roll.values
@@ -45,8 +45,8 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
     ymax = np.nanmax(y)
 
     title1 = f"CVEs Published Per Day in {year}"
-    title2 = (f"Seven-day rolling average of non-rejected CVEs, with the {prev} daily "
-              f"average for comparison.")
+    title2 = (f"Seven-day rolling average of non-rejected CVEs, with the {year} daily "
+              f"average for reference.")
 
     out = []
     for ratio in ratios:
@@ -55,11 +55,11 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         ax.fill_between(x, y, color=COLORS["primary"], alpha=0.10, zorder=2)
         ax.plot(x, y, color=COLORS["primary"], lw=2.6, zorder=3)
 
-        # prior-year average reference
-        ax.axhline(prev_avg, color=COLORS["neutral"], ls="--", lw=1.4, zorder=1)
-        ax.text(x[-1], prev_avg + ymax * 0.015, f"{prev} average: {prev_avg:.0f} per day",
+        # this-year average reference (line sits above the January data on the left)
+        ax.axhline(year_avg, color=COLORS["neutral"], ls="--", lw=1.6, zorder=1)
+        ax.text(x[3], year_avg + ymax * 0.015, f"{year} average: {year_avg:.0f} per day",
                 fontsize=9.5, fontweight="bold", color=COLORS["secondary"],
-                ha="right", va="bottom")
+                ha="left", va="bottom")
 
         # current value
         ax.plot(x[-1], cur, "o", color=COLORS["primary"], markersize=7, zorder=4)

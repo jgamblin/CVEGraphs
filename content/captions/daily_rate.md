@@ -14,22 +14,22 @@ H1 2026 mean 198/day.
 ## LinkedIn / Mastodon
 Attach: `daily_rate_wide_<date>.png`.
 ```
-The CVE firehose is not just big this year, it is accelerating. In January 2026, published CVEs averaged about 139 a day. In June it was 265, nearly double.
+In 2026, CVEs are being published at about 200 a day, up from 132 a day in 2025. And the pace is still climbing inside the year: January averaged about 139 a day, June about 265, nearly double.
 
-This is the seven-day rolling average of new CVEs, so daily spikes and weekend lulls wash out and the trend shows. After a slow January that bottomed near 100 a day, the line climbed above the 2025 average of 132 by mid-February and has stayed there since, still climbing. The rate first crossed 200 a day in late February, and the last month has averaged about 248.
+This is the seven-day rolling average of new CVEs, so daily spikes and weekend lulls wash out and the trend shows. The rate opened the year below the annual average, crossed it in late February, and the second half has run well above, reaching about 248 a day over the last month.
 
-Half a year in, 2026 is running roughly 50% ahead of 2025 on a per-day basis. Whatever your triage capacity was last year, the intake it was sized for is already gone. What are you doing differently to keep up?
+So the firehose is not just bigger than last year, it is accelerating within this one. Whatever your triage capacity was sized for, the intake has already outgrown it. What are you doing differently to keep up?
 
 #vulnerabilitymanagement #cybersecurity #CVE
 ```
 
 ## X / Bluesky
 ```
-The CVE firehose is not just big in 2026, it is accelerating.
+In 2026, CVEs are published at about 200 a day, up from 132 in 2025.
 
-January averaged about 139 new CVEs a day. June hit 265, nearly double. The seven-day rolling average climbed above 2025's 132 a day by mid-February and has stayed there since.
+And the pace is still climbing inside the year: January averaged about 139 a day, June about 265. The seven-day rolling average opened below the year's average, and the second half has run well above it.
 
-Whatever your triage was sized for last year, that intake is already gone.
+The firehose is not just bigger than last year, it is accelerating within this one.
 ```
 
 ## Alt text
@@ -37,12 +37,14 @@ Whatever your triage was sized for last year, that intake is already gone.
 Line chart of the seven-day rolling average of non-rejected CVEs published per day in 2026,
 January to mid-July. The line rises from about 100 per day in early January to a peak near 327
 in late June (May and July top out near 310), ending near 219. A dashed reference line marks the
-2025 daily average of 132; the line crosses above it in mid-February and trends upward. Source: NVD.
+2026 average of about 200 per day; the rolling line runs below it early in the year and mostly
+above it in the second half. Source: NVD.
 ```
 
 ## Notes / caveats
 - Seven-day rolling average by NVD publication date, non-rejected, to smooth the Patch-Tuesday
-  spike and weekend lull. Reference line is the 2025 FULL-YEAR daily average (~132/day).
+  spike and weekend lull. Reference line is the 2026 YTD daily average (~199-200/day); the copy
+  still cites the 2025 average (132/day) as the year-over-year comparison, not shown as a line.
 - Be honest about the July dip (205/day vs June's 265): it is partly a partial month and a
   possible summer slowdown. The rolling line shows it rather than hiding it; do not crop it out.
 - "Accelerating" is a within-year claim (Jan 139 -> Jun 265) plus a YoY one (132 -> ~199), both
