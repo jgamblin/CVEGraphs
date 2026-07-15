@@ -122,7 +122,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
                  color=COLORS["secondary"], ha="left", va="top")
 
         path = GRAPHS / f"scorer_divergence_{ratio}_{asof.strftime('%Y-%m-%d')}.png"
-        stamp_and_save(fig, path, asof.strftime("%b %d, %Y"))
+        path = stamp_and_save(fig, path)
         out.append(path)
     return out
 

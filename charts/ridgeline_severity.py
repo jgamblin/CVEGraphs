@@ -127,7 +127,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS, show_median=False):
 
         suffix = "_median" if show_median else ""
         path = GRAPHS / f"ridgeline_severity{suffix}_{ratio}_{asof.strftime('%Y-%m-%d')}.png"
-        stamp_and_save(fig, path, asof.strftime("%b %d, %Y"))
+        path = stamp_and_save(fig, path)
         out.append(path)
     return out
 

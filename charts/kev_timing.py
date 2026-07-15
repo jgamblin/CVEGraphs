@@ -113,7 +113,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
                  color=COLORS["secondary"], ha="left", va="top")
 
         path = GRAPHS / f"kev_timing_{ratio}_{stamp.strftime('%Y-%m-%d')}.png"
-        stamp_and_save(fig, path, stamp.strftime("%b %d, %Y"))
+        path = stamp_and_save(fig, path)
         out.append(path)
     return out
 

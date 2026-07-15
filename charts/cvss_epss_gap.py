@@ -126,7 +126,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
                      ha="left", va="top")
 
         path = GRAPHS / f"cvss_epss_gap_{ratio}_{asof.strftime('%Y-%m-%d')}.png"
-        stamp_and_save(fig, path, asof_str)
+        path = stamp_and_save(fig, path)
         out.append(path)
     return out
 

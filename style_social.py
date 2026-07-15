@@ -134,6 +134,7 @@ def stamp_and_save(fig, filepath, asof_str=None):
     fig.savefig(filepath, dpi=SAVE_DPI, bbox_inches=None,
                 facecolor="white", edgecolor="none")
     plt.close(fig)
+    return filepath  # the actual (post-dated) path, so callers report the real file
 
 
 apply_style()

@@ -17,6 +17,7 @@ from rolling_config import data_asof, today_utc
 from charts import (
     calendar_heatmap,
     chrome_day,
+    daily_rate,
     cna,
     cna_bump,
     cna_metric_table,
@@ -41,6 +42,7 @@ from charts import (
 # name -> (module, one-line description)
 CHARTS = {
     "pace": (pace, "YTD pace tracker: CVEs so far this year, apples-to-apples"),
+    "daily_rate": (daily_rate, "Line: CVEs published per day this year, 7-day rolling average"),
     "epss_funnel": (epss_funnel, "Exploitation signal: EPSS + KEV vs total volume"),
     "cna": (cna, "CNA leaderboard: who publishes this year's CVEs"),
     "kev": (kev, "KEV watch: confirmed exploitation over the trailing 12 months"),

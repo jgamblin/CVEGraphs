@@ -72,7 +72,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
             fig.text(0.05, 0.882, sub, fontsize=11, color=COLORS["secondary"], ha="left", va="top")
 
         path = GRAPHS / f"cna_{ratio}_{asof.strftime('%Y-%m-%d')}.png"
-        stamp_and_save(fig, path, asof_str)
+        path = stamp_and_save(fig, path)
         out.append(path)
     return out
 
