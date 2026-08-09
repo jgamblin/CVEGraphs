@@ -18,9 +18,10 @@ import pandas as pd
 # First year of the CVE program; historical charts start here.
 HIST_MIN_YEAR = 1999
 
-# @-handle and site stamped onto every chart.
+# @-handle, site, and affiliation stamped onto every chart.
 HANDLE = "@jgamblin"
 SITE = "rogolabs.net"
+AFFIL = "Empirical Security"
 
 
 def today_utc():

@@ -19,7 +19,8 @@ import pandas as pd
 
 from data import load_nvd
 from rolling_config import current_year, data_asof
-from style_social import COLORS, DEFAULT_RATIOS, figsize_for, stamp_and_save
+from style_social import (COLORS, DEFAULT_RATIOS, draw_header, figsize_for,
+                          stamp_and_save)
 
 GRAPHS = Path(__file__).resolve().parent.parent / "graphs"
 
@@ -83,13 +84,9 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
                  f"{year} to date. Source: NVD.",
                  fontsize=foot_size, color=COLORS["secondary"], ha="left", va="bottom")
 
-        top_m = {"wide": 0.82, "square": 0.85, "portrait": 0.87}[ratio]
-        t1 = {"wide": 20, "square": 17, "portrait": 17}[ratio]
+        top_m = {"wide": 0.80, "square": 0.83, "portrait": 0.86}[ratio]
         fig.subplots_adjust(top=top_m, bottom=0.15, left=0.08, right=0.96)
-        fig.text(0.05, 0.965, title1, fontsize=t1, fontweight="bold",
-                 color=COLORS["text"], ha="left", va="top")
-        fig.text(0.05, 0.915, title2, fontsize=10.5, fontweight="bold",
-                 color=COLORS["secondary"], ha="left", va="top")
+        draw_header(fig, title1, title2, ratio=ratio, eyebrow_suffix="VOLUME")
 
         path = GRAPHS / f"daily_rate_{ratio}_{asof.strftime('%Y-%m-%d')}.png"
         path = stamp_and_save(fig, path)
