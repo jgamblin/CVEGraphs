@@ -34,9 +34,10 @@ voice:
 
 > Read `content/insights.json`. Pick the 3 most genuinely surprising and
 > share-worthy findings for this week (avoid repeating last week's angles in
-> `CALENDAR.md`). For each, draft a LinkedIn + X + Bluesky post. House style:
-> no em dashes, no "n=" (spell it out, e.g. "373 CVEs"), lead with the number,
-> end with a question. Note the `suggested_chart` to attach.
+> `CALENDAR.md`). For each, draft a LinkedIn + X + Bluesky post following the
+> **Copy formula** below: open on a one-sentence arguable claim (not a stat),
+> put the load-bearing number in line two, no em dashes, no "n=" (spell it out,
+> e.g. "373 CVEs"), end on a genuine question. Note the `suggested_chart` to attach.
 
 House style for the **chart itself**: the heading is factual and descriptive,
 it states what the chart shows ("How 2026 CVEs Identify the Affected Product"),
@@ -49,6 +50,48 @@ the opinion, and the story live in the post copy, not the chart.
 **Date stamp:** always stamp the chart with the date it is posted (the render
 date, `today_utc()`), never the data-source date (KEV release, data refresh).
 Data provenance goes in the footnote / Source line, not the corner stamp.
+
+### Copy formula (the post text) — highest-leverage lever on reach
+
+From the Jul 2026 engagement pull: opinion-first posts pulled 2,000-3,500
+impressions with 8-17 comments; number-first posts pulled about half and near-zero
+comments. So:
+
+1. **Line one is a one-sentence opinion, not a statistic.** The opener must be an
+   arguable claim a reasonable person could disagree with. A fact can only be read;
+   a claim can be argued, and argument is what drives comments and reposts.
+   - Gut check: could someone reply "no it isn't"? If not, it's a stat, not a hook.
+   - Winners led with a stance: "A CVSS score is not a fact about a bug. It's an
+     opinion with a decimal point." / "The bugs that get exploited are not the ones you
+     see most often."
+   - Underperformers led with a number: "A third of 2026 CVEs carry a CVSS v4
+     score..." / "On July 21, Oracle published 1,097 CVEs..." (0-1 comments each).
+2. **The number is the evidence; it goes in line two.** Lead with the claim, prove it
+   with the stat immediately after.
+3. **At most one line of caveat.** Rigor is required for accuracy (the review panel
+   enforces it), but do not let hedging bury the hook. Make the point, qualify once,
+   move on.
+4. **End on a genuine, specific question.** The question is the comment engine; a
+   statement ending kills comments. Vary it; never reuse a formula like "how does your
+   pipeline handle X?".
+5. **North-star metric: reposts + comments, not impressions or reactions.** Reposts put
+   you in someone else's feed; comments signal a real nerve. Optimize for those.
+6. **Authority + stakes travels.** The best-performing post of the period was commentary
+   borrowing an outside authority's warning (J.P. Morgan) with a stakes frame: 12
+   reposts, more than any chart. Periodically pair a chart with "even \[credible
+   outsider\] is warning about X." Never manufacture alarm the data does not support.
+
+The chart heading stays factual (above); all of this opinion lives in the post copy.
+
+### KEV language (accuracy rule)
+
+CISA KEV is a curated catalog, not the universe of exploited CVEs. Always describe KEV
+membership as **"added to KEV"** or **"on the CISA KEV list"**, never as a blanket
+"exploited". Many CVEs are exploited in the wild without ever being added (no reliable
+public evidence, no available fix, or below CISA's bar), and a CVE being absent from KEV
+does NOT mean it was not exploited. The honest contrast is **"on KEV" vs "not on KEV"**,
+not "exploited" vs "not exploited". EPSS is the "probability of exploitation"; KEV is
+"documented / added to KEV" — keep the two distinct in both chart labels and post copy.
 
 For fully on-brand drafts, run this through the **brand-voice** skill
 (`/brand-voice:enforce-voice`) once its connectors are authorized; until then

@@ -1,10 +1,10 @@
 export const meta = {
   name: 'post-review',
-  description: 'World-class pre-publish review of a CVEGraphs post: verify the data, pressure-test the copy, and critique the rendered graph, then synthesize a go/no-go verdict',
+  description: 'World-class pre-publish review of a CVEGraphs post: verify the data, pressure-test the copy for accuracy, audience reception, AND shareability (sharp opinion-first hook), and critique the rendered graph, then synthesize a go/no-go verdict',
   whenToUse: 'Before publishing any chart post. Pass the chart name as args, e.g. args: "product_id".',
   phases: [
     { title: 'Prep', detail: 'read caption + module, find the PNG, extract claims and copy' },
-    { title: 'Review', detail: 'copy + data + visual-design personas in parallel' },
+    { title: 'Review', detail: 'copy (accuracy + audience/tone + punch/shareability) + data + visual-design personas in parallel' },
     { title: 'Synthesize', detail: 'editor-in-chief verdict and prioritized fixes' },
   ],
 }
@@ -37,6 +37,7 @@ const FINDINGS_SCHEMA = {
       },
     },
     keep: { type: 'string', description: 'one honest thing that already works and should not change' },
+    overall: { type: 'string', description: 'optional: a one-line overall read from this lens (e.g. how the copy lands, or a tone/harshness call)' },
   },
 }
 
@@ -67,9 +68,12 @@ const png = prep.pngPath || `graphs/${name}_wide_*.png`
 const packet = JSON.stringify(prep, null, 2)
 
 const HOUSE = `HOUSE STYLE (flag every violation): no em dashes; no "n=" (spell out counts, e.g. ` +
-  `"373 CVEs"); posts are compact (~3 short paragraphs), lead with the number, end on a question; ` +
-  `palette is blue/grey only, no red/orange EXCEPT a single small deliberate accent marker; KEV ` +
-  `charts stamp the KEV catalog release date, volume charts stamp the data-refresh date.`
+  `"373 CVEs"); posts are compact (~3 short paragraphs); the FIRST line is a one-sentence ARGUABLE ` +
+  `claim (an opinion a reader could disagree with), NOT a statistic, date, or "On <date> X published ` +
+  `N" (the load-bearing number is the evidence in line two); at most one line of caveat so the hook is ` +
+  `not buried; end on a genuine, non-formulaic question; palette is blue/grey only, no red/orange ` +
+  `EXCEPT a single small deliberate accent marker; KEV charts stamp the KEV catalog release date, ` +
+  `volume charts stamp the data-refresh date.`
 
 // ---- Phase 2: review panel ----------------------------------------------
 // Copy + data personas read the caption/module; visual personas READ the PNG image.
@@ -112,6 +116,42 @@ const COPY = [
     `too close to a recent one, if it stacks the same thematic lane as the last several posts, or if ` +
     `its claims contradict the nuance of an earlier post. Name the specific prior post you are ` +
     `comparing against.` },
+  { key: 'audience-practitioner', prompt:
+    `You are a SKEPTICAL WORKING PRACTITIONER in Jerry's feed (SOC analyst / vuln-management lead / ` +
+    `detection engineer) reading this on LinkedIn between meetings. Judge how the post LANDS, not its ` +
+    `style: does it tell you something useful you can act on or share, or does it read as stating the ` +
+    `obvious, as trivia with no "so what", or as scolding you for how you do your job? Flag lines that ` +
+    `feel condescending, preachy, fear-mongering, or that assume the reader is doing it wrong. Flag if ` +
+    `the takeaway does not survive a "so what?". Put your one-line gut read of how it lands in "overall". ` +
+    `Report only real reception risks, not style nits (the copy editor covers those).` },
+  { key: 'tone-reception', prompt:
+    `You are an AUDIENCE-RECEPTION and tone reviewer. A post from a 10k-follower researcher should ` +
+    `invite good-faith discussion, not dunk, moralize, humblebrag, or bait outrage. Assess three ` +
+    `things and cite the exact phrase for each: (1) the HOOK — does it respect the reader or open by ` +
+    `implying they are behind/naive; (2) the BODY tone — generous and curious vs "well, actually" / ` +
+    `lecturing / doom; (3) the CLOSING question — a genuine open question people want to answer, or a ` +
+    `rhetorical/leading one that just performs a point. Flag harshness toward the audience, any named ` +
+    `person, or a vendor. For each, give a warmer wording that keeps the substance and punch. Put an ` +
+    `overall harshness read (warm / neutral / harsh, and why in a few words) in "overall".` },
+  { key: 'punch-shareability', prompt:
+    `You are a PUNCH & SHAREABILITY editor. Reach and comments on LinkedIn come from posts that make an ` +
+    `ARGUABLE claim, not ones that merely state a fact (this is the single biggest driver in the post ` +
+    `history: opinion-first posts pulled 2-3.5k impressions and many comments; number-first posts pulled ` +
+    `~half and near-zero comments). Assess and cite the exact phrase for each:\n` +
+    `(1) OPENING LINE — THE most important check: the first sentence MUST be a one-sentence opinion or ` +
+    `claim a reasonable person could DISAGREE with. A statistic, a date, or "On <date>, X published N..." ` +
+    `as the opener is a BLOCKER. Give a rewritten opinion-first line and move the number to line two. Gut ` +
+    `check: could a reader argue with sentence one? If not, fail it.\n` +
+    `(2) BURIED HOOK — is the claim smothered by caveats? Rigor is required for accuracy, but hold caveats ` +
+    `to about one line; if the qualifiers outweigh the claim, flag it and show a tighter version that keeps ` +
+    `the honesty AND restores the edge.\n` +
+    `(3) CLOSING QUESTION — the post MUST end on a genuine, specific question that invites a real answer. ` +
+    `A statement ending, or no question, is a should-fix (it kills comments); do NOT recommend dropping ` +
+    `the question. A formulaic/rhetorical one (e.g. "how does your pipeline handle X?") is weak; suggest a ` +
+    `fresher, more specific one.\n` +
+    `(4) STAKES / AUTHORITY — note if a stakes frame or borrowed outside authority would make it more ` +
+    `shareable, WITHOUT manufacturing alarm the data does not support.\n` +
+    `Put a one-line shareability read (would a peer repost this? yes/no and why) in "overall".` },
 ]
 const VISUAL = [
   { key: 'dataviz-craft', prompt:
@@ -166,6 +206,13 @@ const verdict = await agent(
   `3. GRAPH verdict: the same, for the visual, then one of SHIP AS-IS / FIX FIRST / REWORK. Only ` +
   `include design changes that genuinely raise the professional quality.\n` +
   `4. Lead with the single biggest risk in one sentence.\n` +
+  `TREAT PUNCH AS A FIRST-CLASS DIMENSION, equal to accuracy: a factually perfect but BLAND post is a ` +
+  `real defect, not a pass. Specifically, a number-first opening line is a blocker (the first sentence ` +
+  `must be an arguable claim, with the number in line two), a hook buried under caveats is a should-fix, ` +
+  `and a missing or statement-only ending is a should-fix (the post must end on a genuine question). ` +
+  `When the accuracy/tone personas conflict with punch (a caveat sharpens accuracy but dulls the hook, ` +
+  `or a question reads as "bait"), DO NOT resolve it by hedging the claim away or dropping the question; ` +
+  `find wording that keeps BOTH the rigor and the edge. Never recommend removing the closing question.\n` +
   `Be concrete and ruthless about priority; most posts should need only a few real changes.`,
   { phase: 'Synthesize', label: 'editor-in-chief', effort: 'high' }
 )
