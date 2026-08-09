@@ -712,6 +712,13 @@ def main():
     except Exception as e:
         print(f"  [product_id] precompute failed: {e}; leaving existing parquets")
 
+    print("  Building credit datasets (credit_rise) ...")
+    try:
+        import scripts_precompute_credits as _cred
+        _cred.main()
+    except Exception as e:
+        print(f"  [credits] precompute failed: {e}; leaving existing parquet")
+
     print("\n[3/3] Fetching feeds ...")
     fetch_feeds()
 
