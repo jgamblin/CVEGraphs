@@ -66,7 +66,7 @@ def render(nvd=None, ratios=DEFAULT_RATIOS):
         fig, ax = plt.subplots(figsize=figsize_for(ratio))
 
         # Grey mesh: every other top-10 issuer, faint and unlabeled.
-        for name in mesh_names:
+        for name in sorted(mesh_names):  # sorted: set order varies per process
             rs = ranks_for(name)
             xs = [xi for xi, r in zip(x, rs) if r is not None and r <= VIS]
             ys = [r for r in rs if r is not None and r <= VIS]
