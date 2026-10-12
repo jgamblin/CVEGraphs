@@ -15,8 +15,11 @@ const name = (typeof args === 'string' && args.trim())
   : (args && args.name) ? args.name : null
 if (!name) throw new Error('post-review needs a chart name, e.g. args: "product_id"')
 
-const capPath = `content/captions/${name}.md`
-const modPath = `charts/${name}.py`
+// A chart under review is normally still a draft; fall back to a posted copy
+// (content/posts/<date>-<name>/) when re-reviewing something that went out.
+const draftDir = `content/drafts/${name}`
+const capPath = `${draftDir}/post.md`
+const modPath = `src/cvegraphs/charts/${name}.py`
 
 // Reusable finding shape so every persona reports the same way.
 const FINDINGS_SCHEMA = {
@@ -45,8 +48,9 @@ const FINDINGS_SCHEMA = {
 phase('Prep')
 const prep = await agent(
   `You are prepping a review packet for the CVEGraphs post "${name}".\n` +
-  `1. Read the caption file ${capPath} and the chart module ${modPath}.\n` +
-  `2. Find the newest rendered wide PNG by running: ls -t graphs/${name}_wide_*.png | head -1\n` +
+  `1. Read the post text ${capPath} and the chart module ${modPath}. If ${capPath} does not exist, ` +
+  `use the newest content/posts/*-${name}/post.md instead and work from that folder.\n` +
+  `2. Find the newest rendered wide PNG in the same folder: ls -t ${draftDir}/${name}_wide_*.png | head -1\n` +
   `3. Extract, verbatim: the LinkedIn/Mastodon post copy, the X/Bluesky copy, and the on-chart ` +
   `title + subtitle.\n` +
   `4. List every load-bearing factual or numeric claim in the copy and chart (each as one short ` +
@@ -64,7 +68,7 @@ const prep = await agent(
     } } }
 )
 
-const png = prep.pngPath || `graphs/${name}_wide_*.png`
+const png = prep.pngPath || `${draftDir}/${name}_wide_*.png`
 const packet = JSON.stringify(prep, null, 2)
 
 const HOUSE = `HOUSE STYLE (flag every violation): no em dashes; no "n=" (spell out counts, e.g. ` +
@@ -112,7 +116,7 @@ const COPY = [
     `\n\n${HOUSE}` },
   { key: 'consistency', prompt:
     `You are the SERIES EDITOR guarding against repetition and cross-post contradiction. Read ` +
-    `content/CALENDAR.md (the post-history log). Flag if this post re-runs a chart or reuses a hook ` +
+    `content/planning/CALENDAR.md (the post-history log). Flag if this post re-runs a chart or reuses a hook ` +
     `too close to a recent one, if it stacks the same thematic lane as the last several posts, or if ` +
     `its claims contradict the nuance of an earlier post. Name the specific prior post you are ` +
     `comparing against.` },

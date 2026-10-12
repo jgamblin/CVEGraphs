@@ -14,9 +14,10 @@ Claude invokes it with:
 Workflow({ scriptPath: ".claude/workflows/post-review.js", args: "<chart>" })
 ```
 
-`args` is the chart name (the stem shared by `charts/<name>.py`,
-`content/captions/<name>.md`, and `graphs/<name>_wide_*.png`). Render the chart first
-(`python make.py <name>`) so a current PNG exists for the visual reviewers.
+`args` is the chart name: the stem shared by `src/cvegraphs/charts/<name>.py` and the draft
+folder `content/drafts/<name>/` (which holds `post.md` and the `<name>_wide_*.png` renders).
+Render the chart first (`cvegraphs render <name>`) so a current PNG exists for the visual
+reviewers. A chart that already went out is read from `content/posts/<date>-<name>/` instead.
 
 ### The panel (9 agents)
 1. **Prep** — reads the caption + module, finds the newest wide PNG, extracts the
@@ -28,7 +29,7 @@ Copy + data:
 3. **domain-skeptic** — overclaims, causation-as-correlation, survivorship bias.
 4. **brand-editor** — house style (no em dashes, no "n=", ~3 tight paragraphs, ends
    on a question, blue/grey palette), voice, hype.
-5. **consistency** — reads `content/CALENDAR.md` to catch repeats, over-stacked
+5. **consistency** — reads `content/planning/CALENDAR.md` to catch repeats, over-stacked
    themes, and contradictions with earlier posts.
 
 Visual (these open and look at the PNG):
