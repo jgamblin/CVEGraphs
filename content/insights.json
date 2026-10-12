@@ -1,64 +1,64 @@
 {
-  "as_of": "2026-07-07",
+  "as_of": "2026-09-08",
   "findings": [
     {
       "category": "exploitation",
       "score": 92.0,
-      "headline": "Of 37,136 CVEs published in 2026, only 90 (0.24%) are on CISA's KEV list so far",
+      "headline": "Of 60,142 CVEs published in 2026, only 146 (0.24%) are on CISA's KEV list so far",
       "detail": "A floor that rises as the cohort ages, not a final rate. Confirmed exploitation stays rare while volume climbs, the whole triage story.",
       "suggested_chart": "epss_funnel",
       "evidence": {
-        "ytd": 37136,
-        "on_kev": 90,
+        "ytd": 60142,
+        "on_kev": 146,
         "kev_pct": 0.24
       }
     },
     {
       "category": "record",
       "score": 90.0,
-      "headline": "2026 year-to-date (37,136) already exceeds every full year before 2024",
-      "detail": "Six-plus months of 2026 outrank all of 2023 (28,817) and every year prior.",
+      "headline": "2026 year-to-date (60,142) already exceeds every full year before 2026",
+      "detail": "Six-plus months of 2026 outrank all of 2025 (48,153) and every year prior.",
       "suggested_chart": "pace",
       "evidence": {
-        "ytd": 37136,
-        "highest_full_year_beaten": 2023,
-        "first_year_still_bigger": 2024
+        "ytd": 60142,
+        "highest_full_year_beaten": 2025,
+        "first_year_still_bigger": 2026
       }
     },
     {
       "category": "record",
       "score": 88.0,
-      "headline": "June 2026 was the busiest CVE month ever: 7,950",
+      "headline": "August 2026 was the busiest CVE month ever: 12,269",
       "detail": "No calendar month in the program's history published more CVEs.",
       "suggested_chart": "pace",
       "evidence": {
-        "month": "2026-06",
-        "count": 7950
+        "month": "2026-08",
+        "count": 12269
       }
     },
     {
       "category": "exploitation",
       "score": 87.0,
-      "headline": "Only 47 of 2026's 37,136 CVEs (0.13%) score EPSS >= 0.5",
-      "detail": "223 (0.6%) clear EPSS 0.1. Predicted exploitation is as rare as confirmed: model v2026.06.15.",
+      "headline": "Only 75 of 2026's 60,142 CVEs (0.12%) score EPSS >= 0.5",
+      "detail": "308 (0.5%) clear EPSS 0.1. Predicted exploitation is as rare as confirmed: model v2026.06.15.",
       "suggested_chart": "epss_funnel",
       "evidence": {
-        "epss_ge_50": 47,
-        "epss_ge_10": 223,
-        "ytd": 37136
+        "epss_ge_50": 75,
+        "epss_ge_10": 308,
+        "ytd": 60142
       }
     },
     {
       "category": "recent",
       "score": 83.0,
-      "headline": "Newest CISA KEV entry: CVE-2026-48908 (JoomShaper SP Page Builder), added Jul 07",
+      "headline": "Newest CISA KEV entry: CVE-2026-19490 (Citrix NetScaler), added Sep 09",
       "detail": "The most recent confirmed-exploited CVE. Timely by definition.",
       "suggested_chart": "kev",
       "evidence": {
-        "cve": "CVE-2026-48908",
-        "vendor": "JoomShaper",
-        "product": "SP Page Builder",
-        "date_added": "2026-07-07"
+        "cve": "CVE-2026-19490",
+        "vendor": "Citrix",
+        "product": "NetScaler",
+        "date_added": "2026-09-09"
       }
     },
     {
@@ -75,102 +75,102 @@
       }
     },
     {
+      "category": "mover",
+      "score": 79.8,
+      "headline": "microsoft published 492 more CVEs this month than last",
+      "detail": "A sharp month-over-month surge worth a closer look.",
+      "suggested_chart": "cna",
+      "evidence": {
+        "cna": "microsoft",
+        "month_over_month_delta": 492
+      }
+    },
+    {
       "category": "kev",
       "score": 78.0,
-      "headline": "CISA added 23 CVEs to KEV in the last 30 days, 2 ransomware-linked",
+      "headline": "CISA added 41 CVEs to KEV in the last 30 days, 0 ransomware-linked",
       "detail": "Exploitation news travels; a fresh KEV batch is always timely.",
       "suggested_chart": "kev",
       "evidence": {
-        "kev_added_30d": 23,
-        "ransomware_linked": 2
+        "kev_added_30d": 41,
+        "ransomware_linked": 0
       }
     },
     {
       "category": "recent",
       "score": 78.0,
-      "headline": "chrome disclosed 52 CVEs in one day (2026-07-01)",
+      "headline": "chrome disclosed 21 CVEs in one day (2026-09-02)",
       "detail": "A single-day mass disclosure. Verify against the vendor's release notes before posting.",
       "suggested_chart": "kev",
       "evidence": {
         "product": "chrome",
-        "window_count": 52,
-        "peak_day": "2026-07-01",
-        "peak_day_count": 52
+        "window_count": 22,
+        "peak_day": "2026-09-02",
+        "peak_day_count": 21
       }
     },
     {
       "category": "mover",
       "score": 76.0,
-      "headline": "GitHub_M is 2026's top CVE issuer with 6,978 (19% of all published)",
+      "headline": "GitHub_M is 2026's top CVE issuer with 9,602 (16% of all published)",
       "detail": "The CNA mix reflects who has scope, not who ships the worst code.",
       "suggested_chart": "cna",
       "evidence": {
         "top_cna": "GitHub_M",
-        "count": 6978,
-        "share_pct": 18.8
-      }
-    },
-    {
-      "category": "curio",
-      "score": 74.0,
-      "headline": "The busiest CVE weekday in 2026 is Wednesday (not Tuesday)",
-      "detail": "Wednesday: 8,314 vs Tuesday: 7,816. The 'Patch Tuesday' mental model does not match the data.",
-      "suggested_chart": "rhythm",
-      "evidence": {
-        "top_weekday": "Wednesday",
-        "counts": {
-          "Wednesday": 8314,
-          "Tuesday": 7816,
-          "Thursday": 6784
-        }
-      }
-    },
-    {
-      "category": "recent",
-      "score": 74.0,
-      "headline": "Highest-EPSS new CVE since Jul 01: CVE-2026-27771 at 0.407",
-      "detail": "The most likely-to-be-exploited of the freshly published set.",
-      "suggested_chart": "kev",
-      "evidence": {
-        "cve": "CVE-2026-27771",
-        "epss": 0.4074
+        "count": 9602,
+        "share_pct": 15.7
       }
     },
     {
       "category": "pace",
       "score": 72.0,
-      "headline": "37,136 CVEs published so far in 2026, one every 7.3 minutes",
-      "detail": "198/day, +52% vs 2025 at the same point. Straight-line run-rate lands near 72,100 for the full year.",
+      "headline": "60,142 CVEs published so far in 2026, one every 6.0 minutes",
+      "detail": "240/day, +87% vs 2025 at the same point. Straight-line run-rate lands near 87,500 for the full year.",
       "suggested_chart": "pace",
       "evidence": {
-        "ytd": 37136,
-        "per_day": 197.5,
-        "minutes": 7.3,
-        "yoy_pct": 52.4,
-        "projected_year": 72100
+        "ytd": 60142,
+        "per_day": 239.6,
+        "minutes": 6.0,
+        "yoy_pct": 87.2,
+        "projected_year": 87500
       }
     },
     {
       "category": "record",
       "score": 68.0,
-      "headline": "The CVE catalog is at 346,029, 3,971 short of 350,000",
-      "detail": "At the current rate it crosses 350,000 in about 20 days.",
+      "headline": "The CVE catalog is at 369,015, 985 short of 370,000",
+      "detail": "At the current rate it crosses 370,000 in about 4 days.",
       "suggested_chart": "pace",
       "evidence": {
-        "total": 346029,
-        "next_milestone": 350000,
-        "days_to_milestone": 20
+        "total": 369015,
+        "next_milestone": 370000,
+        "days_to_milestone": 4
       }
     },
     {
       "category": "curio",
       "score": 66.0,
-      "headline": "The single biggest CVE day of 2026: 2026-06-09 with 747",
+      "headline": "The single biggest CVE day of 2026: 2026-07-21 with 1,474",
       "detail": "Batch publishing by high-volume CNAs drives these spikes.",
       "suggested_chart": "rhythm",
       "evidence": {
-        "peak_day": "2026-06-09",
-        "peak_count": 747
+        "peak_day": "2026-07-21",
+        "peak_count": 1474
+      }
+    },
+    {
+      "category": "curio",
+      "score": 60.0,
+      "headline": "The busiest CVE weekday in 2026 is Tuesday",
+      "detail": "Tuesday: 14,503 vs Wednesday: 11,676. The 'Patch Tuesday' mental model does not match the data.",
+      "suggested_chart": "rhythm",
+      "evidence": {
+        "top_weekday": "Tuesday",
+        "counts": {
+          "Tuesday": 14503,
+          "Wednesday": 11676,
+          "Thursday": 10602
+        }
       }
     }
   ]

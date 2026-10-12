@@ -47,6 +47,27 @@ heading AND the chart labels (axis / category / bucket / legend labels) are in
 subtitle and footnote stay sentence case (they are full sentences). The angle,
 the opinion, and the story live in the post copy, not the chart.
 
+**Text budget on the chart (Jerry, 2026-09-08, stated twice): ONE footnote per
+chart, maximum, and it fits on one line at every ratio.** The subtitle is one
+line too. Jerry's words: "Once again there is way too much text on the graph."
+The failure mode this corrects is stacking method disclosure, baseline
+comparisons and caveats into a four-line footnote block: it squeezes the plot,
+nobody reads it in a feed, and it reads as hedging. What goes where:
+
+| Belongs on the chart | Belongs in the caption / post copy |
+|---|---|
+| Factual Title-Case heading | The argument and the opinion |
+| One-line subtitle saying what a bar is | Baseline comparisons and rates |
+| Value labels on the bars that carry the finding | CWE/CPE set definitions, exclusions, thresholds |
+| One short callout naming the finding | Severity or robustness checks |
+| One footnote: source and as-of date | Every caveat, and the numbers for comments |
+
+Do not read this as licence to drop the rigor. The disclosure still has to
+exist, in `content/captions/<chart>.md`, and the load-bearing caveats still have
+to survive into the post copy. Charts that need a derived figure available for
+the copy should expose it in code (see `charts/patch_tuesday.py:stats()`) rather
+than printing it on the image.
+
 **Date stamp:** always stamp the chart with the date it is posted (the render
 date, `today_utc()`), never the data-source date (KEV release, data refresh).
 Data provenance goes in the footnote / Source line, not the corner stamp.

@@ -1,0 +1,485 @@
+<meta charset="utf-8">
+<title>CVE Tornado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300..700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap">
+<!-- Component styles: the designer's Squarespace-embed CSS, scoped to #cvet. The embed build copies this block as is. -->
+<style id="cvet-style">
+#cvet {
+  --ground: #FFFFFF; --ink: #181818; --ink-2: #525559; --ink-3: rgba(82, 85, 89, 0.7);
+  --rule: #dfe2e5; --soft: #f6f7f9; --accent: #1f3a5f; --alert: #dc2626;
+  --sans: "Host Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --roboto: "Roboto", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  position: relative; width: 100%; max-width: 100%; height: 820px; margin: 0 auto; overflow: hidden;
+  background: var(--ground); color: var(--ink); font-family: var(--sans); color-scheme: light;
+  container-type: inline-size; text-align: left; line-height: normal; letter-spacing: normal;
+}
+#cvet *, #cvet *::before, #cvet *::after { box-sizing: border-box; }
+#cvet #cvet-stage { position: absolute; inset: 0; z-index: 0; touch-action: none; }
+#cvet #cvet-stage canvas { display: block; }
+#cvet .lbl { font: 500 11px/1 var(--mono); color: var(--ink-2); white-space: nowrap; pointer-events: none;
+  text-shadow: 0 0 3px var(--ground), 0 0 6px var(--ground); font-variant-numeric: tabular-nums; }
+#cvet .lbl.month { color: var(--ink-3); letter-spacing: .1em; text-transform: uppercase; }
+#cvet .lbl.year { margin-left: 30px; }
+#cvet .lbl.ring { color: var(--ink-3); }
+#cvet .lbl.ring.norm { color: var(--ink-2); }
+#cvet header { position: absolute; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 6px; pointer-events: none; background: none; }
+#cvet .eyebrow { font: 700 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+#cvet .eyebrow::after { content: ""; display: block; width: 72px; height: 3px; margin-top: 8px; background: var(--accent); }
+#cvet h1 { margin: 6px 0 0; padding: 0; font-family: var(--sans); font-size: 26px; font-weight: 300; line-height: 1.2;
+  letter-spacing: -0.01em; text-transform: none; color: var(--ink); }
+#cvet .stamp { position: absolute; z-index: 3; right: 16px; bottom: 16px; font: 400 11px/1 var(--mono); color: var(--ink-2);
+  opacity: .85; pointer-events: none; font-variant-numeric: tabular-nums; }
+#cvet p { margin: 0; padding: 0; }
+#cvet .desc { color: var(--ink-2); font: 700 14px/1.45 var(--roboto); text-wrap: pretty; }
+#cvet .meta { color: var(--ink-2); font: 400 13px/1.45 var(--roboto); }
+#cvet .readout { margin-top: 6px; font: 700 14px/1.45 var(--roboto); font-variant-numeric: tabular-nums; color: var(--ink); }
+#cvet .readout .d, #cvet #cvet-tip .d { color: var(--accent); }
+#cvet .legend { display: flex; align-items: center; gap: 8px; font: 500 11px/1 var(--roboto); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+#cvet .legend > span:first-child { color: var(--ink-3); text-transform: uppercase; }
+#cvet .legend i { display: block; width: 120px; height: 8px; border-radius: 2px; }
+#cvet .controls { position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; width: max-content; max-width: 100%;
+  margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 18px; padding: 10px 14px;
+  background: var(--soft); border: 1px solid var(--rule); border-radius: 8px; font: 400 13px/1.3 var(--roboto); color: var(--ink); }
+#cvet .sub { margin: 0; color: var(--ink); font: 400 14px/1.45 var(--roboto); text-wrap: pretty; }
+#cvet .btnrow { flex-basis: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; }
+#cvet .group { display: flex; align-items: center; gap: 8px; margin: 0; }
+#cvet .group > span { color: var(--ink-2); }
+#cvet .check { display: flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; }
+#cvet .check input { margin: 0; accent-color: var(--accent); }
+#cvet select, #cvet button { font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--rule);
+  border-radius: 6px; padding: 5px 10px; margin: 0; cursor: pointer; text-transform: none; letter-spacing: normal;
+  line-height: normal; height: auto; width: auto; box-shadow: none; }
+#cvet select option { background: #FFFFFF; }
+#cvet button:hover, #cvet select:hover { border-color: var(--ink-3); }
+#cvet button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+#cvet #cvet-play { min-width: 5.5em; border-color: var(--accent); color: var(--accent); }
+#cvet input[type="range"] { accent-color: var(--accent); width: 120px; margin: 0; padding: 0; }
+#cvet output { font-family: var(--roboto); font-variant-numeric: tabular-nums; min-width: 4.5ch; color: var(--ink); }
+#cvet :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#cvet #cvet-tip { position: absolute; z-index: 4; pointer-events: none; padding: 6px 9px; background: #FFFFFF; border: 1px solid var(--rule);
+  border-radius: 6px; font: 500 12px/1.35 var(--mono); font-variant-numeric: tabular-nums; transform: translate(12px, -50%); color: var(--ink); }
+#cvet #cvet-tip[hidden] { display: none; }
+@container (max-width: 560px) {
+  #cvet h1 { font-size: 19px; }
+  #cvet .desc { font-size: 12.5px; }
+  #cvet .meta, #cvet .stamp { display: none; }
+  #cvet .readout { font-size: 12.5px; margin-top: 2px; }
+  #cvet .controls { gap: 6px 12px; padding: 8px 10px; font-size: 12px; }
+  #cvet select, #cvet button { padding: 4px 8px; }
+  #cvet input[type="range"] { width: 80px; }
+}
+</style>
+<!-- Page styles: stretch the component to the whole window for the standalone and claude.ai pages. Not in the embed. -->
+<style id="page-style">
+  html, body { height: 100%; margin: 0; background: #FFFFFF; }
+  #cvet { height: 100%; }
+  #cvet header { top: 16px; left: 16px; right: 16px; max-width: 34rem; }
+  #cvet .controls { bottom: 44px; max-width: calc(100% - 32px); }
+</style>
+
+<div id="cvet">
+<div id="cvet-stage"></div>
+<header>
+  <div class="eyebrow">CVE Insights &nbsp;·&nbsp; Tornado</div>
+  <h1>CVEs Published per Day, One Turn per Year</h1>
+  <p class="sub"><span class="desc" id="cvet-desc"></span> <span class="meta" id="cvet-meta"></span></p>
+  <div class="readout" id="cvet-readout" aria-live="polite"></div>
+  <div class="legend"><span>Color</span><span id="cvet-lgLo"></span><i id="cvet-lgBar"></i><span id="cvet-lgHi"></span><span id="cvet-lgMid"></span></div>
+</header>
+
+<div id="cvet-tip" hidden></div>
+<div class="stamp">@jgamblin &nbsp;·&nbsp; rogolabs.net &nbsp;·&nbsp; __STAMP__</div>
+
+<form class="controls" id="cvet-controls">
+  <label class="group"><span>Measure</span>
+    <select id="cvet-metric">
+      <option value="rate">CVEs per day</option>
+      <option value="anomaly">vs the 2005–14 norm</option>
+      <option value="yoy">vs a year earlier</option>
+    </select>
+  </label>
+  <div class="group">
+    <label class="check"><input type="checkbox" id="cvet-logR" checked> Log radius</label>
+    <label class="check"><input type="checkbox" id="cvet-logC" checked> Log color</label>
+  </div>
+  <label class="group"><span>Smoothing</span>
+    <input type="range" id="cvet-win" min="7" max="365" step="1" value="30">
+    <output id="cvet-winOut" for="cvet-win">30 d</output>
+  </label>
+  <label class="group"><span>Height</span>
+    <input type="range" id="cvet-hgt" min="0.3" max="2.5" step="0.05" value="1">
+    <output id="cvet-hgtOut" for="cvet-hgt">1.00×</output>
+  </label>
+  <label class="group"><span>Width</span>
+    <input type="range" id="cvet-wid" min="0.3" max="2.5" step="0.05" value="1">
+    <output id="cvet-widOut" for="cvet-wid">1.00×</output>
+  </label>
+  <label class="group"><span>Speed</span>
+    <input type="range" id="cvet-spd" min="-2" max="2" step="0.25" value="0">
+    <output id="cvet-spdOut" for="cvet-spd">1×</output>
+  </label>
+  <div class="btnrow">
+    <div class="group">
+      <button type="button" id="cvet-play">Play</button>
+      <button type="button" id="cvet-all">Show all</button>
+    </div>
+    <div class="group" role="group" aria-label="Camera">
+      <button type="button" data-view="top">Top</button>
+      <button type="button" data-view="side">Side</button>
+      <button type="button" data-view="tilt">Tilt</button>
+      <button type="button" id="cvet-ortho" aria-pressed="false">Ortho</button>
+      <button type="button" id="cvet-spin" aria-pressed="true">Spin</button>
+    </div>
+  </div>
+</form>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+// Daily count of published CVEs by cve_date_published, from 2000-01-01.
+const COUNTS = [__COUNTS__];
+const SNAPSHOT = '__SNAPSHOT__';
+
+const DAY = 864e5, START = Date.UTC(2000, 0, 1), N = COUNTS.length;
+const R = 12, H = 22;                           // scene units at 1×: max radius, total height
+const DURATION = 30;                            // seconds for a full Play at 1× speed
+const BASE_Y0 = 2005, BASE_Y1 = 2014;           // "norm" years for the anomaly metric
+// SEQ runs from the CVE Insights navy into the house alert red so the rate reads by hue, not just depth:
+// pale navy tint for the thin early years, brand navy through the 2010s, maroon into red for today's pace.
+const SEQ = ['#afc0d4','#5a7a9c','#1f3a5f','#4a3a5a','#7d3147','#b02a37','#dc2626']
+  .map(h => new THREE.Color(h));
+// DIV (vs the norm, vs a year earlier): house navy below the norm, grey at it, the house alert red above.
+const DIV = ['#1f3a5f','#3b5b80','#5a7a9c','#8da0b5','#afc0d4','#c9cccf','#e6a9a9','#d97f7f','#cc5656','#c23333','#991f1f']
+  .map(h => new THREE.Color(h));
+
+// Calendar position of every day: fractional years since 2000, and day-of-year.
+const yearsIn = new Float64Array(N), doy = new Uint16Array(N), year = new Uint16Array(N), iso = new Array(N);
+for (let i = 0; i < N; i++) {
+  const t = START + i * DAY, d = new Date(t), y = d.getUTCFullYear();
+  const f = (t - Date.UTC(y, 0, 1)) / (Date.UTC(y + 1, 0, 1) - Date.UTC(y, 0, 1));
+  yearsIn[i] = y - 2000 + f; doy[i] = Math.round(f * 365); year[i] = y; iso[i] = d.toISOString().slice(0, 10);
+}
+const YMAX = yearsIn[N - 1];
+const yOf = yrs => yrs / YMAX * H;
+
+const cum = new Float64Array(N + 1);
+for (let i = 0; i < N; i++) cum[i + 1] = cum[i] + COUNTS[i];
+function sma(W) {                                // centered moving average, shrinking at the ends
+  const h = W >> 1, out = new Float64Array(N);
+  for (let i = 0; i < N; i++) { const a = Math.max(0, i - h), b = Math.min(N, i - h + W); out[i] = (cum[b] - cum[a]) / (b - a); }
+  return out;
+}
+function niceTicks(vmax, n = 4) {
+  const raw = vmax / n, p = 10 ** Math.floor(Math.log10(raw)), m = raw / p;
+  const step = (m < 1.5 ? 1 : m < 3 ? 2 : m < 7 ? 5 : 10) * p, out = [];
+  for (let t = step; t <= vmax * 1.0001; t += step) out.push(t);
+  return out;
+}
+// Log ratios use a +1/day pseudocount, like the log rate: 2000–04 CVEs came in batches with month-long gaps,
+// so even the smoothed rate hits zero on ~2% of days and a plain ratio's log would be −∞.
+const lr = (a, b) => Math.log2((a + 1) / (b + 1));
+const times = x => `${x >= 10 ? x.toFixed(0) : x.toFixed(x < 1 ? 2 : 1)}×`;
+const pow2 = k => (k === -1 ? '½×' : k === -2 ? '¼×' : `${2 ** k}×`);
+const range = (a, b) => Array.from({ length: b - a + 1 }, (_, k) => a + k);
+
+// build(s) turns the smoothed daily rate s into a linear series (lin) and a log series (log).
+// Radius and color each pick one scale. For that scale: rad() maps a value to a radius, ticks are the floor
+// rings in the same units, text() labels the color legend, and mid (when set) centers a diverging color scale.
+const METRICS = {
+  rate: {
+    desc: log => `One turn is one calendar year, height is time, and the radius is CVEs published per day${log ? ' on a log scale' : ''}.`,
+    build: s => ({ start: 0, lin: s, log: s.map(x => Math.log10(1 + x)), fmt: i => `${s[i].toFixed(1)} CVEs/day` }),
+    lin: { rad: x => x, ticks: S => niceTicks(Math.max(...S.lin)).map(t => [t, `${t}/d`]), text: q => `${Math.round(q)}/d` },
+    log: { rad: x => x, ticks: () => [1, 3, 10, 30, 100, 300, 1000].map(t => [Math.log10(1 + t), `${t}/d`]),
+           text: q => { const v = 10 ** q - 1; return `${v < 10 ? v.toFixed(1) : Math.round(v)}/d`; } },
+  },
+  anomaly: {
+    midName: 'norm',
+    desc: log => log
+      ? `Radius is CVEs per day as a multiple of the ${BASE_Y0}–${BASE_Y1} average for the same day of year, on a log scale. The darker ring is that norm.`
+      : `Radius is CVEs per day above the ${BASE_Y0}–${BASE_Y1} average for the same day of year. The darker ring is that norm; inside it is below normal.`,
+    build: s => {
+      const sum = new Float64Array(366), cnt = new Float64Array(366);
+      for (let i = 0; i < N; i++) if (year[i] >= BASE_Y0 && year[i] <= BASE_Y1) { sum[doy[i]] += s[i]; cnt[doy[i]]++; }
+      const norm = i => sum[doy[i]] / cnt[doy[i]], lin = s.map((x, i) => x - norm(i));
+      return { start: 0, lin, log: s.map((x, i) => lr(x, norm(i))), off: Math.max(...lin) * 0.2,
+               fmt: i => `${lin[i] >= 0 ? '+' : '−'}${Math.abs(lin[i]).toFixed(1)}/day vs norm (${times(s[i] / norm(i))})` };
+    },
+    lin: { rad: (x, S) => Math.max(0, x + S.off), mid: 0, text: q => `${q >= 0 ? '+' : '−'}${Math.round(Math.abs(q))}/d`,
+           ticks: S => [[0, 'norm', true], ...niceTicks(Math.max(...S.lin)).map(t => [t, `+${t}/d`])] },
+    log: { rad: x => Math.max(0, x + 3), mid: 0, text: q => times(2 ** q),            // ⅛× sits at the center
+           ticks: () => range(-2, 6).map(k => [k, k ? pow2(k) : 'norm', !k]) },
+  },
+  yoy: {
+    midName: 'no growth',
+    desc: log => `Radius is the smoothed rate divided by the same window a year earlier${log ? ', on a log scale' : ''}. The darker ring is no growth. Capped at 8×.`,
+    build: s => {
+      // Capped at 8× (and ¼× on the log scale) so the early thin years don't squash every ring into the center.
+      const ratio = new Float64Array(N), log = new Float64Array(N);
+      for (let i = 365; i < N; i++) { ratio[i] = s[i - 365] > 0 ? s[i] / s[i - 365] : 1; log[i] = lr(s[i], s[i - 365]); }
+      return { start: 365, lin: ratio.map(x => Math.min(8, x)), log: log.map(x => Math.min(3, Math.max(-2, x))),
+               fmt: i => `${ratio[i].toFixed(2)}× a year earlier` };
+    },
+    lin: { rad: x => x, mid: 1, text: q => times(Math.max(0, q)), ticks: () => [[1, '1×', true], [2, '2×'], [4, '4×'], [8, '8×']] },
+    log: { rad: x => x + 2, mid: 0, text: q => times(2 ** q), ticks: () => range(-1, 3).map(k => [k, pow2(k), !k]) },
+  },
+};
+
+// ---------- scene ----------
+const Root = document.getElementById('cvet'), stage = document.getElementById('cvet-stage');   // everything sizes to Root, not the window
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setClearColor(0xFFFFFF);
+stage.appendChild(renderer.domElement);
+const labels = new CSS2DRenderer();
+labels.domElement.style.cssText = 'position:absolute;inset:0;pointer-events:none';
+stage.appendChild(labels.domElement);
+
+const scene = new THREE.Scene();
+// Perspective for depth; orthographic for true side and top views, with no foreshortening of the floor or the coils.
+const persp = new THREE.PerspectiveCamera(38, 1, 0.1, 500);
+const ortho = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 500);
+const tanHalfFov = Math.tan(THREE.MathUtils.degToRad(persp.fov) / 2);
+let camera = persp, orthoHalf = 10;                  // orthoHalf: half the visible height at ortho zoom 1
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, H / 2, 0);
+controls.enableDamping = true;
+controls.autoRotateSpeed = 0.8;
+
+const label = (text, cls, x, y, z) => {
+  const el = document.createElement('div'); el.className = `lbl ${cls}`; el.textContent = text;
+  const o = new CSS2DObject(el); o.position.set(x, y, z); return o;
+};
+const polar = (r, th, y) => new THREE.Vector3(r * Math.sin(th), y, -r * Math.cos(th));  // Jan at 12 o'clock, clockwise from above
+const ruleMat = new THREE.LineBasicMaterial({ color: 0xDFE2E5 });
+const normMat = new THREE.LineBasicMaterial({ color: 0x8DA0B5 });   // muted navy-grey, the house 'neutral'
+// Everything drawn to scale lives in `world`; the Height and Width sliders just scale it.
+const world = new THREE.Group();
+scene.add(world);
+const Hs = () => H * world.scale.y, Rs = () => R * world.scale.x;
+
+// Time axis with a label every five years; months around the floor.
+world.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, H, 0)]), ruleMat));
+const yearLabels = [];
+for (let y = 2000; y <= 2025; y += 5) { const o = label(String(y), 'year', 0, yOf(y - 2000), 0); yearLabels.push(o); world.add(o); }
+const floorLabels = [];
+'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ').forEach((m, k) => {
+  const p = polar(R * 1.1, 2 * Math.PI * (k + 0.5) / 12, 0), o = label(m, 'month', p.x, 0, p.z);
+  floorLabels.push(o); world.add(o);
+});
+for (let k = 0; k < 12; k++) {
+  world.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([polar(0, 0, 0), polar(R * 1.02, 2 * Math.PI * k / 12, 0)]), ruleMat));
+}
+
+const lineMat = new LineMaterial({ vertexColors: true, linewidth: 2.2, worldUnits: false });
+const line = new Line2(new LineGeometry(), lineMat);
+world.add(line);
+const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 12), new THREE.MeshBasicMaterial({ color: 0xDC2626 }));   // house alert red marks 'now'
+head.visible = false;
+scene.add(head);
+let ringGroup = new THREE.Group();
+world.add(ringGroup);
+
+// ---------- data -> geometry ----------
+let S, M, pos, n;
+const tmp = new THREE.Color();
+function ramp(stops, x) {
+  x = Math.min(1, Math.max(0, x)) * (stops.length - 1);
+  const i = Math.min(stops.length - 2, Math.floor(x));
+  return tmp.lerpColors(stops[i], stops[i + 1], x - i);
+}
+function build() {
+  M = METRICS[metricEl.value];
+  S = M.build(sma(+winEl.value));
+  n = N - S.start;
+  const rs = logR.checked ? 'log' : 'lin', cs = logC.checked ? 'log' : 'lin';
+  const RS = M[rs], CS = M[cs], rq = S[rs], cq = S[cs];
+  let rmax = 0, cmin = Infinity, cmax = -Infinity;
+  for (let i = S.start; i < N; i++) {
+    rmax = Math.max(rmax, RS.rad(rq[i], S)); cmin = Math.min(cmin, cq[i]); cmax = Math.max(cmax, cq[i]);
+  }
+  // Diverging scales are symmetric around the norm, so equal distances read as equal color. The extent is the
+  // 99th percentile of distance from the norm, so a few near-empty days can't stretch the scale; beyond it colors saturate.
+  const div = CS.mid !== undefined;
+  const dev = div ? Array.from(cq.subarray(S.start), q => Math.abs(q - CS.mid)).sort((a, b) => a - b) : [];
+  const e = div ? dev[Math.floor(0.99 * (dev.length - 1))] : 0;
+  const lo = div ? CS.mid - e : cmin, hi = div ? CS.mid + e : cmax;
+  const color = div ? q => ramp(DIV, 0.5 + 0.5 * (q - CS.mid) / e) : q => ramp(SEQ, 0.06 + 0.8 * (q - lo) / (hi - lo));
+  const scale = R / rmax;
+  pos = new Float32Array(n * 3);
+  const col = new Float32Array(n * 3);
+  for (let k = 0; k < n; k++) {
+    const i = S.start + k, r = RS.rad(rq[i], S) * scale;
+    const p = polar(r, 2 * Math.PI * (yearsIn[i] % 1), yOf(yearsIn[i]));
+    pos.set([p.x, p.y, p.z], k * 3);
+    const c = color(cq[i]); col.set([c.r, c.g, c.b], k * 3);
+  }
+  lgBar.style.background = `linear-gradient(90deg, ${range(0, 10).map(k => color(lo + (hi - lo) * k / 10).getStyle()).join(',')})`;
+  lgLo.textContent = CS.text(lo); lgHi.textContent = CS.text(hi);
+  lgMid.textContent = div ? `grey = ${M.midName}` : '';
+  const g = new LineGeometry(); g.setPositions(pos); g.setColors(col);
+  line.geometry.dispose(); line.geometry = g;
+
+  world.remove(ringGroup);
+  ringGroup.traverse(o => o.element?.remove());
+  ringGroup = new THREE.Group();
+  for (const [t, text, norm] of RS.ticks(S)) {
+    const r = RS.rad(t, S) * scale;
+    if (r <= 0 || r > R * 1.001) continue;
+    const pts = Array.from({ length: 129 }, (_, k) => polar(r, 2 * Math.PI * k / 128, 0));
+    ringGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), norm ? normMat : ruleMat));
+    const o = label(text, norm ? 'ring norm' : 'ring', 0, 0, -r); ringGroup.add(o);
+  }
+  world.add(ringGroup);
+  document.getElementById('cvet-desc').textContent = M.desc(logR.checked);
+  setHead(playing || headK < n - 1 ? Math.min(headK, n - 1) : n - 1);
+}
+
+// ---------- playback ----------
+let playing = false, headK = Infinity, headF = 0;
+const playBtn = document.getElementById('cvet-play'), readout = document.getElementById('cvet-readout');
+function describe(k) { const i = S.start + k; return `<span class="d">${iso[i]}</span>  ${S.fmt(i)}`; }
+function setHead(k) {
+  headK = Math.max(1, Math.min(n - 1, Math.floor(k)));
+  line.geometry.instanceCount = headK;              // draw segments 0..headK-1
+  head.visible = headK < n - 1;
+  head.position.fromArray(pos, headK * 3).multiply(world.scale);   // head sits outside world so it stays round
+  readout.innerHTML = describe(headK);
+}
+function play() {
+  if (headK >= n - 1) headF = 0; else headF = headK;
+  playing = true; playBtn.textContent = 'Pause';
+}
+function pause() { playing = false; playBtn.textContent = headK >= n - 1 ? 'Replay' : 'Play'; }
+playBtn.onclick = () => (playing ? pause() : play());
+document.getElementById('cvet-all').onclick = () => { playing = false; setHead(n - 1); playBtn.textContent = 'Play'; };
+
+// ---------- controls ----------
+const metricEl = document.getElementById('cvet-metric'), winEl = document.getElementById('cvet-win'), winOut = document.getElementById('cvet-winOut');
+const logR = document.getElementById('cvet-logR'), logC = document.getElementById('cvet-logC');
+const [lgBar, lgLo, lgHi, lgMid] = ['lgBar', 'lgLo', 'lgHi', 'lgMid'].map(id => document.getElementById(`cvet-${id}`));
+metricEl.onchange = logR.onchange = logC.onchange = build;
+winEl.oninput = () => { winOut.textContent = `${winEl.value} d`; build(); };
+document.getElementById('cvet-controls').onsubmit = e => e.preventDefault();
+
+const [hgt, wid, spd, hgtOut, widOut, spdOut] = ['hgt', 'wid', 'spd', 'hgtOut', 'widOut', 'spdOut'].map(id => document.getElementById(`cvet-${id}`));
+function reshape() {
+  const y0 = controls.target.y;
+  world.scale.set(+wid.value, +hgt.value, +wid.value);
+  hgtOut.textContent = `${(+hgt.value).toFixed(2)}×`; widOut.textContent = `${(+wid.value).toFixed(2)}×`;
+  const dy = Hs() / 2 - y0;                          // keep the spiral's middle where the camera looks
+  controls.target.y += dy; camera.position.y += dy;
+  head.position.fromArray(pos, headK * 3).multiply(world.scale);
+}
+hgt.oninput = wid.oninput = reshape;
+let speed = 1;                                       // slider is log2, so ¼× … 4× sits evenly
+spd.oninput = () => { speed = 2 ** +spd.value; spdOut.textContent = `${+speed.toFixed(2)}×`; };
+
+const spinBtn = document.getElementById('cvet-spin');
+const setSpin = on => { controls.autoRotate = on; spinBtn.setAttribute('aria-pressed', String(on)); };
+spinBtn.onclick = () => setSpin(!controls.autoRotate);
+setSpin(!matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+function fitOrtho() {
+  const a = Root.clientWidth / Root.clientHeight;
+  Object.assign(ortho, { left: -orthoHalf * a, right: orthoHalf * a, top: orthoHalf, bottom: -orthoHalf });
+  ortho.updateProjectionMatrix();
+}
+const orthoBtn = document.getElementById('cvet-ortho');
+function setOrtho(on) {
+  orthoBtn.setAttribute('aria-pressed', String(on));
+  if ((camera === ortho) === on) return;
+  // Keep the framing at the target: an ortho half-height equals distance × tan(fov/2) in perspective.
+  // The ortho camera sits far back along the same direction so nothing falls behind its near plane.
+  const dir = camera.position.clone().sub(controls.target);
+  if (on) { orthoHalf = dir.length() * tanHalfFov; ortho.zoom = 1; fitOrtho(); }
+  const dist = on ? 200 : orthoHalf / ortho.zoom / tanHalfFov;
+  (on ? ortho : persp).position.copy(controls.target).addScaledVector(dir.normalize(), dist);
+  camera = on ? ortho : persp;
+  controls.object = camera;
+  controls.update();
+}
+orthoBtn.onclick = () => setOrtho(camera !== ortho);
+
+// Side and Top are flat (orthographic) so proportions are true; Tilt keeps perspective for depth.
+const VIEWS = { top: [0.0001, true], side: [Math.PI / 2, true], tilt: [1.05, false] };
+function view(name) {
+  const [phi, flat] = VIEWS[name], aspect = Root.clientWidth / Root.clientHeight;
+  setOrtho(flat);
+  const size = name === 'top' ? 2 * Rs() * 1.25 : Math.max(Hs(), 2 * Rs()) * 1.12;
+  const half = size / 2 / Math.min(1, aspect);       // half the height that has to fit on screen
+  if (flat) { orthoHalf = half; ortho.zoom = 1; fitOrtho(); }
+  const dist = flat ? 200 : half / tanHalfFov + (name === 'top' ? Hs() / 2 : 0);
+  const theta = controls.getAzimuthalAngle();
+  controls.target.set(0, Hs() / 2, 0);
+  camera.position.setFromSphericalCoords(dist, phi, name === 'top' ? 0 : theta).add(controls.target);
+  controls.update();
+}
+Root.querySelectorAll('[data-view]').forEach(b => b.onclick = () => view(b.dataset.view));
+
+// ---------- hover ----------
+const ray = new THREE.Raycaster(); ray.params.Line2 = { threshold: 6 };
+const tip = document.getElementById('cvet-tip'), pointer = new THREE.Vector2();
+let pointerAt = null;
+renderer.domElement.addEventListener('pointermove', e => { const b = Root.getBoundingClientRect(); pointerAt = [e.clientX - b.left, e.clientY - b.top]; });
+renderer.domElement.addEventListener('pointerleave', () => { pointerAt = null; tip.hidden = true; });
+function hover() {
+  if (!pointerAt) return;
+  pointer.set(pointerAt[0] / Root.clientWidth * 2 - 1, -pointerAt[1] / Root.clientHeight * 2 + 1);
+  ray.setFromCamera(pointer, camera);
+  const hit = ray.intersectObject(line).find(h => h.faceIndex < headK);
+  tip.hidden = !hit;
+  if (hit) { tip.innerHTML = describe(hit.faceIndex); tip.style.left = `${pointerAt[0]}px`; tip.style.top = `${pointerAt[1]}px`; }
+}
+
+// ---------- loop ----------
+function resize() {
+  const w = Root.clientWidth, h = Root.clientHeight;
+  renderer.setSize(w, h); labels.setSize(w, h);
+  lineMat.resolution.set(w, h);
+  persp.aspect = w / h; persp.updateProjectionMatrix(); fitOrtho();
+}
+new ResizeObserver(resize).observe(Root);
+
+const total = COUNTS.reduce((a, b) => a + b, 0);
+document.getElementById('cvet-meta').textContent =
+  `${total.toLocaleString('en-US')} published CVEs by publish date, ${iso[0]} to ${iso[N - 1]} · CVE List V5, newest record ${SNAPSHOT}`;
+
+resize();
+build();
+view('tilt');
+
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.1);
+  if (playing) {
+    headF += dt * n / DURATION * speed;
+    setHead(headF);
+    if (headK >= n - 1) pause();
+  }
+  controls.update();
+  const phi = controls.getPolarAngle();
+  yearLabels.forEach(o => (o.visible = phi > 0.35));                    // they stack on the axis from above
+  floorLabels.forEach(o => (o.visible = Math.abs(phi - Math.PI / 2) > 0.12));
+  ringGroup.children.forEach(o => { if (o.isCSS2DObject) o.visible = Math.abs(phi - Math.PI / 2) > 0.12; });
+  hover();
+  renderer.render(scene, camera);
+  labels.render(scene, camera);
+});
+</script>

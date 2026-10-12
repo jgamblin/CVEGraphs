@@ -8,6 +8,7 @@ repo is rebuildable anywhere without depending on a sibling checkout:
     NVD JSON            https://nvd.handsonhacking.org/nvd.json      -> processed/nvd_cves.parquet
     CVE List V5 (git)   github.com/CVEProject/cvelistV5              -> processed/cvelist_v5.parquet
     CISA KEV catalog    cisa.gov feed                                -> processed/kev_catalog.json
+    ENISA EUVD exploited euvdservices.enisa.europa.eu API             -> processed/euvd_kev.json
     CVEForecast feed    cveforecast.org/data.json                    -> processed/forecast.json
     EPSS scores (V5)    empiricalsec/epss_scores (daily, production)  -> processed/epss.parquet
 
@@ -44,6 +45,10 @@ from pathlib import Path
 import pandas as pd
 import requests
 
+# Matches a CWE id embedded in a problemTypes description, e.g.
+# "CWE-79 Cross-Site Scripting (XSS)". Used when a CNA omits the `cweId` key.
+CWE_IN_TEXT = re.compile(r"\bCWE-\d+", re.IGNORECASE)
+
 try:
     from tqdm import tqdm
 except ImportError:  # tqdm is optional; degrade to a no-op iterator
@@ -66,6 +71,8 @@ KEV_URLS = [
     "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
     "https://raw.githubusercontent.com/cisagov/kev-data/main/known_exploited_vulnerabilities.json",
 ]
+# ENISA EU Vulnerability Database: the exploited (EU KEV) subset, paged 100 at a time.
+EUVD_EXPLOITED_URL = "https://euvdservices.enisa.europa.eu/api/search?exploited=true&page={page}&size=100"
 FORECAST_URLS = [
     "https://cveforecast.org/data.json",
     "https://raw.githubusercontent.com/RogoLabs/CVEForecast/main/web/data.json",
@@ -431,12 +438,22 @@ def _process_cve_file(cve_file):
             if aff.get("product"):
                 products.append(aff["product"])
 
-        cwes = [
-            desc["cweId"]
-            for pt in cna.get("problemTypes", [])
-            for desc in pt.get("descriptions", [])
-            if desc.get("cweId")
-        ]
+        # A CNA can declare a weakness class two ways: the optional `cweId` key, or a
+        # bare "CWE-79 Cross-Site Scripting (XSS)" string in `description` (usually
+        # with type "CWE"). Reading only `cweId` scored WPScan at 0% CWE coverage on
+        # all 697 of its 2026 CVEs when the real figure is 100%, and did the same to
+        # CERT/CC and Samsung Mobile. Accept either form; a literal CWE-<n> in the
+        # description is a positive assertion, so it counts regardless of `type`.
+        cwes = []
+        for pt in cna.get("problemTypes", []):
+            for desc in pt.get("descriptions", []):
+                cwe_id = desc.get("cweId")
+                if cwe_id:
+                    cwes.append(cwe_id)
+                    continue
+                m = CWE_IN_TEXT.search(desc.get("description") or "")
+                if m:
+                    cwes.append(m.group(0).upper())
 
         cvss_v3 = cvss_v4 = severity = None
         for m in cna.get("metrics", []):
@@ -667,8 +684,42 @@ def fetch_feeds():
     else:
         print("[Forecast] fetch failed; leaving any existing forecast.json in place")
 
+    fetch_euvd_exploited()
     fetch_epss()
     fetch_cwe_pillars()
+
+
+def fetch_euvd_exploited():
+    """ENISA EUVD exploited list -> processed/euvd_kev.json (slim rows).
+
+    Keeps only the fields the charts use; the CVE id lives in the ``aliases``
+    blob alongside GHSA ids. Leaves any existing file in place on failure or a
+    short read, so a flaky page never truncates the list.
+    """
+    items, page, total = [], 0, None
+    try:
+        while True:
+            r = requests.get(EUVD_EXPLOITED_URL.format(page=page),
+                             headers={"User-Agent": "CVEGraphs"}, timeout=60)
+            r.raise_for_status()
+            d = r.json()
+            total = d.get("total", 0)
+            batch = d.get("items", [])
+            items += batch
+            if not batch or len(items) >= total:
+                break
+            page += 1
+            time.sleep(0.3)
+    except Exception as e:
+        print(f"[EUVD] fetch failed ({e}); leaving any existing euvd_kev.json in place")
+        return
+    if total is None or len(items) < total:
+        print(f"[EUVD] short read ({len(items)} of {total}); leaving existing file")
+        return
+    keep = ("id", "aliases", "datePublished", "exploitedSince", "assigner", "baseScore")
+    slim = [{k: i.get(k) for k in keep} for i in items]
+    (OUTPUT_DIR / "euvd_kev.json").write_text(json.dumps(slim))
+    print(f"[EUVD] wrote processed/euvd_kev.json ({len(slim):,} exploited entries)")
 
 
 # =============================================================================
@@ -719,8 +770,76 @@ def main():
     except Exception as e:
         print(f"  [credits] precompute failed: {e}; leaving existing parquet")
 
+    print("  Building Cisco rollup classification (cisco_rollup) ...")
+    try:
+        import scripts_precompute_cisco_rollup as _cr
+        _cr.main()
+    except Exception as e:
+        print(f"  [cisco_rollup] precompute failed: {e}; leaving existing parquet")
+
+    print("  Building same-CVE score pairs (score_disagreement) ...")
+    try:
+        import scripts_precompute_score_pairs as _sp
+        _sp.main()
+    except Exception as e:
+        print(f"  [score_pairs] precompute failed: {e}; leaving existing parquet")
+
+    print("  Building CWE-787 chain dataset (cwe787_alone) ...")
+    try:
+        import scripts_precompute_cwe787 as _c787
+        _c787.main()
+    except Exception as e:
+        print(f"  [cwe787] precompute failed: {e}; leaving existing parquet")
+
     print("\n[3/3] Fetching feeds ...")
     fetch_feeds()
+
+    # Depends on kev_catalog.json, so it must follow fetch_feeds(). Fetches
+    # historical EPSS snapshots (cached in processed/epss_history_cache), so
+    # the first run is slow and re-runs only pull dates newly added to KEV.
+    print("  Building EPSS report card (epss_report_card) ...")
+    try:
+        import scripts_precompute_epss_report_card as _rc
+        _rc.main()
+    except Exception as e:
+        print(f"  [epss_report_card] precompute failed: {e}; leaving existing parquet")
+
+    # Shares the epss_history_cache the report card fills, so ordering here
+    # keeps the snapshot downloads to whatever the report card did not need.
+    print("  Building EPSS early-warning curve (epss_early_warning) ...")
+    try:
+        import scripts_precompute_epss_early_warning as _ew
+        _ew.main()
+    except Exception as e:
+        print(f"  [epss_early_warning] precompute failed: {e}; leaving existing parquet")
+
+    # Reuses the same snapshot cache; adds only the post-listing offset dates.
+    print("  Building EPSS KEV window (epss_kev_window) ...")
+    try:
+        import scripts_precompute_epss_kev_window as _kw
+        _kw.main()
+    except Exception as e:
+        print(f"  [epss_kev_window] precompute failed: {e}; leaving existing parquet")
+
+    # Independent of the CVE/KEV/EPSS feeds above: fetches four open detection
+    # rulesets (~120 MB) and builds the CVE -> rule-name map the detection_*
+    # charts join against. Cached downloads survive a network failure, so a
+    # blip degrades to stale rather than to a smaller coverage number.
+    print("  Building open detection-rule map (detection_coverage/breadth) ...")
+    try:
+        import scripts_precompute_detection_rules as _dr
+        _dr.main()
+    except Exception as e:
+        print(f"  [detection_rules] precompute failed: {e}; leaving existing parquet")
+
+    # Independent of every feed above: syncs a sparse clone of the reviewed
+    # half of github/advisory-database for the ghsa_output chart.
+    print("  Building GitHub-reviewed advisory table (ghsa_output) ...")
+    try:
+        import scripts_precompute_ghsa_reviewed as _gh
+        _gh.main()
+    except Exception as e:
+        print(f"  [ghsa_output] precompute failed: {e}; leaving existing parquet")
 
     print("\nDone. Data is in ./processed. Render with: python make.py all")
 

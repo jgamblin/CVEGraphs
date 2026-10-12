@@ -12,6 +12,7 @@ Everything routes through the helpers here so the window is defined in one place
 """
 
 import datetime as _dt
+import os
 
 import pandas as pd
 
@@ -25,7 +26,18 @@ AFFIL = "Empirical Security"
 
 
 def today_utc():
-    """Current UTC date as a tz-aware midnight Timestamp."""
+    """Current UTC date as a tz-aware midnight Timestamp.
+
+    ``CVEGRAPHS_POST_DATE=YYYY-MM-DD`` overrides it. Posting from a US timezone in
+    the evening lands on the NEXT UTC day, so a chart rendered at 9pm Central on
+    the 10th would otherwise stamp the 11th and read as post-dated to most of the
+    audience. Set the override to the date you are actually posting; it drives the
+    corner stamp and the output filename together, so they cannot drift apart.
+    """
+    override = os.environ.get("CVEGRAPHS_POST_DATE", "").strip()
+    if override:
+        d = pd.Timestamp(override)
+        return pd.Timestamp(d.year, d.month, d.day, tz="UTC")
     now = _dt.datetime.now(_dt.timezone.utc)
     return pd.Timestamp(now.year, now.month, now.day, tz="UTC")
 

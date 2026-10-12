@@ -15,3 +15,5 @@ __pycache__/
 # Weekly run logs
 logs/
 content/insights_latest.md
+graphs/*
+!graphs/.gitkeep
