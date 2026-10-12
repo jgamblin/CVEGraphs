@@ -2,11 +2,9 @@
 /data/
 /processed/
 
-# Rendered media: post text (.md) in content/ is tracked, renders are not
-content/**/*.png
-content/**/*.gif
-content/**/*.mp4
-content/**/*.csv
+# content/ is tracked in full (post text AND the images that go out), except
+# renders a newer render replaced, and the weekly job's copy of the brief.
+content/**/superseded/
 content/insights/insights_latest.md
 
 # Local run logs and the golden-render baseline

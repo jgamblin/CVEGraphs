@@ -35,7 +35,9 @@ that becomes a new post.
 
 ## What is tracked
 
-Markdown and HTML are committed. Rendered PNG / GIF / MP4 / CSV files are
-gitignored, so they live only on this machine. Posts migrated on 2026-10-11 from
+Everything here is committed, images included, so each post folder on GitHub
+is the complete record of what went out. The exception is `superseded/` folders,
+which are gitignored: they hold renders that a newer render replaced, so commit
+a draft's images once you are happy with them. Posts migrated on 2026-10-11 from
 the old `graphs/` + `content/captions/` layout have `migrated: 2026-10-11` in
 their front matter, and no `data_as_of` or `commit`.
