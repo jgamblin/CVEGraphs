@@ -57,7 +57,11 @@ def cmd_render(args):
     from cvegraphs.data import load_nvd
 
     # Load once and share across every chart in this run.
-    nvd = load_nvd()
+    try:
+        nvd = load_nvd()
+    except FileNotFoundError as e:
+        print(e)
+        return 1
     _warn_if_stale(nvd)
 
     failed = {}
