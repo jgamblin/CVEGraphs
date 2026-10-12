@@ -1,42 +1,39 @@
 # Weekly automation (launchd)
 
-Runs the full pipeline every week on your Mac: refresh data → mine insights →
-render all charts, then leaves a ranked brief at `content/insights_latest.md`
-(and a desktop notification with the top finding).
+`run_weekly.sh` runs the full pipeline on this Mac: refresh data, mine the
+insight brief, and render every chart into `content/drafts/`. It then copies the
+brief to `content/insights/insights_latest.md` and shows a desktop notification
+with the top finding. It runs through the repo's `.venv`, so set that up first
+(see the top-level README).
 
-This is a one-time **manual install** — it schedules code to run beyond any
-single session, so you install it yourself.
+The pipeline downloads several GB and reads local files, so it has to run here,
+not in CI or a cloud routine. Curation and posting stay manual.
 
-## Install
+## Install (one-time, manual)
 
 ```bash
-# 1. make the runner executable
-chmod +x ~/Documents/Github/CVEGraphs/run_weekly.sh
-
-# 2. copy the agent into place
-cp ~/Documents/Github/CVEGraphs/deploy/com.jgamblin.cvegraphs.weekly.plist \
-   ~/Library/LaunchAgents/
-
-# 3. load it
+chmod +x ~/Documents/Github/CVEGraphs/ops/run_weekly.sh
+cp ~/Documents/Github/CVEGraphs/ops/com.jgamblin.cvegraphs.weekly.plist ~/Library/LaunchAgents/
 launchctl load -w ~/Library/LaunchAgents/com.jgamblin.cvegraphs.weekly.plist
 ```
 
-Runs **Monday 06:00 local**. Edit `StartCalendarInterval` in the plist to change
-day/time, then reload (unload + load).
+It runs **Monday at 06:00 local time**. To change that, edit `StartCalendarInterval`
+in the plist, then unload and load it again.
 
-## Verify / operate
+## Operate
 
 ```bash
-launchctl list | grep cvegraphs          # is it registered?
-launchctl start com.jgamblin.cvegraphs.weekly   # run once now (test)
-tail -f logs/weekly-*.log                 # watch a run
+launchctl list | grep cvegraphs                  # registered?
+launchctl start com.jgamblin.cvegraphs.weekly    # run once now
+tail -f logs/weekly-*.log                        # watch a run
 ```
+
+A chart that fails to render is listed in the log and does not fail the run.
 
 ## Email the brief (optional)
 
 Uncomment the `EnvironmentVariables` / `MAIL_TO` block in the plist (requires a
-working `mail` setup), or pipe `content/insights_latest.md` to Slack / any
-notifier from the end of `run_weekly.sh`.
+working `mail` setup).
 
 ## Uninstall
 
@@ -45,9 +42,5 @@ launchctl unload -w ~/Library/LaunchAgents/com.jgamblin.cvegraphs.weekly.plist
 rm ~/Library/LaunchAgents/com.jgamblin.cvegraphs.weekly.plist
 ```
 
-## Note on the schedule
-
-The pipeline downloads/refreshes large data (NVD, CVE List V5) and reads local
-files, so it must run on this machine, not a cloud routine. After the first run
-the NVD download is skipped when unchanged and the CVE List clone updates
-incrementally, so weekly runs are much lighter than the first.
+After the first run, the NVD download is skipped when nothing has changed and
+the CVE List clone updates incrementally, so later weekly runs are much lighter.

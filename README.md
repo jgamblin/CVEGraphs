@@ -1,78 +1,93 @@
 # CVEGraphs
 
-CVE graphs to share on social media, a few times a week.
+The engine behind **CVE Insights**: standalone, feed-sized CVE charts posted to
+LinkedIn (and X, Bluesky, Mastodon) about twice a week. It keeps its own local
+snapshot of NVD, CVE List V5, CISA KEV, EPSS and a few smaller feeds, and
+renders each chart in three aspect ratios with a post-ready text file next to it.
 
-An evergreen engine that renders unique, self-contained CVE charts sized for the
-feed. It reuses the proven data pipeline and design language from
-[H12026CVEBlog](../H12026CVEBlog) but is built to run *continuously* rather than
-for a single blog launch. See [PLAN.md](PLAN.md) for the full strategy.
+Every post is a one-off: a chart is built for a finding, reviewed, posted, and
+then frozen with the exact images and text that went out.
 
-## Quick start
+## Setup
+
+Python 3.12+ and pip.
 
 ```bash
-pip install -r requirements.txt
-
-python refresh_data.py     # populate ./processed (weekly)
-python make.py list        # show available charts
-python make.py pace        # render one chart, all aspect ratios
-python make.py all         # render the whole shelf into ./graphs
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt -e .
+cvegraphs refresh          # first run downloads ~7 GB into data/ and builds processed/
 ```
 
-Each chart renders three aspect ratios into `graphs/`:
-**square** (1080×1080, LinkedIn/X/Mastodon/Bluesky/IG), **portrait** (1080×1350,
-IG + LinkedIn feed), and **wide** (1600×900, X landscape).
+`requirements.txt` pins the exact versions the golden renders were made with;
+`pyproject.toml` holds the looser ranges. Recording the cvenado video also needs
+`pip install -e ".[media]"`, `playwright install chromium` and ffmpeg.
 
-## How it fits together
+## Making a post
 
-| File | Role |
-|------|------|
-| `refresh_data.py` | Weekly: pull fresh data into `processed/` |
-| `data.py` | Load the NVD / CVE List parquet snapshots |
-| `rolling_config.py` | Rolling "as of today" window + YTD comparison helpers |
-| `style_social.py` | Social styling: ratios, big fonts, handle/date/site stamp |
-| `charts/*.py` | One module per chart; each exposes `render()` |
-| `make.py` | CLI: render one chart, `all`, or `list` |
-| `insights.py` | Mine + score share-worthy findings -> ranked brief |
-| `run_weekly.sh` | One-shot pipeline: refresh + insights + render |
-| `deploy/` | launchd agent + install steps for the weekly schedule |
-| `content/` | `BACKLOG.md`, `CALENDAR.md`, `INSIGHTS.md`, `captions/` |
+```bash
+cvegraphs refresh --feeds-only            # or a full `cvegraphs refresh` if it has been a week
+cvegraphs render kev_weekend              # -> content/drafts/kev_weekend/*.png
+$EDITOR content/drafts/kev_weekend/post.md   # the copy lives next to the images
+#   ask Claude: "run the post-review workflow on kev_weekend"
+CVEGRAPHS_POST_DATE=2026-10-13 cvegraphs render kev_weekend   # stamp the day it goes out
+cvegraphs publish kev_weekend --link https://www.linkedin.com/...
+#   -> content/posts/2026-10-13-kev_weekend/, then log it in content/planning/CALENDAR.md
+```
 
-## Workflow
+`cvegraphs list` shows every chart with a one-line description.
 
-1. `refresh_data.py` (Mon AM, ideally scheduled) refreshes the data snapshot.
-2. `insights.py` mines a ranked brief of share-worthy findings.
-3. Curate the top few into posts (Claude + `content/INSIGHTS.md`), pairing each
-   with its `suggested_chart`.
-4. `make.py <chart>` (or `all`) renders the shelf with today's date in filenames.
-5. Post 2–3×/week per `content/CALENDAR.md`.
+## Commands
 
-See `content/INSIGHTS.md` for the discovery-to-post pipeline (code extracts and
-scores; Claude curates and writes).
+| Command | What it does |
+|---|---|
+| `cvegraphs list` | Every renderable chart, media item and paper |
+| `cvegraphs render <name ...>` | Render into `content/drafts/<name>/` (older renders move to `superseded/`) |
+| `cvegraphs render all` | The whole shelf; a failing chart is reported, not fatal |
+| `cvegraphs publish <name>` | Move a draft to `content/posts/<date>-<name>/` with front matter (chart, date, data as-of, commit) |
+| `cvegraphs refresh` | Download + parse upstream data, then run every precompute step |
+| `cvegraphs refresh --feeds-only` | Just KEV, EUVD, forecast, EPSS and CWE (fast) |
+| `cvegraphs precompute [name ...]` | Rerun derived datasets in `processed/` |
+| `cvegraphs insights --top 15` | Mine a ranked brief of candidate findings into `content/insights/` |
 
-### Automate it
+`cvegraphs pace` (no verb) still means `render pace`.
 
-`run_weekly.sh` chains steps 1–2–4 (refresh → insights → render) and leaves a
-ranked brief at `content/insights_latest.md`. To run it every Monday, install the
-launchd agent per `deploy/README.md` (a one-time manual step, since it schedules
-code beyond a single session). Curation and posting stay in your hands.
+## Layout
 
-## Status
+```
+src/cvegraphs/        the code (see src/cvegraphs/README.md)
+  charts/             one module per chart
+  precompute/         derived datasets built after a refresh
+  data/               loaders + the refresh (nvd, cvelist, feeds)
+  media/ papers/      the CVE tornado page and long-form HTML reports
+content/              everything produced or written for posting (see content/README.md)
+  drafts/<chart>/     post.md + renders not yet posted
+  posts/<date>-<chart>/   frozen once it goes out
+  planning/           BACKLOG, CALENDAR (posting log), INSIGHTS (copy rules)
+  insights/           the mined insight brief
+docs/                 data rules, adding a chart, history
+ops/                  weekly launchd job (refresh, insights, render all)
+tests/                pytest suite + golden-render check
+data/ processed/      raw clones and parquet snapshot (gitignored, local only)
+```
 
-Fourteen charts across the shelf:
+## Checks
 
-- **Bar / line workhorses** — Pace Tracker, EPSS Funnel, CNA Leaderboard, KEV
-  Watch, Chrome Day, CVSS vs EPSS gap.
-- **Non-bar formats** for feed variety — Calendar Heatmap, Waffle, Ridgeline, CNA
-  Bump, CWE Circle Pack.
-- **CVSS scoring-methodology set** — CNA score spread (`cna_spread`), scorer
-  divergence (`scorer_divergence`), and CWE score spread (`cwe_spread`), which
-  together show how much a CVSS number depends on *who* assigned it.
+```bash
+ruff check src tests
+pytest                               # snapshot tests skip when processed/ is absent
+python tests/golden_render.py        # pixel-compare every chart against logs/golden/
+```
 
-An insight miner (`insights.py`) and a weekly runner (`run_weekly.sh` + `deploy/`)
-round it out. `refresh_data.py` is self-contained — it rebuilds the parquet from
-upstream feeds (NVD, CVE List V5, CISA KEV, CVEForecast, and production EPSS V5)
-with no dependency on any sibling repo, and reconciles CVSS v4 from the
-authoritative CVE List vector (the NVD mirror's v4 runs low). EPSS is available via
-`data.load_nvd(with_epss=True)` or `data.load_epss()`.
+CI (`.github/workflows/ci.yml`) runs lint and the tests that need no data. The
+refresh and rendering run only on this machine; see `ops/README.md` for the
+weekly schedule.
+
+## Reading the data correctly
+
+Several fields measure process rather than reality (KEV date granularity, MITRE
+timestamps, NVD Deferred status, CISA-ADP scores echoing the CNA, and more).
+Read [docs/data-rules.md](docs/data-rules.md) before building a chart on a new
+field.
 
 Built on free CVE tooling from [RogoLabs](https://rogolabs.net).
