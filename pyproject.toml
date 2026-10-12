@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cvegraphs"
+version = "1.0.0"
+description = "CVE charts for social media (CVE Insights), rendered from a local data snapshot"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Jerry Gamblin" }]
+requires-python = ">=3.12"
+# Ranges here; exact known-good versions are pinned in requirements.txt.
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=2.0",
+    "matplotlib>=3.9",
+    "requests>=2.32",
+    "pyarrow>=17",
+    "tqdm>=4.66",
+    "circlify>=0.15",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+# Only for recording the cvenado MP4/GIF (also needs ffmpeg and `playwright install chromium`).
+media = ["playwright>=1.45"]
+
+[project.scripts]
+cvegraphs = "cvegraphs.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+cvegraphs = ["fonts/*.ttf", "media/*/template.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "snapshot: needs the local processed/ snapshot (skipped when it is absent, e.g. in CI)",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+# Correctness checks only. The code predates a formatter and is not reformatted
+# wholesale; E/W style rules would be churn without catching bugs.
+select = ["F", "E9", "B006", "B008", "I"]
+# Unused locals predate the reorg (computed values a chart stopped drawing);
+# harmless, and removing them is a separate cleanup.
+ignore = ["F841"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cvegraphs"]

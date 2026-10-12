@@ -1,8 +1,13 @@
-# CVEGraphs — social media graph engine
-pandas>=2.2.0,<3.0
-numpy>=2.0.0,<3.0
-matplotlib>=3.9.0,<4.0
-requests>=2.32.0,<3.0
-pyarrow>=17.0.0,<18.0  # parquet support
-tqdm>=4.66.0,<5.0     # download / parse progress bars
-circlify>=0.15.0,<1.0 # circle-packing layout (cwe_circles chart)
+# Exact versions the golden renders were produced with (2026-10-11, Python 3.14).
+# Chart output is byte-for-byte reproducible only on these; bump deliberately and
+# re-baseline with `python tests/golden_render.py --update`.
+#
+#   python3 -m venv .venv && . .venv/bin/activate
+#   pip install -r requirements.txt -e ".[dev]"
+pandas==3.0.3
+numpy==2.5.0
+matplotlib==3.11.0
+requests==2.34.2
+pyarrow==24.0.0
+tqdm==4.68.3
+circlify==0.15.1
